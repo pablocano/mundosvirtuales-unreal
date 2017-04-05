@@ -12,8 +12,4 @@ UCLASS()
 class PLANT_API APlantGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
-	
-	
-	
 };
