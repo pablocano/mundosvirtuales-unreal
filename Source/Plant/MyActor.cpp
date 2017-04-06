@@ -16,9 +16,12 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	wheel = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("Skeletal Mesh")); // text("") can be just about anything.
 	wheel->SetSkeletalMesh(mesh.Object);
 	wheel->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	wheel->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	wheel->SetAnimationMode(EAnimationMode::Type::AnimationSingleNode);
 	wheel->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	wheel->OnBeginCursorOver.AddDynamic(this, &AMyActor::CustomOnBeginMouseOver);
+	wheel->OnClicked.AddDynamic(this, &AMyActor::CustomOnBeginMouseClicked);
+
 }
 
 // Called when the game starts or when spawned
@@ -36,7 +39,8 @@ void AMyActor::BeginPlay()
 		}
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("large: %f"), large));*/
-	wheel->PlayAnimation(animation, false);
+	
+	
 }
 
 // Called every frame
@@ -51,6 +55,15 @@ void AMyActor::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Mouse Over"));
+	}
+}
+
+void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Mouse Cliked"));
+		wheel->PlayAnimation(animation, false);
 	}
 }
 

@@ -11,6 +11,7 @@ class PLANT_API AMyActor : public AActor
 	GENERATED_UCLASS_BODY() //note that this is GENERATED_UCLASS_BODY and not GENERATED_BODY.
 
 public:
+	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* wheel;
 
 	UAnimSequence* animation;
@@ -23,4 +24,7 @@ public:
 
 	UFUNCTION()
 	void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
+
+	UFUNCTION(Category = Default)
+	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
 };
