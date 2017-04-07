@@ -65,7 +65,7 @@ void AMyPawn::Tick(float DeltaTime)
 		ZoomFactor = FMath::Clamp<float>(ZoomFactor, 0.0f, 1.0f);*/
 		//Blend our camera's FOV and our SpringArm's length based on ZoomFactor
 		//OurCamera->FieldOfView = FMath::Lerp<float>(90.0f, 60.0f, ZoomFactor);
-		OurCameraSpringArm->TargetArmLength = FMath::Lerp<float>(2000.0f, 10.0f, ZoomFactor);
+		OurCameraSpringArm->TargetArmLength = FMath::Lerp<float>(2000.0f, 200.0f, ZoomFactor);
 	}
 
 	//Rotate our actor's yaw, which will turn our camera because we're attached to it
@@ -114,8 +114,8 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	const FInputAxisKeyMapping upKey(FName("MoveUp"), EKeys::SpaceBar, 1.f);
 	const FInputAxisKeyMapping downKey(FName("MoveUp"), EKeys::C, -1.f);
 
-	const FInputAxisKeyMapping turnAxis(FName("CameraYaw"), FKey(FName("MouseX")), 1);
-	const FInputAxisKeyMapping lookupAxis(FName("CameraPitch"), FKey(FName("MouseY")), 1);
+	const FInputAxisKeyMapping turnAxis(FName("CameraYaw"), FKey(FName("MouseX")), 1.0f);
+	const FInputAxisKeyMapping lookupAxis(FName("CameraPitch"), FKey(FName("MouseY")),1.0f);
 
 	const FInputAxisKeyMapping wheelAxis(FName("CameraZoom"), FKey(FName("MouseWheelAxis")), 1);
 
@@ -157,12 +157,12 @@ void AMyPawn::MoveRight(float AxisValue)
 
 void AMyPawn::PitchCamera(float AxisValue)
 {
-	CameraInput.Y = -2*AxisValue;
+	CameraInput.Y = 2*AxisValue;
 }
 
 void AMyPawn::YawCamera(float AxisValue)
 {
-	CameraInput.X = -2*AxisValue;
+	CameraInput.X = 2*AxisValue;
 }
 
 void AMyPawn::Zoom(float AxisValue)
