@@ -22,6 +22,23 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	wheel->OnBeginCursorOver.AddDynamic(this, &AMyActor::CustomOnBeginMouseOver);
 	wheel->OnClicked.AddDynamic(this, &AMyActor::CustomOnBeginMouseClicked);
 
+	// Generate Widget Info
+	widgetInfoComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("Widget Component Info"));
+	widgetInfoComponent->SetVisibility(true);
+	widgetInfoComponent->SetWidgetClass(UMyUserWidgetInfo::StaticClass());
+	widgetInfoComponent->SetOnlyOwnerSee(true);
+	widgetInfoComponent->SetDrawSize(FVector2D(500, 500));
+	widgetInfoComponent->RelativeLocation = FVector(100.0f, 50.0f, 50.0f);
+	widgetInfoComponent->RelativeRotation = FRotator(0.0f, 0.0f, 0.0f);
+	// widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	widgetInfoComponent->AttachTo(RootComponent);
+	// collisions
+	widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	// block camera & visibility for mouse cursor
+	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
+	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 }
 
 // Called when the game starts or when spawned
@@ -40,6 +57,23 @@ void AMyActor::BeginPlay()
 	}
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("large: %f"), large));*/
 	
+	widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
+	widgetInfo->Init();
+
+	for (int i = 0; i < 5; i++)
+	{
+		USensor* sensor = NewObject<USensor>();
+		sensor->SetNameSensor("Sensor " + i);
+		Sensors.Add(sensor);
+	}
+
+	widgetInfo->SetSensors(Sensors);	
+
+	widgetInfoComponent->SetWidget(widgetInfo);
+	widgetInfoComponent->SetWidget(widgetInfo);
+	widgetInfoComponent->SetWidgetSpace(EWidgetSpace::Screen);
+
+	widgetInfoComponent->SetDrawSize(FVector2D(200.0f, 200.0f));
 	
 }
 

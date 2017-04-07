@@ -3,12 +3,25 @@
 #pragma once
 
 #include "GameFramework/Actor.h"
+#include "Components/WidgetComponent.h"
+#include "MyUserWidgetInfo.h"
+
 #include "MyActor.generated.h"
+
 
 UCLASS()
 class PLANT_API AMyActor : public AActor
 {
 	GENERATED_UCLASS_BODY() //note that this is GENERATED_UCLASS_BODY and not GENERATED_BODY.
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
+	class UWidgetComponent* widgetInfoComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
+	class UMyUserWidgetInfo* widgetInfo;
+
+	UPROPERTY()
+	TArray<USensor*> Sensors;
 
 public:
 	UPROPERTY(VisibleAnywhere)
