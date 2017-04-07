@@ -3,7 +3,6 @@
 #include "Plant.h"
 #include "MyActor.h"
 
-
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -21,6 +20,8 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	wheel->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	wheel->OnBeginCursorOver.AddDynamic(this, &AMyActor::CustomOnBeginMouseOver);
 	wheel->OnClicked.AddDynamic(this, &AMyActor::CustomOnBeginMouseClicked);
+
+	//machine = new Machine();
 
 }
 

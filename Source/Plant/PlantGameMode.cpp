@@ -3,11 +3,11 @@
 #include "Plant.h"
 #include "PlantGameMode.h"
 #include "MyActor.h"
-#include "MyCharacter.h"
+#include "MyPawn.h"
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	DefaultPawnClass = AMyCharacter::StaticClass();
+	DefaultPawnClass = AMyPawn::StaticClass();
 }
 
 void APlantGameMode::StartPlay()
