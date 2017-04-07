@@ -24,17 +24,16 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	// Generate Widget Info
 	widgetInfoComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("Widget Component Info"));
 	widgetInfoComponent->SetVisibility(true);
-	widgetInfoComponent->SetWidgetClass(UMyUserWidgetInfo::StaticClass());
-	widgetInfoComponent->SetOnlyOwnerSee(true);
+	widgetInfoComponent->SetOnlyOwnerSee(false);
+	widgetInfoComponent->SetWidgetSpace(EWidgetSpace::World);
 	widgetInfoComponent->SetDrawSize(FVector2D(500, 500));
-	widgetInfoComponent->RelativeLocation = FVector(100.0f, 50.0f, 50.0f);
-	widgetInfoComponent->RelativeRotation = FRotator(0.0f, 0.0f, 0.0f);
-	// widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	widgetInfoComponent->AttachTo(RootComponent);
+	//widgetInfoComponent->RelativeLocation = FVector(100.0f, 50.0f, 50.0f);
+	//widgetInfoComponent->RelativeRotation = FRotator(0.0f, 0.0f, 0.0f);
+	widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	// collisions
 	widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	// block camera & visibility for mouse cursor
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
@@ -44,20 +43,8 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 void AMyActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	/*UAnimInstance *AnimInst = wheel->GetAnimInstance();
-	float large;
-	if (AnimInst)
-	{
-		UAnimMontage* montage = AnimInst->PlaySlotAnimationAsDynamicMontage(animation, TEXT("UpperBody"), 0.1f, 0.1f, 0.1f, 1000.0f,-1.0f,0.f);
-		if (montage) {
-			large = montage->GetPlayLength();
-		}
-	}
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("large: %f"), large));*/
 	
 	widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
-	widgetInfo->Init();
 
 	for (int i = 0; i < 5; i++)
 	{
@@ -67,13 +54,7 @@ void AMyActor::BeginPlay()
 	}
 
 	widgetInfo->SetSensors(Sensors);	
-
 	widgetInfoComponent->SetWidget(widgetInfo);
-	widgetInfoComponent->SetWidget(widgetInfo);
-	widgetInfoComponent->SetWidgetSpace(EWidgetSpace::Screen);
-
-	widgetInfoComponent->SetDrawSize(FVector2D(200.0f, 200.0f));
-	
 }
 
 // Called every frame
@@ -93,6 +74,15 @@ void AMyActor::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
 
 void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key)
 {
+	/*UAnimInstance *AnimInst = wheel->GetAnimInstance();
+	float large;
+	if (AnimInst)
+	{
+	UAnimMontage* montage = AnimInst->PlaySlotAnimationAsDynamicMontage(animation, TEXT("UpperBody"), 0.1f, 0.1f, 0.1f, 1000.0f,-1.0f,0.f);
+	if (montage) {
+	large = montage->GetPlayLength();
+	}
+	}*/
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Mouse Cliked"));

@@ -12,9 +12,7 @@
 UCLASS()
 class PLANT_API UMyUserWidgetInfo : public UUserWidget
 {
-	GENERATED_BODY()
-
-	virtual void NativeConstruct() override;
+	GENERATED_UCLASS_BODY()
 
 	UPROPERTY()
 	UVerticalBox* ItemWidgetsBox;
@@ -25,8 +23,4 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetSensors(const TArray<USensor*>& Sensors);
-
-	UFUNCTION()
-	void Init();
-	
 };

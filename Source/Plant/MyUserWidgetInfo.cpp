@@ -4,16 +4,15 @@
 #include "MyUserWidgetInfo.h"
 
 
-void UMyUserWidgetInfo::Init()
+UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	ScrollBox = NewObject<UScrollBox>(GetWorld(), UScrollBox::StaticClass());
-	ItemWidgetsBox = NewObject<UVerticalBox>(GetWorld(), UVerticalBox::StaticClass());
+	auto widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
+	this->WidgetTree = widgetTree;
+	ScrollBox = ObjectInitializer.CreateDefaultSubobject<UScrollBox>(widgetTree, TEXT("Scroll Box"));
+	this->WidgetTree->RootWidget = ScrollBox;
+	ItemWidgetsBox = ObjectInitializer.CreateDefaultSubobject<UVerticalBox>(ScrollBox, TEXT("Vertical Box"));
 	ScrollBox->AddChild(ItemWidgetsBox);
-}
-
-void UMyUserWidgetInfo::NativeConstruct()
-{
-	Super::NativeConstruct();
 }
 
 void UMyUserWidgetInfo::SetSensors(const TArray<USensor*>& Sensors)
