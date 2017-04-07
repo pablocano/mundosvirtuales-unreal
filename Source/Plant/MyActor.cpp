@@ -3,7 +3,6 @@
 #include "Plant.h"
 #include "MyActor.h"
 
-
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
