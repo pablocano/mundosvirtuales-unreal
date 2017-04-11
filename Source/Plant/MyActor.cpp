@@ -8,21 +8,31 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 {
 	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> mesh(TEXT("/Game/3DSMaxAnimations/Wheel2"));
-	static ConstructorHelpers::FObjectFinder<UAnimSequence> anim(TEXT("/Game/3DSMaxAnimations/Wheel2_Anim"));
-	animation = anim.Object;
+	
+}
 
-	wheel = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("Skeletal Mesh")); // text("") can be just about anything.
-	wheel->SetSkeletalMesh(mesh.Object);
-	wheel->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	wheel->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	wheel->SetAnimationMode(EAnimationMode::Type::AnimationSingleNode);
-	wheel->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	wheel->OnBeginCursorOver.AddDynamic(this, &AMyActor::CustomOnBeginMouseOver);
-	wheel->OnClicked.AddDynamic(this, &AMyActor::CustomOnBeginMouseClicked);
+void AMyActor::init(Machine& machine){
+
+	this->machine = &machine;
+
+	for (MachinePart& machinePart : this->machine->machineParts)
+	{
+		FString name(machinePart.name.c_str());
+		UMySkeletalMeshComponent* part = NewObject<UMySkeletalMeshComponent>(this, FName(*name)); // text("") can be just about anything.
+		part->init(this,&machinePart);
+		part->RegisterComponent();
+		part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		skeleton.Add(part);
+	}
+
+	
+
+
+
 
 	// Generate Widget Info
-	widgetInfoComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("Widget Component Info"));
+	widgetInfoComponent = NewObject<UWidgetComponent>(this, TEXT("Widget Component Info"));
+	widgetInfoComponent->RegisterComponent();
 	widgetInfoComponent->SetVisibility(true);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
 	widgetInfoComponent->SetWidgetSpace(EWidgetSpace::World);
@@ -62,31 +72,5 @@ void AMyActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-}
-
-void AMyActor::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
-{
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Mouse Over"));
-	}
-}
-
-void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key)
-{
-	/*UAnimInstance *AnimInst = wheel->GetAnimInstance();
-	float large;
-	if (AnimInst)
-	{
-	UAnimMontage* montage = AnimInst->PlaySlotAnimationAsDynamicMontage(animation, TEXT("UpperBody"), 0.1f, 0.1f, 0.1f, 1000.0f,-1.0f,0.f);
-	if (montage) {
-	large = montage->GetPlayLength();
-	}
-	}*/
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Mouse Cliked"));
-		wheel->PlayAnimation(animation, false);
-	}
 }
 
