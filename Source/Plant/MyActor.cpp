@@ -4,7 +4,7 @@
 #include "MyActor.h"
 
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+	: Super(ObjectInitializer), Space(EWidgetSpace::World)
 {
 	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -21,22 +21,28 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	wheel->OnBeginCursorOver.AddDynamic(this, &AMyActor::CustomOnBeginMouseOver);
 	wheel->OnClicked.AddDynamic(this, &AMyActor::CustomOnBeginMouseClicked);
 
-	// Generate Widget Info
+	// Widget Info
 	widgetInfoComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("Widget Component Info"));
-	widgetInfoComponent->SetVisibility(true);
+	widgetInfoComponent->SetVisibility(false);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
-	widgetInfoComponent->SetWidgetSpace(EWidgetSpace::World);
-	widgetInfoComponent->SetDrawSize(FVector2D(500, 500));
-	//widgetInfoComponent->RelativeLocation = FVector(100.0f, 50.0f, 50.0f);
-	//widgetInfoComponent->RelativeRotation = FRotator(0.0f, 0.0f, 0.0f);
+	widgetInfoComponent->SetDrawSize(FVector2D(200, 300));
+	widgetInfoComponent->SetRelativeLocation(FVector(0.0f, 400.0f, 300.0f));
+	widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	// collisions
 	widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	// block camera & visibility for mouse cursor
+	widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+	widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .75f));
+	widgetInfoComponent->SetBlendMode(EWidgetBlendMode::Transparent);
+	widgetInfoComponent->SetWidgetSpace(Space);
+
+	if (Space == EWidgetSpace::World)
+	{
+		widgetInfoComponent->SetTwoSided(true);
+		SetBoolUProperty(widgetInfoComponent, TEXT("bReceiveHardwareInput"), true);  // Enable click
+	}
 }
 
 // Called when the game starts or when spawned
@@ -49,12 +55,14 @@ void AMyActor::BeginPlay()
 	for (int i = 0; i < 5; i++)
 	{
 		USensor* sensor = NewObject<USensor>();
-		sensor->SetNameSensor("Sensor " + i);
+		sensor->SetNameSensor(FString::Printf(TEXT("Sensor %d"), i));
 		Sensors.Add(sensor);
 	}
 
 	widgetInfo->SetSensors(Sensors);	
 	widgetInfoComponent->SetWidget(widgetInfo);
+	widgetInfoComponent->SetVisibility(true);
+	widgetInfo->DisableWidget();
 }
 
 // Called every frame
@@ -62,6 +70,7 @@ void AMyActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	widgetInfo->UpdateWidget(DeltaTime);
 }
 
 void AMyActor::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
@@ -88,5 +97,6 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Mouse Cliked"));
 		wheel->PlayAnimation(animation, false);
 	}
-}
 
+	widgetInfo->EnableWidget();
+}

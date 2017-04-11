@@ -4,11 +4,15 @@
 #include "Sensor.h"
 #include "Components/TextBlock.h"
 
-USensor::USensor() : nameSensor(TEXT("Sensor"))
+USensor::USensor() : nameSensor(TEXT("Sensor")), TypeSensor(ETypeSensor::Default)
 {
 }
 
-USensor::USensor(const char* name) : nameSensor(name)
+USensor::USensor(const char* name) : nameSensor(name), TypeSensor(ETypeSensor::Default)
+{
+}
+
+USensor::USensor(FString name) : nameSensor(name), TypeSensor(ETypeSensor::Default)
 {
 }
 
@@ -16,20 +20,41 @@ USensor::~USensor()
 {
 }
 
-UWidget* USensor::getWidget()
+void USensor::CreateWidget()
 {
-	UTextBlock* textBlock = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
+	textBlock = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
 	textBlock->SetText(FText::FromString(nameSensor));
-	textBlock->Font.Size = 24;
-	textBlock->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
-	textBlock->MinDesiredWidth = 200.0f;
+	textBlock->Font.Size = 8;
+	textBlock->SetColorAndOpacity(FSlateColor(FLinearColor(.0f, .0f, .0f, 1.0f)));
+	textBlock->MinDesiredWidth = 100.0f;
 	textBlock->SetJustification(ETextJustify::Left);
 	textBlock->SetRenderTranslation(FVector2D(0.0, 0.0f));
 
-	return textBlock;
+	widget = textBlock;
+}
+
+UWidget* USensor::getWidget()
+{
+	return widget;
 }
 
 void USensor::SetNameSensor(const char* name)
 {
 	nameSensor = name;
+}
+
+void USensor::SetNameSensor(FString name)
+{
+	nameSensor = name;
+}
+
+void USensor::UpdateData(float InDeltaTime)
+{
+	textBlock->SetText(FText::FromString(GetStringDataSensor()));
+}
+
+FString USensor::GetStringDataSensor()
+{
+	const FString Message = FString::Printf(TEXT("Update %s: %0.2f"), *nameSensor, FMath::FRandRange(20.f, 25.f));
+	return Message;
 }

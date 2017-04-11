@@ -24,6 +24,9 @@ class PLANT_API AMyActor : public AActor
 	TArray<USensor*> Sensors;
 
 public:
+	UPROPERTY(EditAnywhere, Category = UserInterface)
+	EWidgetSpace Space;
+
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* wheel;
 
@@ -40,4 +43,5 @@ public:
 
 	UFUNCTION(Category = Default)
 	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
+
 };
