@@ -15,7 +15,7 @@ class PLANT_API AMyActor : public AActor
 	GENERATED_UCLASS_BODY() //note that this is GENERATED_UCLASS_BODY and not GENERATED_BODY.
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
-	class UWidgetComponent* widgetInfoComponent;
+	class UWidgetInfoComponent* widgetInfoComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
 	class UMyUserWidgetInfo* widgetInfo;

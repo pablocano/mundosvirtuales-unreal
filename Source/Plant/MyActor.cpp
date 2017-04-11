@@ -2,6 +2,7 @@
 
 #include "Plant.h"
 #include "MyActor.h"
+#include "WidgetInfoComponent.h"
 
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), Space(EWidgetSpace::World)
@@ -22,7 +23,7 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	wheel->OnClicked.AddDynamic(this, &AMyActor::CustomOnBeginMouseClicked);
 
 	// Widget Info
-	widgetInfoComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetComponent>(this, TEXT("Widget Component Info"));
+	widgetInfoComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetInfoComponent>(this, TEXT("Widget Component Info"));
 	widgetInfoComponent->SetVisibility(false);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
 	widgetInfoComponent->SetDrawSize(FVector2D(200, 300));
@@ -61,8 +62,8 @@ void AMyActor::BeginPlay()
 
 	widgetInfo->SetSensors(Sensors);	
 	widgetInfoComponent->SetWidget(widgetInfo);
-	widgetInfoComponent->SetVisibility(true);
-	widgetInfo->DisableWidget();
+	widgetInfo->buttonOk->OnClicked.AddDynamic(widgetInfoComponent, &UWidgetInfoComponent::OnClickButtonOk);
+	widgetInfoComponent->DisableWidget();
 }
 
 // Called every frame
@@ -70,7 +71,10 @@ void AMyActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	widgetInfo->UpdateWidget(DeltaTime);
+	if (widgetInfoComponent->IsVisible())
+	{
+		widgetInfo->UpdateWidgetSensors(DeltaTime);
+	}
 }
 
 void AMyActor::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
@@ -98,5 +102,5 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 		wheel->PlayAnimation(animation, false);
 	}
 
-	widgetInfo->EnableWidget();
+	widgetInfoComponent->EnableWidget();
 }

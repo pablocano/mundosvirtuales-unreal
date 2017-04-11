@@ -29,23 +29,15 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	float accTime;
 
 public:
+	UPROPERTY()
+	UButton* buttonOk;
+
 	UFUNCTION(BlueprintCallable)
 	void SetSensors(const TArray<USensor*>& arrSensors);
 
 	UFUNCTION()
-	void OnClickButtonOk();
-
-	UFUNCTION()
-	void EnableWidget();
-
-	UFUNCTION()
-	void DisableWidget();
-
-	UFUNCTION()
-	void UpdateWidget(float InDeltaTime);
+	void UpdateWidgetSensors(float InDeltaTime);
 
 	UFUNCTION()
 	void UpdateDataSensors(float InDeltaTime);
-
-	void AssignAnimations();
 };

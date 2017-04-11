@@ -9,11 +9,11 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 {
 	auto widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
 	this->WidgetTree = widgetTree;
-	ScrollBox = ObjectInitializer.CreateDefaultSubobject<UScrollBox>(widgetTree, TEXT("Scroll Box"));
+	ScrollBox = NewObject<UScrollBox>(widgetTree, TEXT("Scroll Box"));
 	this->WidgetTree->RootWidget = ScrollBox;
-	ItemWidgetsBox = ObjectInitializer.CreateDefaultSubobject<UVerticalBox>(ScrollBox, TEXT("Vertical Box"));
+	ItemWidgetsBox = NewObject<UVerticalBox>(ScrollBox, TEXT("Vertical Box"));
 	ScrollBox->AddChild(ItemWidgetsBox);
-	SetForegroundColor(FSlateColor(FLinearColor(.6f, .6f, 0.6f, .7f)));
+	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
 }
 
 void UMyUserWidgetInfo::SetSensors(const TArray<USensor*>& arrSensors)
@@ -39,43 +39,19 @@ void UMyUserWidgetInfo::SetSensors(const TArray<USensor*>& arrSensors)
 	}
 
 	// Generate Button Ok
-	UButton* buttonOk = NewObject<UButton>(this, UButton::StaticClass());
+	buttonOk = NewObject<UButton>(this, UButton::StaticClass());
 	UTextBlock* textButtonOk = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
 	textButtonOk->SetText(FText::FromString("Ok"));
 	
 	buttonOk->AddChild(textButtonOk);
-	buttonOk->OnClicked.AddDynamic(this, &UMyUserWidgetInfo::OnClickButtonOk);
 
 	UVerticalBoxSlot* SlotItem = ItemWidgetsBox->AddChildToVerticalBox(buttonOk);
 	SlotItem->SetPadding(fPadding);
 }
 
-void UMyUserWidgetInfo::OnClickButtonOk()
+void UMyUserWidgetInfo::UpdateWidgetSensors(float InDeltaTime)
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Red, TEXT("Click Button Ok"));
-	}
-
-	DisableWidget();
-}
-
-void UMyUserWidgetInfo::EnableWidget()
-{
-	SetVisibility(ESlateVisibility::Visible);
-}
-
-void UMyUserWidgetInfo::DisableWidget()
-{
-	SetVisibility(ESlateVisibility::Collapsed);
-}
-
-void UMyUserWidgetInfo::UpdateWidget(float InDeltaTime)
-{
-	if (GetVisibility() == ESlateVisibility::Visible)
-	{
-		UpdateDataSensors(InDeltaTime);
-	}
+	UpdateDataSensors(InDeltaTime);
 }
 
 void UMyUserWidgetInfo::UpdateDataSensors(float InDeltaTime)
