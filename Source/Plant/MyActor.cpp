@@ -36,7 +36,7 @@ void AMyActor::init(Machine& machine){
 
 
 	// Generate Widget Info
-	widgetInfoComponent = NewObject<UWidgetComponent>(this, TEXT("Widget Component Info"));
+	widgetInfoComponent = NewObject<UWidgetInfoComponent>(this, TEXT("Widget Component Info"));
 	widgetInfoComponent->RegisterComponent();
 	widgetInfoComponent->SetVisibility(true);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
@@ -103,33 +103,12 @@ void AMyActor::Tick(float DeltaTime)
 	}
 }
 
-void AMyActor::CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent)
-{
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Cyan, TEXT("Mouse Over"));
-	}
-}
-
 void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key)
 {
-	/*UAnimInstance *AnimInst = wheel->GetAnimInstance();
-	float large;
-	if (AnimInst)
-	{
-	UAnimMontage* montage = AnimInst->PlaySlotAnimationAsDynamicMontage(animation, TEXT("UpperBody"), 0.1f, 0.1f, 0.1f, 1000.0f,-1.0f,0.f);
-	if (montage) {
-	large = montage->GetPlayLength();
-	}
-	}*/
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("Mouse Cliked"));
-		wheel->PlayAnimation(animation, false);
-	}
 
-	if (GEngine)
-	{
 		FRotator rotCamera = GEngine->GetFirstLocalPlayerController(GetWorld())->PlayerCameraManager->GetCameraRotation();
 		rotCamera.Yaw -= 180;
 		rotCamera.Pitch = 0;

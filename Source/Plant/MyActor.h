@@ -31,6 +31,9 @@ protected:
 	UFUNCTION()
 	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
 
+	UFUNCTION()
+	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
+
 public:
 	UPROPERTY(EditAnywhere, Category = UserInterface)
 	EWidgetSpace Space;
