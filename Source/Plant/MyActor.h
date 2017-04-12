@@ -5,7 +5,8 @@
 #include "GameFramework/Actor.h"
 #include "Components/WidgetComponent.h"
 #include "MyUserWidgetInfo.h"
-
+#include "PlantCore/Machine.h"
+#include "MySkeletalMeshComponent.h"
 #include "MyActor.generated.h"
 
 
@@ -35,9 +36,9 @@ public:
 	EWidgetSpace Space;
 
 	UPROPERTY(VisibleAnywhere)
-	USkeletalMeshComponent* wheel;
+	TArray<UMySkeletalMeshComponent*> skeleton;
 
-	UAnimSequence* animation;
+	Machine* machine;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,10 +46,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
-	UFUNCTION()
-	void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
-
-	UFUNCTION(Category = Default)
-	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
+	void init(Machine& machine);
 
 };

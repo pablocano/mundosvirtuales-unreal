@@ -8,6 +8,7 @@
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	DefaultPawnClass = AMyPawn::StaticClass();
+	flat = new Flat();
 }
 
 void APlantGameMode::StartPlay()
@@ -15,10 +16,6 @@ void APlantGameMode::StartPlay()
 	Super::StartPlay();
 
 	StartMatch();
-
-	FActorSpawnParameters SpawnInfo;
-	// Spawninfo has additional info you might want to modify such as the name of the spawned actor.
-	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	if (GEngine)
 	{
@@ -31,10 +28,29 @@ void APlantGameMode::StartPlay()
 		MyController->bEnableMouseOverEvents = true;
 	}
 
+	initWorld();
+}
+
+void APlantGameMode::initWorld()
+{
+	FActorSpawnParameters SpawnInfo;
+	// Spawninfo has additional info you might want to modify such as the name of the spawned actor.
+	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	UWorld* const World = GetWorld();
 	if (World)
 	{
-		AMyActor* MyActor = World->SpawnActor<AMyActor>(AMyActor::StaticClass(), FVector(200, 0, 0), FRotator::ZeroRotator, SpawnInfo);
+		for(Machine& machine : flat->machines)
+		{
+			FTransform SpawnLocAndRotation;
+			AMyActor* MyActor = World->SpawnActorDeferred<AMyActor>(AMyActor::StaticClass(), SpawnLocAndRotation);
+			
+			MyActor->init(machine);
+
+			MyActor->FinishSpawning(SpawnLocAndRotation);
+			
+			//AMyActor* MyActor = World->SpawnActor<AMyActor>(AMyActor::StaticClass(), FVector(40, 400, 20), FRotator::ZeroRotator, SpawnInfo);
+		}
+
 	}
 }
 

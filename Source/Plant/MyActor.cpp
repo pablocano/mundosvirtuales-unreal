@@ -13,22 +13,32 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 
 	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> mesh(TEXT("/Game/3DSMaxAnimations/Wheel2"));
-	static ConstructorHelpers::FObjectFinder<UAnimSequence> anim(TEXT("/Game/3DSMaxAnimations/Wheel2_Anim"));
-	animation = anim.Object;
+	
+}
 
-	wheel = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("Skeletal Mesh")); // text("") can be just about anything.
-	wheel->SetSkeletalMesh(mesh.Object);
-	wheel->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	wheel->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	wheel->SetAnimationMode(EAnimationMode::Type::AnimationSingleNode);
-	wheel->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	wheel->OnBeginCursorOver.AddDynamic(this, &AMyActor::CustomOnBeginMouseOver);
-	wheel->OnClicked.AddDynamic(this, &AMyActor::CustomOnBeginMouseClicked);
+void AMyActor::init(Machine& machine){
 
-	// Widget Info
-	widgetInfoComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetInfoComponent>(this, TEXT("Widget Component Info"));
-	widgetInfoComponent->SetVisibility(false);
+	this->machine = &machine;
+
+	for (MachinePart& machinePart : this->machine->machineParts)
+	{
+		FString name(machinePart.name.c_str());
+		UMySkeletalMeshComponent* part = NewObject<UMySkeletalMeshComponent>(this, FName(*name)); // text("") can be just about anything.
+		part->init(this,&machinePart);
+		part->RegisterComponent();
+		part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		skeleton.Add(part);
+	}
+
+	
+
+
+
+
+	// Generate Widget Info
+	widgetInfoComponent = NewObject<UWidgetComponent>(this, TEXT("Widget Component Info"));
+	widgetInfoComponent->RegisterComponent();
+	widgetInfoComponent->SetVisibility(true);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
 	widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	widgetInfoComponent->SetDrawSize(FVector2D(200, 150));

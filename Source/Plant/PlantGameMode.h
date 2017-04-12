@@ -3,6 +3,7 @@
 #pragma once
 
 #include "GameFramework/GameMode.h"
+#include "PlantCore/Flat.h"
 #include "PlantGameMode.generated.h"
 
 /**
@@ -14,4 +15,8 @@ class PLANT_API APlantGameMode : public AGameMode
 	GENERATED_UCLASS_BODY()
 	
 	virtual void StartPlay() override;
+
+	void initWorld();
+
+	Flat* flat;
 };
