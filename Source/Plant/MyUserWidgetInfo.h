@@ -18,6 +18,9 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UVerticalBox* ItemWidgetsBox;
 
 	UPROPERTY()
+	UHorizontalBox* ItemButtonBarBox;
+
+	UPROPERTY()
 	UScrollBox* ScrollBox;
 
 	UPROPERTY()

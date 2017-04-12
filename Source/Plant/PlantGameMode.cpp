@@ -34,7 +34,7 @@ void APlantGameMode::StartPlay()
 	UWorld* const World = GetWorld();
 	if (World)
 	{
-		AMyActor* MyActor = World->SpawnActor<AMyActor>(AMyActor::StaticClass(), FVector(40, 400, 20), FRotator::ZeroRotator, SpawnInfo);
+		AMyActor* MyActor = World->SpawnActor<AMyActor>(AMyActor::StaticClass(), FVector(200, 0, 0), FRotator::ZeroRotator, SpawnInfo);
 	}
 }
 

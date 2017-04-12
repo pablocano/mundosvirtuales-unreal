@@ -7,6 +7,10 @@
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), Space(EWidgetSpace::World)
 {
+	// Create Root
+
+	RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("Root Component"));
+
 	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> mesh(TEXT("/Game/3DSMaxAnimations/Wheel2"));
@@ -26,16 +30,16 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	widgetInfoComponent = ObjectInitializer.CreateDefaultSubobject<UWidgetInfoComponent>(this, TEXT("Widget Component Info"));
 	widgetInfoComponent->SetVisibility(false);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
-	widgetInfoComponent->SetDrawSize(FVector2D(200, 300));
-	widgetInfoComponent->SetRelativeLocation(FVector(0.0f, 400.0f, 300.0f));
-	widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	widgetInfoComponent->SetDrawSize(FVector2D(200, 150));
+	widgetInfoComponent->SetRelativeLocation(FVector(100.f, 0.f, 150.f));
+	widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 	widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-	widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .75f));
+	widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .95f));
 	widgetInfoComponent->SetBlendMode(EWidgetBlendMode::Transparent);
 	widgetInfoComponent->SetWidgetSpace(Space);
 
@@ -50,19 +54,31 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 void AMyActor::BeginPlay()
 {
 	Super::BeginPlay();
+	// FVector locationWidget = FVector(0.f, 0.f, 150.f) + GetActorLocation();
+	// widgetInfoComponent->SetRelativeLocation(locationWidget);
+	// widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	
 	widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
 
-	for (int i = 0; i < 5; i++)
-	{
-		USensor* sensor = NewObject<USensor>();
-		sensor->SetNameSensor(FString::Printf(TEXT("Sensor %d"), i));
-		Sensors.Add(sensor);
-	}
+	USensor* sensor1 = NewObject<USensor>();
+	sensor1->SetNameSensor("Temperatura");
+	sensor1->SetTypeSensor(ETypeSensor::Temperature);
+	Sensors.Add(sensor1);
+
+	USensor* sensor2 = NewObject<USensor>();
+	sensor2->SetNameSensor("Presion");
+	sensor2->SetTypeSensor(ETypeSensor::Pressure);
+	Sensors.Add(sensor2);
+
+	USensor* sensor3 = NewObject<USensor>();
+	sensor3->SetNameSensor("Flujo");
+	sensor3->SetTypeSensor(ETypeSensor::Flow);
+	Sensors.Add(sensor3);
 
 	widgetInfo->SetSensors(Sensors);	
 	widgetInfoComponent->SetWidget(widgetInfo);
-	widgetInfo->buttonOk->OnClicked.AddDynamic(widgetInfoComponent, &UWidgetInfoComponent::OnClickButtonOk);
+	widgetInfo->buttonOk->OnClicked.AddDynamic(this, &AMyActor::OnClickButtonOk);
+	widgetInfoComponent->OnClicked.AddDynamic(this, &AMyActor::OnClickWidgetComponent);
 	widgetInfoComponent->DisableWidget();
 }
 
@@ -102,5 +118,27 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 		wheel->PlayAnimation(animation, false);
 	}
 
+	if (GEngine)
+	{
+		FRotator rotCamera = GEngine->GetFirstLocalPlayerController(GetWorld())->PlayerCameraManager->GetCameraRotation();
+		rotCamera.Yaw -= 180;
+		rotCamera.Pitch = 0;
+		widgetInfoComponent->SetWorldRotation(rotCamera);
+	}
+
 	widgetInfoComponent->EnableWidget();
 }
+
+void AMyActor::OnClickButtonOk()
+{
+	widgetInfoComponent->DisableWidget();
+}
+
+void AMyActor::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Hola"));
+	}
+}
+

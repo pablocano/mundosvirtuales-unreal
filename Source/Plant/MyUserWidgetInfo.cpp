@@ -5,12 +5,45 @@
 
 
 UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), DeltaTime(1.0f), accTime(0.f)
+	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f)
 {
-	auto widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
+	static FMargin fPadding(5);
+
+	UWidgetTree* widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
 	this->WidgetTree = widgetTree;
-	ScrollBox = NewObject<UScrollBox>(widgetTree, TEXT("Scroll Box"));
-	this->WidgetTree->RootWidget = ScrollBox;
+	
+	// Content Window
+	UVerticalBox* ContentWindowBox = NewObject<UVerticalBox>(widgetTree, TEXT("Content Windows"));
+	this->WidgetTree->RootWidget = ContentWindowBox;
+
+	// Title Bar and Buttons
+	UHorizontalBox* TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("Title Bar"));
+	ContentWindowBox->AddChildToVerticalBox(TitleBarBox);
+
+	// Generate Title
+	UTextBlock* textTitle = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
+	textTitle->SetText(FText::FromString(TEXT("Información")));
+	textTitle->Font.Size = 8;
+	textTitle->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
+	UHorizontalBoxSlot* SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(textTitle);
+	SlotItemHorz->SetPadding(fPadding);
+	SlotItemHorz->SetSize(ESlateSizeRule::Fill);
+	textTitle->SetVisibility(ESlateVisibility::HitTestInvisible);
+
+	// Generate Button Ok
+	buttonOk = NewObject<UButton>(TitleBarBox, UButton::StaticClass());
+	UTextBlock* textButtonOk = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
+	textButtonOk->SetText(FText::FromString(TEXT("X")));
+	textButtonOk->Font.Size = 8;
+	textButtonOk->SetColorAndOpacity(FSlateColor(FLinearColor(.0f, .0f, .0f, 1.0f)));
+	buttonOk->AddChild(textButtonOk);
+	SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(buttonOk);
+
+	// Work Space
+	ScrollBox = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box"));
+	UVerticalBoxSlot* SlotItemVert;
+	SlotItemVert = ContentWindowBox->AddChildToVerticalBox(ScrollBox);
+	SlotItemVert->SetSize(ESlateSizeRule::Fill);
 	ItemWidgetsBox = NewObject<UVerticalBox>(ScrollBox, TEXT("Vertical Box"));
 	ScrollBox->AddChild(ItemWidgetsBox);
 	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
@@ -37,16 +70,6 @@ void UMyUserWidgetInfo::SetSensors(const TArray<USensor*>& arrSensors)
 		UVerticalBoxSlot* SlotItem = ItemWidgetsBox->AddChildToVerticalBox(sensor->getWidget());
 		SlotItem->SetPadding(fPadding);
 	}
-
-	// Generate Button Ok
-	buttonOk = NewObject<UButton>(this, UButton::StaticClass());
-	UTextBlock* textButtonOk = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
-	textButtonOk->SetText(FText::FromString("Ok"));
-	
-	buttonOk->AddChild(textButtonOk);
-
-	UVerticalBoxSlot* SlotItem = ItemWidgetsBox->AddChildToVerticalBox(buttonOk);
-	SlotItem->SetPadding(fPadding);
 }
 
 void UMyUserWidgetInfo::UpdateWidgetSensors(float InDeltaTime)
@@ -58,7 +81,7 @@ void UMyUserWidgetInfo::UpdateDataSensors(float InDeltaTime)
 {
 	accTime += InDeltaTime;
 
-	if (accTime > DeltaTime)
+	if (accTime >= DeltaTime)
 	{
 		for (USensor* sensor : Sensors)
 		{

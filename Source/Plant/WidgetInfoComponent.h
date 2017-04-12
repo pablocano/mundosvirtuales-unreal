@@ -20,7 +20,5 @@ public:
 
 	UFUNCTION()
 	void DisableWidget();
-	
-	UFUNCTION()
-	void OnClickButtonOk();
+
 };

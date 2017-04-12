@@ -41,6 +41,8 @@ public:
 	USensor(FString name);
 	~USensor();
 
+	void SetTypeSensor(ETypeSensor typeSensor);
+
 	void SetNameSensor(const char* name);
 	
 	void SetNameSensor(FString name);

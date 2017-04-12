@@ -13,10 +13,3 @@ void UWidgetInfoComponent::DisableWidget()
 	SetVisibility(false);
 }
 
-void UWidgetInfoComponent::OnClickButtonOk()
-{
-	DisableWidget();
-}
-
-
-

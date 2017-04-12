@@ -23,6 +23,13 @@ class PLANT_API AMyActor : public AActor
 	UPROPERTY()
 	TArray<USensor*> Sensors;
 
+protected:
+	UFUNCTION()
+	void OnClickButtonOk();
+
+	UFUNCTION()
+	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
+
 public:
 	UPROPERTY(EditAnywhere, Category = UserInterface)
 	EWidgetSpace Space;

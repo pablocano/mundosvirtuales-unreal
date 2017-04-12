@@ -20,12 +20,16 @@ USensor::~USensor()
 {
 }
 
+void USensor::SetTypeSensor(ETypeSensor typeSensor)
+{
+	TypeSensor = typeSensor;
+}
+
 void USensor::CreateWidget()
 {
 	textBlock = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
 	textBlock->SetText(FText::FromString(nameSensor));
 	textBlock->Font.Size = 8;
-	textBlock->SetColorAndOpacity(FSlateColor(FLinearColor(.0f, .0f, .0f, 1.0f)));
 	textBlock->MinDesiredWidth = 100.0f;
 	textBlock->SetJustification(ETextJustify::Left);
 	textBlock->SetRenderTranslation(FVector2D(0.0, 0.0f));
@@ -55,6 +59,6 @@ void USensor::UpdateData(float InDeltaTime)
 
 FString USensor::GetStringDataSensor()
 {
-	const FString Message = FString::Printf(TEXT("Update %s: %0.2f"), *nameSensor, FMath::FRandRange(20.f, 25.f));
+	const FString Message = FString::Printf(TEXT("%s: %0.2f"), *nameSensor, FMath::FRandRange(20.f, 25.f));
 	return Message;
 }
