@@ -50,4 +50,9 @@ void UMySkeletalMeshComponent::CustomOnEndMouseOver(UPrimitiveComponent* Touched
 void UMySkeletalMeshComponent::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key)
 {
 	this->PlayAnimation(animation, false);
+
+	if (parent)
+	{
+		parent->CustomOnBeginMouseClicked(TouchedComponent, key);
+	}
 }

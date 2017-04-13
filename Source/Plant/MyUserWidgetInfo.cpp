@@ -38,6 +38,7 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	textButtonOk->SetColorAndOpacity(FSlateColor(FLinearColor(.0f, .0f, .0f, 1.0f)));
 	buttonOk->AddChild(textButtonOk);
 	SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(buttonOk);
+	buttonOk->SetVisibility(ESlateVisibility::Visible);
 
 	// Work Space
 	ScrollBox = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box"));

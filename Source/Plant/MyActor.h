@@ -24,7 +24,7 @@ class PLANT_API AMyActor : public AActor
 	UPROPERTY()
 	TArray<USensor*> Sensors;
 
-protected:
+public:
 	UFUNCTION()
 	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
 

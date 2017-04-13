@@ -64,9 +64,6 @@ void AMyActor::init(Machine& machine){
 void AMyActor::BeginPlay()
 {
 	Super::BeginPlay();
-	// FVector locationWidget = FVector(0.f, 0.f, 150.f) + GetActorLocation();
-	// widgetInfoComponent->SetRelativeLocation(locationWidget);
-	// widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	
 	widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
 
