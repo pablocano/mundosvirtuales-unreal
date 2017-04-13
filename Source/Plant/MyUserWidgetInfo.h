@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
+#include "WidgetInfoComponent.h"
 #include "Sensor.h"
 #include "MyUserWidgetInfo.generated.h"
 
@@ -21,6 +22,9 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UHorizontalBox* ItemButtonBarBox;
 
 	UPROPERTY()
+	UWidgetInfoComponent* parentComponent;
+
+	UPROPERTY()
 	UScrollBox* ScrollBox;
 
 	UPROPERTY()
@@ -30,6 +34,12 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	float DeltaTime;
 
 	float accTime;
+
+	UFUNCTION()
+	void OnClickButtonOk();
+
+	UFUNCTION()
+	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
 
 public:
 	UPROPERTY()
@@ -43,4 +53,13 @@ public:
 
 	UFUNCTION()
 	void UpdateDataSensors(float InDeltaTime);
+
+	UFUNCTION()
+	void SetParentComponent(UWidgetInfoComponent* parent);
+
+	UFUNCTION()
+	UWidgetInfoComponent* GetParentComponent() { return parentComponent; };
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 };

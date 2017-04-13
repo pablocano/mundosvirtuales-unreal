@@ -26,12 +26,6 @@ class PLANT_API AMyActor : public AActor
 
 protected:
 	UFUNCTION()
-	void OnClickButtonOk();
-
-	UFUNCTION()
-	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
-
-	UFUNCTION()
 	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
 
 public:

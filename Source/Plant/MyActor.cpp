@@ -87,9 +87,9 @@ void AMyActor::BeginPlay()
 
 	widgetInfo->SetSensors(Sensors);	
 	widgetInfoComponent->SetWidget(widgetInfo);
-	widgetInfo->buttonOk->OnClicked.AddDynamic(this, &AMyActor::OnClickButtonOk);
-	widgetInfoComponent->OnClicked.AddDynamic(this, &AMyActor::OnClickWidgetComponent);
 	widgetInfoComponent->DisableWidget();
+
+	widgetInfo->SetParentComponent(widgetInfoComponent);
 }
 
 // Called every frame
@@ -116,18 +116,5 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 	}
 
 	widgetInfoComponent->EnableWidget();
-}
-
-void AMyActor::OnClickButtonOk()
-{
-	widgetInfoComponent->DisableWidget();
-}
-
-void AMyActor::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey)
-{
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Hola"));
-	}
 }
 

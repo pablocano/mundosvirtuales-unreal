@@ -47,6 +47,15 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	ItemWidgetsBox = NewObject<UVerticalBox>(ScrollBox, TEXT("Vertical Box"));
 	ScrollBox->AddChild(ItemWidgetsBox);
 	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
+
+	// Delegate click actions
+	buttonOk->OnClicked.AddDynamic(this, &UMyUserWidgetInfo::OnClickButtonOk);
+}
+
+void UMyUserWidgetInfo::SetParentComponent(UWidgetInfoComponent* parent)
+{
+	// textTitle->OnClicked.AddDynamic(this, &OnClickWidgetComponent);
+	parentComponent = parent;
 }
 
 void UMyUserWidgetInfo::SetSensors(const TArray<USensor*>& arrSensors)
@@ -92,3 +101,41 @@ void UMyUserWidgetInfo::UpdateDataSensors(float InDeltaTime)
 	}
 }
 
+void UMyUserWidgetInfo::OnClickButtonOk()
+{
+	parentComponent->DisableWidget();
+}
+
+void UMyUserWidgetInfo::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Hola"));
+	}
+}
+
+FReply UMyUserWidgetInfo::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	bool bAltDown = InMouseEvent.IsAltDown();
+	bool bCtrlDown = InMouseEvent.IsControlDown();
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click WidgetInfo"));
+	}
+
+	return FReply::Handled();
+}
+
+FReply UMyUserWidgetInfo::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	bool bAltDown = InMouseEvent.IsAltDown();
+	bool bCtrlDown = InMouseEvent.IsControlDown();
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Release Click WidgetInfo"));
+	}
+
+	return FReply::Handled();
+}
