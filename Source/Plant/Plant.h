@@ -11,3 +11,4 @@
 #include "Runtime/UMG/Public/IUMGModule.h"
 #include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 
+void SetBoolUProperty(UObject* Object, FName PropertyName, bool value);
