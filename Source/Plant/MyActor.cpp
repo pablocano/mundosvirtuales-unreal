@@ -15,6 +15,8 @@ void AMyActor::init(Machine& machine){
 
 	this->machine = &machine;
 
+	USceneComponent* root = NewObject<USceneComponent>(this, TEXT("RootComponent"));
+	this->SetRootComponent(root);
 	for (MachinePart& machinePart : this->machine->machineParts)
 	{
 		FString name(machinePart.name.c_str());
@@ -24,11 +26,6 @@ void AMyActor::init(Machine& machine){
 		part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		skeleton.Add(part);
 	}
-
-	
-
-
-
 
 	// Generate Widget Info
 	widgetInfoComponent = NewObject<UWidgetComponent>(this, TEXT("Widget Component Info"));

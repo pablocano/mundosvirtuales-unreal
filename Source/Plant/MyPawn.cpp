@@ -17,7 +17,7 @@ AMyPawn::AMyPawn(const FObjectInitializer& ObjectInitializer)
 	OurCameraSpringArm->SetupAttachment(RootComponent);
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 50.f), FRotator(-60.f, 0.f, 0.f));
 	OurCameraSpringArm->TargetArmLength = 400.f;
-	ZoomFactor = 0.9f;
+	ZoomFactor = 1.f;
 	OurCameraSpringArm->bDoCollisionTest = false;
 	OurCameraSpringArm->bEnableCameraLag = true;
 	OurCameraSpringArm->CameraLagSpeed = 3.f;

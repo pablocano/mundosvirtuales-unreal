@@ -27,9 +27,12 @@ class PLANT_API UMySkeletalMeshComponent : public USkeletalMeshComponent
 
 	void init(AMyActor* aMyActor, MachinePart* part);
 	
+	USkeletalMesh* mesh;
 	UAnimSequence* animation;
 
 	AMyActor* parent;
 
 	MachinePart* part;
+
+	bool selected;
 };
