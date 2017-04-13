@@ -18,9 +18,29 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UVerticalBox* ItemWidgetsBox;
 
 	UPROPERTY()
+	UHorizontalBox* ItemButtonBarBox;
+
+	UPROPERTY()
 	UScrollBox* ScrollBox;
 
+	UPROPERTY()
+	TArray<USensor*> Sensors;
+
+	UPROPERTY()
+	float DeltaTime;
+
+	float accTime;
+
 public:
+	UPROPERTY()
+	UButton* buttonOk;
+
 	UFUNCTION(BlueprintCallable)
-	void SetSensors(const TArray<USensor*>& Sensors);
+	void SetSensors(const TArray<USensor*>& arrSensors);
+
+	UFUNCTION()
+	void UpdateWidgetSensors(float InDeltaTime);
+
+	UFUNCTION()
+	void UpdateDataSensors(float InDeltaTime);
 };

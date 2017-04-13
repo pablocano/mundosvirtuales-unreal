@@ -5,4 +5,15 @@
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Plant, "Plant" );
 
-//IMPLEMENT_PRIMARY_GAME_MODULE(FUE4MagicGameModule, Plant, "Plant");
+// Utils Function
+
+void SetBoolUProperty(UObject* Object, FName PropertyName, bool value)
+{
+	UProperty* Property = Object->GetClass()->FindPropertyByName(PropertyName);
+
+	if (UBoolProperty *BoolProperty = Cast<UBoolProperty>(Property))
+	{
+		void* ValuePtr = BoolProperty->ContainerPtrToValuePtr<void>(Object);
+		BoolProperty->SetPropertyValue(ValuePtr, value);
+	}
+}

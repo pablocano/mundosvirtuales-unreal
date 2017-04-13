@@ -16,7 +16,7 @@ class PLANT_API AMyActor : public AActor
 	GENERATED_UCLASS_BODY() //note that this is GENERATED_UCLASS_BODY and not GENERATED_BODY.
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
-	class UWidgetComponent* widgetInfoComponent;
+	class UWidgetInfoComponent* widgetInfoComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
 	class UMyUserWidgetInfo* widgetInfo;
@@ -24,7 +24,20 @@ class PLANT_API AMyActor : public AActor
 	UPROPERTY()
 	TArray<USensor*> Sensors;
 
+protected:
+	UFUNCTION()
+	void OnClickButtonOk();
+
+	UFUNCTION()
+	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
+
+	UFUNCTION()
+	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
+
 public:
+	UPROPERTY(EditAnywhere, Category = UserInterface)
+	EWidgetSpace Space;
+
 	UPROPERTY(VisibleAnywhere)
 	TArray<UMySkeletalMeshComponent*> skeleton;
 
@@ -37,4 +50,5 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	void init(Machine& machine);
+
 };
