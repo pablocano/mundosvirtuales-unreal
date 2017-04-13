@@ -30,14 +30,8 @@ void AMyActor::init(Machine& machine){
 		skeleton.Add(part);
 	}
 
-	
-
-
-
-
 	// Generate Widget Info
 	widgetInfoComponent = NewObject<UWidgetInfoComponent>(this, TEXT("Widget Component Info"));
-	widgetInfoComponent->RegisterComponent();
 	widgetInfoComponent->SetVisibility(true);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
 	widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
@@ -58,6 +52,8 @@ void AMyActor::init(Machine& machine){
 		widgetInfoComponent->SetTwoSided(true);
 		SetBoolUProperty(widgetInfoComponent, TEXT("bReceiveHardwareInput"), true);  // Enable click
 	}
+	
+	widgetInfoComponent->RegisterComponent();
 }
 
 // Called when the game starts or when spawned
