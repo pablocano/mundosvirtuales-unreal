@@ -28,7 +28,6 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	UHorizontalBoxSlot* SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(textTitle);
 	SlotItemHorz->SetPadding(fPadding);
 	SlotItemHorz->SetSize(ESlateSizeRule::Fill);
-	textTitle->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	// Generate Button Ok
 	buttonOk = NewObject<UButton>(TitleBarBox, UButton::StaticClass());
@@ -38,7 +37,6 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	textButtonOk->SetColorAndOpacity(FSlateColor(FLinearColor(.0f, .0f, .0f, 1.0f)));
 	buttonOk->AddChild(textButtonOk);
 	SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(buttonOk);
-	buttonOk->SetVisibility(ESlateVisibility::Visible);
 
 	// Work Space
 	ScrollBox = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box"));
@@ -117,26 +115,14 @@ void UMyUserWidgetInfo::OnClickWidgetComponent(UPrimitiveComponent* pComponent, 
 
 FReply UMyUserWidgetInfo::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	bool bAltDown = InMouseEvent.IsAltDown();
-	bool bCtrlDown = InMouseEvent.IsControlDown();
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click WidgetInfo"));
-	}
+	parentComponent->StartMoveComponent();
 
 	return FReply::Handled();
 }
 
 FReply UMyUserWidgetInfo::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	bool bAltDown = InMouseEvent.IsAltDown();
-	bool bCtrlDown = InMouseEvent.IsControlDown();
-
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Release Click WidgetInfo"));
-	}
+	parentComponent->EndMoveComponent();
 
 	return FReply::Handled();
 }
