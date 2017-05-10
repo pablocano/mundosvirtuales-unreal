@@ -53,12 +53,14 @@ void UMySkeletalMeshComponent::CustomOnBeginMouseClicked(UPrimitiveComponent* To
 	{
 		if (!selected)
 		{
+			this->SetCustomDepthStencilValue(250);
 			SetPlayRate(1.f);
 			selected = true;
 			Play(false);
 		}
 		else
 		{
+			this->SetCustomDepthStencilValue(0);
 			selected = false;
 			SetPlayRate(-1.f);
 			Play(false);
