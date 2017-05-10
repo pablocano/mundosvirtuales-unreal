@@ -11,10 +11,20 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 
 	UWidgetTree* widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
 	this->WidgetTree = widgetTree;
-	
+
+	UScaleBox* ScaleBox = NewObject<UScaleBox>(widgetTree, UScaleBox::StaticClass());
+	ScaleBox->SetUserSpecifiedScale(0.25f);
+	ScaleBox->SetStretch(EStretch::ScaleToFit);
+	this->WidgetTree->RootWidget = ScaleBox;
+
+	USizeBox* SizeBox = NewObject<USizeBox>(ScaleBox, USizeBox::StaticClass());
+	SizeBox->SetHeightOverride(150.f);
+	SizeBox->SetWidthOverride(200.f);
+	ScaleBox->AddChild(SizeBox);
+
 	// Content Window
-	UVerticalBox* ContentWindowBox = NewObject<UVerticalBox>(widgetTree, TEXT("Content Windows"));
-	this->WidgetTree->RootWidget = ContentWindowBox;
+	UVerticalBox* ContentWindowBox = NewObject<UVerticalBox>(SizeBox, TEXT("Content Windows"));
+	SizeBox->AddChild(ContentWindowBox);
 
 	// Title Bar and Buttons
 	UHorizontalBox* TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("Title Bar"));
@@ -23,7 +33,7 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	// Generate Title
 	UTextBlock* textTitle = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
 	textTitle->SetText(FText::FromString(TEXT("Información")));
-	textTitle->Font.Size = 8;
+	textTitle->Font.Size = 12;
 	textTitle->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
 	UHorizontalBoxSlot* SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(textTitle);
 	SlotItemHorz->SetPadding(fPadding);
@@ -31,12 +41,25 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 
 	// Generate Button Ok
 	buttonOk = NewObject<UButton>(TitleBarBox, UButton::StaticClass());
-	UTextBlock* textButtonOk = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
-	textButtonOk->SetText(FText::FromString(TEXT("X")));
-	textButtonOk->Font.Size = 8;
-	textButtonOk->SetColorAndOpacity(FSlateColor(FLinearColor(.0f, .0f, .0f, 1.0f)));
-	buttonOk->AddChild(textButtonOk);
 	SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(buttonOk);
+	SlotItemHorz->SetPadding(fPadding);
+
+	FVector2D sizeButton(16, 16);
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGObj(TEXT("/Game/WidgetTextures/close_button"));
+	ButtonBG = ButtonBGObj.Object;
+	buttonOk->WidgetStyle.Normal.SetResourceObject(ButtonBG);
+	buttonOk->WidgetStyle.Normal.ImageSize = sizeButton;
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGPressedObj(TEXT("/Game/WidgetTextures/close_button_pressed"));
+	ButtonBGPressed = ButtonBGPressedObj.Object;
+	buttonOk->WidgetStyle.Pressed.SetResourceObject(ButtonBGPressed);
+	buttonOk->WidgetStyle.Pressed.ImageSize = sizeButton;
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGHoveredObj(TEXT("/Game/WidgetTextures/close_button_hovered"));
+	ButtonBGHovered = ButtonBGHoveredObj.Object;
+	buttonOk->WidgetStyle.Hovered.SetResourceObject(ButtonBGHovered);
+	buttonOk->WidgetStyle.Hovered.ImageSize = sizeButton;
 
 	// Work Space
 	ScrollBox = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box"));
@@ -53,7 +76,6 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 
 void UMyUserWidgetInfo::SetParentComponent(UWidgetInfoComponent* parent)
 {
-	// textTitle->OnClicked.AddDynamic(this, &OnClickWidgetComponent);
 	parentComponent = parent;
 }
 

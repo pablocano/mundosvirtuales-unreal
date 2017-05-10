@@ -35,7 +35,7 @@ void AMyActor::init(Machine& machine){
 	widgetInfoComponent->SetVisibility(true);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
 	widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	widgetInfoComponent->SetDrawSize(FVector2D(200, 150));
+	widgetInfoComponent->SetDrawSize(FVector2D(100, 75));
 	widgetInfoComponent->SetRelativeLocation(FVector(100.f, 0.f, 150.f));
 	widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -43,7 +43,7 @@ void AMyActor::init(Machine& machine){
 	widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-	widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .95f));
+	widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .8f));
 	widgetInfoComponent->SetBlendMode(EWidgetBlendMode::Transparent);
 	widgetInfoComponent->SetWidgetSpace(Space);
 

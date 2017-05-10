@@ -30,6 +30,10 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UPROPERTY()
 	TArray<USensor*> Sensors;
 
+	UTexture2D* ButtonBG;
+	UTexture2D* ButtonBGPressed;
+	UTexture2D* ButtonBGHovered;
+
 	UPROPERTY()
 	float DeltaTime;
 
