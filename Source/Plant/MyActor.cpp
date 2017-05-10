@@ -20,6 +20,8 @@ void AMyActor::init(Machine& machine){
 
 	this->machine = &machine;
 
+	USceneComponent* root = NewObject<USceneComponent>(this, TEXT("RootComponent"));
+	this->SetRootComponent(root);
 	for (MachinePart& machinePart : this->machine->machineParts)
 	{
 		FString name(machinePart.name.c_str());
