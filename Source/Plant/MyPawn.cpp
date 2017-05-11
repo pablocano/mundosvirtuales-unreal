@@ -15,9 +15,9 @@ AMyPawn::AMyPawn(const FObjectInitializer& ObjectInitializer)
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
-	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 50.f), FRotator(-60.f, 0.f, 0.f));
+	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 0.f), FRotator(-30.f, 0.f, 0.f));
 	OurCameraSpringArm->TargetArmLength = 400.f;
-	ZoomFactor = 1.f;
+	ZoomFactor = 0.f;
 	OurCameraSpringArm->bDoCollisionTest = false;
 	OurCameraSpringArm->bEnableCameraLag = true;
 	OurCameraSpringArm->CameraLagSpeed = 3.f;
@@ -92,6 +92,10 @@ void AMyPawn::Tick(float DeltaTime)
 			NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime * 5.f;
 			NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime * 5.f;
 			NewLocation += GetActorUpVector() * MovementInput.Z * DeltaTime * 5.f;
+			if (NewLocation.Z < 0.f)
+			{
+				NewLocation.Z = 0.f;
+			}
 			SetActorLocation(NewLocation);
 		}
 	}
