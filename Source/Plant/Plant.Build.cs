@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+using System;
 using System.IO;
 using UnrealBuildTool;
 
@@ -40,16 +41,13 @@ public class Plant : ModuleRules
         {
             isLibrarySupported = true;
 
-            string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x64" : "x86";
             string LibrariesPath = Path.Combine(ThirdPartyPath, "PlantCore", "Libraries");
-
-            /*
-            test your path with:
-            using System; // Console.WriteLine("");
-            Console.WriteLine("... LibrariesPath -> " + LibrariesPath);
-            */
-
-            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, "PlantCore." + PlatformString + ".lib"));
+            string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x64" : "x86";
+            string ConfigurationString = (Target.Configuration == UnrealTargetConfiguration.Debug) ? "Debug" : "Release";
+  
+            Console.WriteLine("... LibrariesPath -> " + Path.Combine(LibrariesPath, PlatformString, ConfigurationString));
+            
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, PlatformString, ConfigurationString, "plantCorelib.lib"));
         }
 
         if (isLibrarySupported)
@@ -59,6 +57,33 @@ public class Plant : ModuleRules
         }
 
         Definitions.Add(string.Format("WITH_PLANT_CORE_BINDING={0}", isLibrarySupported ? 1 : 0));
+
+        return isLibrarySupported;
+    }
+
+    public bool LoadThirdPartyLibrary(TargetInfo Target, string LibName)
+    {
+        bool isLibrarySupported = false;
+
+        string LibrariesPath = Path.Combine(ThirdPartyPath, LibName, "Libraries");
+        string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x64" : "x86";
+        string ConfigurationString = (Target.Configuration == UnrealTargetConfiguration.Debug) ? "Debug" : "Release";
+
+
+        if (Target.Platform == UnrealTargetPlatform.Win64)
+        {
+            isLibrarySupported = true;
+
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, PlatformString, ConfigurationString, LibName + ".lib"));
+        }
+
+        if (isLibrarySupported)
+        {
+            // Include path
+            PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, LibName, "Includes"));
+        }
+
+        Definitions.Add(string.Format("WITH_" + LibName.ToUpper() + "_BINDING={0}", isLibrarySupported ? 1 : 0));
 
         return isLibrarySupported;
     }
