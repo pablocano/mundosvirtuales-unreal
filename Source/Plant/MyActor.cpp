@@ -46,12 +46,11 @@ void AMyActor::init(Machine& machine){
 
 	// Generate Widget Info
 	widgetInfoComponent = NewObject<UWidgetInfoComponent>(this, TEXT("Widget Component Info"));
-	widgetInfoComponent->RegisterComponent();
 	widgetInfoComponent->SetVisibility(true);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
 	widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	widgetInfoComponent->SetDrawSize(FVector2D(200, 150));
-	widgetInfoComponent->SetRelativeLocation(FVector(100.f, 0.f, 150.f));
+	widgetInfoComponent->SetDrawSize(FVector2D(800, 600));
+	widgetInfoComponent->SetRelativeLocation(FVector(100.f, 0.f, 300.f));
 	widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -67,6 +66,8 @@ void AMyActor::init(Machine& machine){
 		widgetInfoComponent->SetTwoSided(true);
 		SetBoolUProperty(widgetInfoComponent, TEXT("bReceiveHardwareInput"), true);  // Enable click
 	}
+
+	widgetInfoComponent->RegisterComponent();
 }
 
 // Called when the game starts or when spawned
@@ -122,6 +123,10 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 		rotCamera.Yaw -= 180;
 		rotCamera.Pitch = 0;
 		widgetInfoComponent->SetWorldRotation(rotCamera);
+		FVector mouseLocation, mouseDirection, loc;
+		GEngine->GetFirstLocalPlayerController(GetWorld())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection);
+		TouchedComponent->GetClosestPointOnCollision(mouseLocation, loc);
+		widgetInfoComponent->SetWorldLocation(loc);
 	}
 
 	widgetInfoComponent->EnableWidget();
@@ -152,7 +157,7 @@ void AMyActor::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKe
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Hola"));
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click on WidgetComponent"));
 	}
 }
 

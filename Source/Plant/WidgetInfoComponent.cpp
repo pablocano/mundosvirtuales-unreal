@@ -2,6 +2,14 @@
 
 #include "Plant.h"
 #include "WidgetInfoComponent.h"
+#include "MyUserWidgetInfo.h"
+
+void UWidgetInfoComponent::SetWidget(UUserWidget* InWidget)
+{
+	Super::SetWidget(InWidget);
+
+	((UMyUserWidgetInfo*) InWidget)->SetParentComponent(this);
+}
 
 void UWidgetInfoComponent::EnableWidget()
 {

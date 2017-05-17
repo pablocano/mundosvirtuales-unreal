@@ -44,6 +44,7 @@ protected:
 	UFUNCTION()
 	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
 
+public:
 	UFUNCTION()
 	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
 

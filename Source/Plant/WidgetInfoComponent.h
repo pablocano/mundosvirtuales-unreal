@@ -30,4 +30,6 @@ public:
 
 	UFUNCTION()
 	void MoveWidget();
+
+	virtual void SetWidget(UUserWidget* Widget) override;
 };

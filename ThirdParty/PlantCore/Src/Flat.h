@@ -14,6 +14,8 @@ public:
 
 	static std::string materialList[82];
 
+	static std::string machineInfo[82];
+
 	std::vector<Machine> machines;
 };
 

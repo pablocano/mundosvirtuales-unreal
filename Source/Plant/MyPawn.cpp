@@ -16,7 +16,7 @@ AMyPawn::AMyPawn(const FObjectInitializer& ObjectInitializer)
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
 	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 0.f), FRotator(-30.f, 0.f, 0.f));
-	OurCameraSpringArm->TargetArmLength = 400.f;
+	OurCameraSpringArm->TargetArmLength = 4000.f;
 	ZoomFactor = 0.f;
 	OurCameraSpringArm->bDoCollisionTest = false;
 	OurCameraSpringArm->bEnableCameraLag = true;
@@ -65,7 +65,7 @@ void AMyPawn::Tick(float DeltaTime)
 		ZoomFactor = FMath::Clamp<float>(ZoomFactor, 0.0f, 1.0f);*/
 		//Blend our camera's FOV and our SpringArm's length based on ZoomFactor
 		//OurCamera->FieldOfView = FMath::Lerp<float>(90.0f, 60.0f, ZoomFactor);
-		OurCameraSpringArm->TargetArmLength = FMath::Lerp<float>(2000.0f, 10.0f, ZoomFactor);
+		OurCameraSpringArm->TargetArmLength = FMath::Lerp<float>(20000.0f, 10.0f, ZoomFactor);
 	}
 
 	//Rotate our actor's yaw, which will turn our camera because we're attached to it
@@ -87,7 +87,7 @@ void AMyPawn::Tick(float DeltaTime)
 		if (!MovementInput.IsZero())
 		{
 			//Scale our movement input axis values by 100 units per second
-			MovementInput = MovementInput.GetSafeNormal() * (1.02f  - ZoomFactor) * 500.0f;
+			MovementInput = MovementInput.GetSafeNormal() * (1.02f  - ZoomFactor) * 1000.0f;
 			FVector NewLocation = GetActorLocation();
 			NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime * 5.f;
 			NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime * 5.f;

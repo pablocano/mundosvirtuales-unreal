@@ -34,6 +34,14 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UTexture2D* ButtonBGPressed;
 	UTexture2D* ButtonBGHovered;
 
+	USizeBox* SizeBox;
+	UScaleBox* ScaleBox;
+	UWidgetTree* widgetTree;
+	FMargin fPadding;
+
+	UVerticalBox* ContentWindowBox;
+	UHorizontalBox* TitleBarBox;
+
 	UPROPERTY()
 	float DeltaTime;
 

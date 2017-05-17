@@ -23,9 +23,6 @@ class PLANT_API UMyStaticMeshComponent : public UStaticMeshComponent, public IMe
 	UFUNCTION()
 	void CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent);
 
-	UFUNCTION(Category = Default)
-	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
-
 	UFUNCTION()
 	virtual bool setFocus_Implementation(bool focus) override;
 
@@ -40,5 +37,8 @@ class PLANT_API UMyStaticMeshComponent : public UStaticMeshComponent, public IMe
 
 	bool selected;
 	
+protected:
+	UFUNCTION(Category = Default)
+	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
 	
 };

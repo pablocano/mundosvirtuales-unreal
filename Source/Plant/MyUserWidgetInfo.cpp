@@ -5,29 +5,27 @@
 
 
 UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f)
+	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f), fPadding(5)
 {
-	static FMargin fPadding(5);
-
-	UWidgetTree* widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
+	widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
 	this->WidgetTree = widgetTree;
 
-	UScaleBox* ScaleBox = NewObject<UScaleBox>(widgetTree, UScaleBox::StaticClass());
-	ScaleBox->SetUserSpecifiedScale(0.25f);
+	ScaleBox = NewObject<UScaleBox>(widgetTree, UScaleBox::StaticClass());
+	ScaleBox->SetUserSpecifiedScale(1.0f);
 	ScaleBox->SetStretch(EStretch::ScaleToFit);
 	this->WidgetTree->RootWidget = ScaleBox;
 
-	USizeBox* SizeBox = NewObject<USizeBox>(ScaleBox, USizeBox::StaticClass());
-	SizeBox->SetHeightOverride(150.f);
-	SizeBox->SetWidthOverride(200.f);
+	SizeBox = NewObject<USizeBox>(ScaleBox, USizeBox::StaticClass());
+	SizeBox->SetHeightOverride(180.f);
+	SizeBox->SetWidthOverride(240.f);
 	ScaleBox->AddChild(SizeBox);
 
 	// Content Window
-	UVerticalBox* ContentWindowBox = NewObject<UVerticalBox>(SizeBox, TEXT("Content Windows"));
+	ContentWindowBox = NewObject<UVerticalBox>(SizeBox, TEXT("Content Windows"));
 	SizeBox->AddChild(ContentWindowBox);
 
 	// Title Bar and Buttons
-	UHorizontalBox* TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("Title Bar"));
+	TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("Title Bar"));
 	ContentWindowBox->AddChildToVerticalBox(TitleBarBox);
 
 	// Generate Title
@@ -81,8 +79,6 @@ void UMyUserWidgetInfo::SetParentComponent(UWidgetInfoComponent* parent)
 
 void UMyUserWidgetInfo::SetSensors(const TArray<USensor*>& arrSensors)
 {
-	static FMargin fPadding(5);
-
 	if (!ItemWidgetsBox)
 	{
 		return;
@@ -131,7 +127,7 @@ void UMyUserWidgetInfo::OnClickWidgetComponent(UPrimitiveComponent* pComponent, 
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Hola"));
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click on Component"));
 	}
 }
 

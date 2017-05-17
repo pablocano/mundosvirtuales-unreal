@@ -31,6 +31,11 @@ void UMyStaticMeshComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * Tou
 		this->SetCustomDepthStencilValue(253);
 		selected = false;
 	}
+
+	if (parent)
+	{
+		parent->CustomOnBeginMouseClicked(TouchedComponent, key);
+	}
 }
 
 bool UMyStaticMeshComponent::setFocus_Implementation(bool focus)
