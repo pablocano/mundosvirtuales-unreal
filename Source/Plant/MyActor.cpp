@@ -25,19 +25,32 @@ void AMyActor::init(Machine& machine){
 	for (MachinePart& machinePart : this->machine->machineParts)
 	{
 		FString name(machinePart.name.c_str());
-		UMySkeletalMeshComponent* part = NewObject<UMySkeletalMeshComponent>(this, FName(*name)); // text("") can be just about anything.
-		part->init(this,&machinePart);
-		part->RegisterComponent();
-		part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		skeleton.Add(part);
+		if (machinePart.animated)
+		{
+			UMySkeletalMeshComponent* part = NewObject<UMySkeletalMeshComponent>(this, FName(*name)); // text("") can be just about anything.
+			part->init(this, &machinePart);
+			part->RegisterComponent();
+			part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			skeleton.Add(part);
+		}
+		else 
+		{
+			UMyStaticMeshComponent* part = NewObject<UMyStaticMeshComponent>(this, FName(*name)); // text("") can be just about anything.
+			part->init(this, &machinePart);
+			part->RegisterComponent();
+			part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			skeleton.Add(part);
+		}
+		
 	}
 
 	// Generate Widget Info
 	widgetInfoComponent = NewObject<UWidgetInfoComponent>(this, TEXT("Widget Component Info"));
+	widgetInfoComponent->RegisterComponent();
 	widgetInfoComponent->SetVisibility(true);
 	widgetInfoComponent->SetOnlyOwnerSee(false);
 	widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	widgetInfoComponent->SetDrawSize(FVector2D(100, 75));
+	widgetInfoComponent->SetDrawSize(FVector2D(200, 150));
 	widgetInfoComponent->SetRelativeLocation(FVector(100.f, 0.f, 150.f));
 	widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -45,7 +58,7 @@ void AMyActor::init(Machine& machine){
 	widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
 	widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
-	widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .8f));
+	widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .95f));
 	widgetInfoComponent->SetBlendMode(EWidgetBlendMode::Transparent);
 	widgetInfoComponent->SetWidgetSpace(Space);
 
@@ -54,14 +67,15 @@ void AMyActor::init(Machine& machine){
 		widgetInfoComponent->SetTwoSided(true);
 		SetBoolUProperty(widgetInfoComponent, TEXT("bReceiveHardwareInput"), true);  // Enable click
 	}
-	
-	widgetInfoComponent->RegisterComponent();
 }
 
 // Called when the game starts or when spawned
 void AMyActor::BeginPlay()
 {
 	Super::BeginPlay();
+	// FVector locationWidget = FVector(0.f, 0.f, 150.f) + GetActorLocation();
+	// widgetInfoComponent->SetRelativeLocation(locationWidget);
+	// widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	
 	widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
 
@@ -82,9 +96,9 @@ void AMyActor::BeginPlay()
 
 	widgetInfo->SetSensors(Sensors);	
 	widgetInfoComponent->SetWidget(widgetInfo);
+	widgetInfo->buttonOk->OnClicked.AddDynamic(this, &AMyActor::OnClickButtonOk);
+	widgetInfoComponent->OnClicked.AddDynamic(this, &AMyActor::OnClickWidgetComponent);
 	widgetInfoComponent->DisableWidget();
-
-	widgetInfo->SetParentComponent(widgetInfoComponent);
 }
 
 // Called every frame
@@ -111,5 +125,34 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 	}
 
 	widgetInfoComponent->EnableWidget();
+}
+
+bool AMyActor::toggleFocus()
+{
+
+	selected = !selected;
+	for (UMeshComponent* part : skeleton)
+	{
+		IMeshInterface* partInterface = Cast<IMeshInterface>(part);
+		if (partInterface)
+		{
+			partInterface->Execute_setFocus(part, selected);
+		}
+	}
+	
+	return false;
+}
+
+void AMyActor::OnClickButtonOk()
+{
+	widgetInfoComponent->DisableWidget();
+}
+
+void AMyActor::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Hola"));
+	}
 }
 

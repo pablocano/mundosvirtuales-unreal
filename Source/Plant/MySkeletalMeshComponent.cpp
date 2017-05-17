@@ -15,18 +15,14 @@ void UMySkeletalMeshComponent::init(AMyActor* aMyActor, MachinePart* machinePart
 {
 	parent = aMyActor;
 	part = machinePart;
-
-	FString path("/Game/Test/");
-	FString baseName = (std::string("wheel."+parent->machine->name + "_solid__").c_str());
-
-	FString meshName = path  + FString(std::string("wheel." + parent->machine->name + "_solid__"+ part->name).c_str());
-	FString animationName = path + FString(std::string(parent->machine->name + "_solid__" + part->name+ "_Anim").c_str()) + FString(std::string("." + parent->machine->name + "_solid__" + part->name + "_Anim").c_str());
+	FString meshName = FString(part->name.c_str());
+	//FString animationName = path + FString(std::string(parent->machine->name + "_solid__" + part->name+ "_Anim").c_str()) + FString(std::string("." + parent->machine->name + "_solid__" + part->name + "_Anim").c_str());
 
 	mesh = LoadObject<USkeletalMesh>(NULL, *meshName, NULL, LOAD_None, NULL);
-	animation = LoadObject<UAnimSequence>(NULL, *animationName, NULL, LOAD_None, NULL);
+	//animation = LoadObject<UAnimSequence>(NULL, *animationName, NULL, LOAD_None, NULL);
 
-	ensureMsg(mesh != nullptr, TEXT("Node is invalid"));
-	ensureMsg(animation != nullptr, TEXT("Node is invalid"));
+	ensureMsgf(mesh != nullptr, TEXT("Node is invalid"));
+	ensureMsgf(animation != nullptr, TEXT("Node is invalid"));
 
 	this->OnBeginCursorOver.AddDynamic(this, &UMySkeletalMeshComponent::CustomOnBeginMouseOver);
 	this->OnEndCursorOver.AddDynamic(this, &UMySkeletalMeshComponent::CustomOnEndMouseOver);
@@ -72,4 +68,9 @@ void UMySkeletalMeshComponent::CustomOnBeginMouseClicked(UPrimitiveComponent* To
 	{
 		parent->CustomOnBeginMouseClicked(TouchedComponent, key);
 	}
+}
+
+bool UMySkeletalMeshComponent::setFocus_Implementation(bool focus)
+{
+	return true;
 }

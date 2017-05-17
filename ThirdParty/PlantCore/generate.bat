@@ -8,3 +8,4 @@ cmake --build build32 --config Release
 cmake --build build64 --config Release
 cmake --build build32 --config Debug
 cmake --build build64 --config Debug
+for /r Src\ %%x in (*.h) do copy "%%x" Includes\PlantCore /Y
