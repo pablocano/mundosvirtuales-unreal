@@ -26,10 +26,14 @@ class PLANT_API UMyStaticMeshComponent : public UStaticMeshComponent, public IMe
 	UFUNCTION()
 	virtual bool setFocus_Implementation(bool focus) override;
 
+	UFUNCTION()
+	virtual bool setEmissive_Implementation(float emissive) override;
+
 	void init(AMyActor* aMyActor, MachinePart* part);
 
 	UStaticMesh* mesh;
 	UMaterialInterface* material;
+	UMaterialInstanceDynamic* DynMaterial;
 
 	AMyActor* parent;
 
