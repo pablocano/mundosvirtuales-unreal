@@ -29,6 +29,9 @@ class PLANT_API UMySkeletalMeshComponent : public USkeletalMeshComponent, public
 	UFUNCTION()
 	virtual bool setFocus_Implementation(bool focus) override;
 
+	UFUNCTION()
+	virtual bool setEmissive_Implementation(float emissive) override;
+
 	void init(AMyActor* aMyActor, MachinePart* part);
 	
 	USkeletalMesh* mesh;

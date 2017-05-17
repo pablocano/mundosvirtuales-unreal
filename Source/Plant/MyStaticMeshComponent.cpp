@@ -11,33 +11,67 @@ UMyStaticMeshComponent::UMyStaticMeshComponent(const FObjectInitializer& ObjectI
 
 void UMyStaticMeshComponent::CustomOnBeginMouseOver(UPrimitiveComponent * TouchedComponent)
 {
-	parent->toggleFocus();
+	if (parent->IsSelected())
+	{
+		if (!selected)
+		{
+			this->SetRenderCustomDepth(true);
+		}
+	}
+	else
+	{
+		parent->setHover(true);
+	}
 }
 
 void UMyStaticMeshComponent::CustomOnEndMouseOver(UPrimitiveComponent * TouchedComponent)
 {
-	parent->toggleFocus();
+	if (parent->IsSelected())
+	{
+		if (!selected)
+		{
+			this->SetRenderCustomDepth(false);
+		}
+	}
+	else
+	{
+		parent->setHover(false);
+	}
 }
 
 void UMyStaticMeshComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * TouchedComponent, FKey key)
 {
-	if (!selected)
+	if (!parent->IsSelected())
 	{
-		this->SetCustomDepthStencilValue(254);
-		selected = true;
+		parent->setSelect(true);
 	}
-	else
-	{
-		this->SetCustomDepthStencilValue(253);
-		selected = false;
+	else {
+		if (!selected)
+		{
+			parent->setSelectedPart(this);
+		}
+		else
+		{
+			parent->setSelectedPart(0);
+		}
 	}
 }
 
 bool UMyStaticMeshComponent::setFocus_Implementation(bool focus)
 {
+	selected = focus;
+	int stencilValue = focus ? 255 : 254;
+	this->SetCustomDepthStencilValue(stencilValue);
 	this->SetRenderCustomDepth(focus);
 	return true;
 }
+
+bool UMyStaticMeshComponent::setEmissive_Implementation(float emissive)
+{
+	DynMaterial->SetScalarParameterValue("Emissive", emissive);
+	return true;
+}
+
 
 void UMyStaticMeshComponent::init(AMyActor * aMyActor, MachinePart * machinePart)
 {
@@ -58,7 +92,13 @@ void UMyStaticMeshComponent::init(AMyActor * aMyActor, MachinePart * machinePart
 	this->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	this->SetStaticMesh(mesh);
-	this->SetMaterial(0, material);
 
-	this->SetCustomDepthStencilValue(253);
+	DynMaterial = UMaterialInstanceDynamic::Create(material, this);	
+	DynMaterial->SetScalarParameterValue("Emissive", 0.f);
+
+
+	this->SetMaterial(0, DynMaterial);
+	
+
+	this->SetCustomDepthStencilValue(254);
 }

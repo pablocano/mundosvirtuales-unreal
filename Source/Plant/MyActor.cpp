@@ -31,7 +31,7 @@ void AMyActor::init(Machine& machine){
 			part->init(this, &machinePart);
 			part->RegisterComponent();
 			part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-			skeleton.Add(part);
+			meshParts.Add(part);
 		}
 		else 
 		{
@@ -39,7 +39,7 @@ void AMyActor::init(Machine& machine){
 			part->init(this, &machinePart);
 			part->RegisterComponent();
 			part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-			skeleton.Add(part);
+			meshParts.Add(part);
 		}
 		
 	}
@@ -66,6 +66,65 @@ void AMyActor::init(Machine& machine){
 	{
 		widgetInfoComponent->SetTwoSided(true);
 		SetBoolUProperty(widgetInfoComponent, TEXT("bReceiveHardwareInput"), true);  // Enable click
+	}
+}
+
+void AMyActor::setHover(bool hover)
+{
+	for (UMeshComponent* part : meshParts)
+	{
+		IMeshInterface* partInterface = Cast<IMeshInterface>(part);
+		if (partInterface)
+		{
+			float emissive = hover ? 0.1f : 0.f;
+			partInterface->Execute_setEmissive(part, emissive);
+		}
+	}
+}
+
+void AMyActor::setSelect(bool select)
+{
+	selected = select;
+	for (UMeshComponent* part : meshParts)
+	{
+		IMeshInterface* partInterface = Cast<IMeshInterface>(part);
+		if (partInterface)
+		{
+			float emissive = selected ? 0.1f : 0.f;
+			partInterface->Execute_setEmissive(part, emissive);
+		}
+	}
+
+	if (selected)
+	{
+		widgetInfoComponent->EnableWidget();
+	}
+	else
+	{
+		widgetInfoComponent->DisableWidget();
+	}
+}
+
+void AMyActor::setSelectedPart(UMeshComponent * part)
+{
+	if (selectedPart)
+	{
+		IMeshInterface* partInterface = Cast<IMeshInterface>(selectedPart);
+		if (partInterface)
+		{
+			partInterface->Execute_setFocus(selectedPart, false);
+		}
+	}
+	
+	selectedPart = part;
+
+	if (selectedPart)
+	{
+		IMeshInterface* partInterface = Cast<IMeshInterface>(selectedPart);
+		if (partInterface)
+		{
+			partInterface->Execute_setFocus(selectedPart, true);
+		}
 	}
 }
 
@@ -125,22 +184,6 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 	}
 
 	widgetInfoComponent->EnableWidget();
-}
-
-bool AMyActor::toggleFocus()
-{
-
-	selected = !selected;
-	for (UMeshComponent* part : skeleton)
-	{
-		IMeshInterface* partInterface = Cast<IMeshInterface>(part);
-		if (partInterface)
-		{
-			partInterface->Execute_setFocus(part, selected);
-		}
-	}
-	
-	return false;
 }
 
 void AMyActor::OnClickButtonOk()

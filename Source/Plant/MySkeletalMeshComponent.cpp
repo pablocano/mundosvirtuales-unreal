@@ -69,3 +69,8 @@ bool UMySkeletalMeshComponent::setFocus_Implementation(bool focus)
 {
 	return true;
 }
+
+bool UMySkeletalMeshComponent::setEmissive_Implementation(float emissive)
+{
+	return true;
+}

@@ -35,7 +35,15 @@ public:
 
 	void init(Machine& machine);
 
-	bool toggleFocus();
+	void setHover(bool hover);
+
+	void setSelect(bool select);
+
+	void setSelectedPart(UMeshComponent* part);
+
+	UMeshComponent* getSelectedPart() { return selectedPart; }
+
+	bool IsSelected() { return selected; }
 
 protected:
 	UFUNCTION()
@@ -52,7 +60,9 @@ private:
 	EWidgetSpace Space;
 
 	//UPROPERTY(VisibleAnywhere)
-	TArray<UMeshComponent*> skeleton;
+	TArray<UMeshComponent*> meshParts;
+
+	UMeshComponent* selectedPart;
 
 	Machine* machine;
 
