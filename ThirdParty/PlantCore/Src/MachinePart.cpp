@@ -2,7 +2,7 @@
 
 
 
-MachinePart::MachinePart(std::string name) : name(name)
+MachinePart::MachinePart(std::string name, std::string material) : name(name), material(material), animated(false)
 {
 }
 

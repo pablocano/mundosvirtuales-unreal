@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include "Machine.h"
 
 class Flat
@@ -8,6 +9,10 @@ class Flat
 public:
 	Flat();
 	~Flat();
+
+	static std::string machineList[82];
+
+	static std::string materialList[82];
 
 	std::vector<Machine> machines;
 };

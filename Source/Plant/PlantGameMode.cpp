@@ -45,7 +45,7 @@ void APlantGameMode::initWorld()
 			AMyActor* MyActor = World->SpawnActorDeferred<AMyActor>(AMyActor::StaticClass(), SpawnLocAndRotation);
 			MyActor->init(machine);
 			MyActor->FinishSpawning(SpawnLocAndRotation);
-			MyActor->SetActorLocation(FVector(0, 0, 10));
+			MyActor->SetActorLocationAndRotation(FVector(500, 500, 2),FRotator(0,0,90));
 		}
 
 	}

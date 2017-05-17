@@ -7,12 +7,15 @@
 #include "MyUserWidgetInfo.h"
 #include "PlantCore/Machine.h"
 #include "MySkeletalMeshComponent.h"
+#include "MyStaticMeshComponent.h"
+#include "MeshInterface.h"
 #include "MyActor.generated.h"
 
 
 UCLASS()
 class PLANT_API AMyActor : public AActor
 {
+public:
 	GENERATED_UCLASS_BODY() //note that this is GENERATED_UCLASS_BODY and not GENERATED_BODY.
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
@@ -24,6 +27,16 @@ class PLANT_API AMyActor : public AActor
 	UPROPERTY()
 	TArray<USensor*> Sensors;
 
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	// Called every frame
+	virtual void Tick(float DeltaSeconds) override;
+
+	void init(Machine& machine);
+
+	bool toggleFocus();
+
 protected:
 	UFUNCTION()
 	void OnClickButtonOk();
@@ -34,21 +47,15 @@ protected:
 	UFUNCTION()
 	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
 
-public:
+private:
 	UPROPERTY(EditAnywhere, Category = UserInterface)
 	EWidgetSpace Space;
 
-	UPROPERTY(VisibleAnywhere)
-	TArray<UMySkeletalMeshComponent*> skeleton;
+	//UPROPERTY(VisibleAnywhere)
+	TArray<UMeshComponent*> skeleton;
 
 	Machine* machine;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	// Called every frame
-	virtual void Tick(float DeltaSeconds) override;
-
-	void init(Machine& machine);
+	bool selected;
 
 };

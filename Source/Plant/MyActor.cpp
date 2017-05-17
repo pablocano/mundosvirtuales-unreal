@@ -25,11 +25,23 @@ void AMyActor::init(Machine& machine){
 	for (MachinePart& machinePart : this->machine->machineParts)
 	{
 		FString name(machinePart.name.c_str());
-		UMySkeletalMeshComponent* part = NewObject<UMySkeletalMeshComponent>(this, FName(*name)); // text("") can be just about anything.
-		part->init(this,&machinePart);
-		part->RegisterComponent();
-		part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		skeleton.Add(part);
+		if (machinePart.animated)
+		{
+			UMySkeletalMeshComponent* part = NewObject<UMySkeletalMeshComponent>(this, FName(*name)); // text("") can be just about anything.
+			part->init(this, &machinePart);
+			part->RegisterComponent();
+			part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			skeleton.Add(part);
+		}
+		else 
+		{
+			UMyStaticMeshComponent* part = NewObject<UMyStaticMeshComponent>(this, FName(*name)); // text("") can be just about anything.
+			part->init(this, &machinePart);
+			part->RegisterComponent();
+			part->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			skeleton.Add(part);
+		}
+		
 	}
 
 	// Generate Widget Info
@@ -113,6 +125,22 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 	}
 
 	widgetInfoComponent->EnableWidget();
+}
+
+bool AMyActor::toggleFocus()
+{
+
+	selected = !selected;
+	for (UMeshComponent* part : skeleton)
+	{
+		IMeshInterface* partInterface = Cast<IMeshInterface>(part);
+		if (partInterface)
+		{
+			partInterface->Execute_setFocus(part, selected);
+		}
+	}
+	
+	return false;
 }
 
 void AMyActor::OnClickButtonOk()
