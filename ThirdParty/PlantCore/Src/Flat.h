@@ -17,5 +17,6 @@ public:
 	static std::string machineInfo[82];
 
 	std::vector<Machine> machines;
+
 };
 

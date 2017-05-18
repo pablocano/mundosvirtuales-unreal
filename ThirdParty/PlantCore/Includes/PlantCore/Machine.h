@@ -7,11 +7,16 @@
 class Machine
 {
 public:
-	Machine(std::string name);
+	Machine(std::string name, std::string info, bool canShowInfo = false);
 	~Machine();
 
 	std::vector<MachinePart> machineParts;
 
 	std::string name;
+
+	bool canShowInfo;
+
+	std::string info;
+
 };
 

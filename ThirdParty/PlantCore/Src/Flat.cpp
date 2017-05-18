@@ -254,25 +254,33 @@ std::string Flat::machineInfo[82] = { "/Game/Proter/Planta-05102017_Bombas_y_tub
 
 Flat::Flat()
 {
-	Machine caseta("Caseta");
+	Machine caseta("Caseta", "Nada de info");
+	Machine bomba("Bomba", "Nada de info", true);
+	Machine *machine;
+
 	for (size_t i = 0; i < 82; i++)
 	{
-		std::size_t found = machineList[i].find("Caseta");
-		if (found != std::string::npos)
-		{
-			MachinePart p(machineList[i], materialList[i]);
-			caseta.machineParts.push_back(p);
-		}
+
+		if (machineList[i].find("Bombas_y_tuberias__Bomba") != std::string::npos ||
+			machineList[i].find("Bombas_y_tuberias__Soplador") != std::string::npos ||
+			machineList[i].find("Bombas_y_tuberias__Reduccion_bomba") != std::string::npos ||
+			machineList[i].find("Bombas_y_tuberias__Motor") != std::string::npos)
+			machine = &bomba;
+		else if (machineList[i].find("Caseta") != std::string::npos)
+			machine = &caseta;
 		else
 		{
-			Machine m(machineList[i]);
-			MachinePart p(machineList[i], materialList[i]);
-			m.machineParts.push_back(p);
+			Machine m(machineList[i], machineInfo[i]);
 			machines.push_back(m);
+			machine = &machines.back();
 		}
+
+		MachinePart p(machineList[i], materialList[i], machineInfo[i]);
+		machine->machineParts.push_back(p);
 		
 	}
 	machines.push_back(caseta);
+	machines.push_back(bomba);
 	/*Machine wheel("wheel");
 
 	for (int i = 2; i < 36; i++)

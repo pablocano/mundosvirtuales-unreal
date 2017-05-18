@@ -4,12 +4,14 @@
 class MachinePart
 {
 public:
-	MachinePart(std::string name, std::string material);
+	MachinePart(std::string name, std::string material, std::string info);
 	~MachinePart();
 
 	std::string name;
 
 	std::string material;
+
+	std::string info;
 
 	bool animated;
 };
