@@ -87,7 +87,7 @@ void AMyPawn::Tick(float DeltaTime)
 		if (!MovementInput.IsZero())
 		{
 			//Scale our movement input axis values by 100 units per second
-			MovementInput = MovementInput.GetSafeNormal() * (1.02f  - ZoomFactor) * 1000.0f;
+			MovementInput = MovementInput.GetSafeNormal() * (1.02f  - ZoomFactor) * 5000.0f;
 			FVector NewLocation = GetActorLocation();
 			NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime * 5.f;
 			NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime * 5.f;
