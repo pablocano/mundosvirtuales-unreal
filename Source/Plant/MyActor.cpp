@@ -77,12 +77,14 @@ void AMyActor::init(Machine& _machine){
 
 void AMyActor::setHover(bool hover)
 {
+	if (!machine->canBeSelected)
+		return;
 	for (UMeshComponent* part : meshParts)
 	{
 		IMeshInterface* partInterface = Cast<IMeshInterface>(part);
 		if (partInterface)
 		{
-			float emissive = hover ? 0.1f : 0.f;
+			float emissive = hover ? 0.3f : 0.f;
 			partInterface->Execute_setEmissive(part, emissive);
 		}
 	}
@@ -90,6 +92,8 @@ void AMyActor::setHover(bool hover)
 
 void AMyActor::setSelect(bool select)
 {
+	if (!machine->canBeSelected)
+		return;
 	AMyGameState* gameState = GetWorld()->GetGameState<AMyGameState>();
 	selected = select && gameState->setSelectedMyActor(this);
 	for (UMeshComponent* part : meshParts)
@@ -97,8 +101,17 @@ void AMyActor::setSelect(bool select)
 		IMeshInterface* partInterface = Cast<IMeshInterface>(part);
 		if (partInterface)
 		{
-			float emissive = selected ? 0.1f : 0.f;
+			float emissive = selected ? 0.8f : 0.f;
 			partInterface->Execute_setEmissive(part, emissive);
+		}
+	}
+
+	if (!selected && selectedPart)
+	{
+		IMeshInterface* partInterface = Cast<IMeshInterface>(selectedPart);
+		if (partInterface)
+		{
+			partInterface->Execute_setFocus(selectedPart, false);
 		}
 	}
 
@@ -113,6 +126,8 @@ void AMyActor::setSelect(bool select)
 
 void AMyActor::setSelectedPart(UMeshComponent * part)
 {
+	if (!machine->canBeSelected)
+		return;
 	if (selectedPart)
 	{
 		IMeshInterface* partInterface = Cast<IMeshInterface>(selectedPart);

@@ -426,22 +426,29 @@ std::string Flat::machinePartNumber[82] = {
 
 Flat::Flat()
 {
-	Machine caseta("Caseta", "Nada de info", "Caseta",  "NA");
-	Machine motor("Bomba", "Nada de info", "Motor", "PR0101-1", true);
-	Machine bomba("Bomba", "Nada de info", "Bomba", "PR0501-3", true);
+	Machine caseta("Caseta", "Nada de info", "Caseta",  "NA", true);
+	Machine bomba("Bomba", "Nada de info", "Bomba", "PR0501-3", true,true);
+	Machine soplador("Soplador", "Nada de Info", "Soplador","NA", true);
+	Machine planta("Planta", "", "Planta","NA", true);
 	Machine *machine;
 
 	for (size_t i = 0; i < 82; i++)
 	{
 
 		if (machineList[i].find("Bombas_y_tuberias__Bomba") != std::string::npos ||
-			machineList[i].find("Bombas_y_tuberias__Reduccion_bomba") != std::string::npos)
-			machine = &bomba;
-		else if (machineList[i].find("Bombas_y_tuberias__Soplador") != std::string::npos ||
+			machineList[i].find("Bombas_y_tuberias__Reduccion_bomba") != std::string::npos ||
 			machineList[i].find("Bombas_y_tuberias__Motor") != std::string::npos)
-			machine = &motor;
-		else if (machineList[i].find("Caseta") != std::string::npos)
+			machine = &bomba;
+		else if (machineList[i].find("Bombas_y_tuberias__Soplador") != std::string::npos)
+			machine = &soplador;
+		else if (machineList[i].find("Caseta") != std::string::npos && machineList[i].find("Bases") == std::string::npos)
+		{
 			machine = &caseta;
+		}
+		else if (machineList[i].find("_Planta__") != std::string::npos)
+		{
+			machine = &planta;
+		}
 		else
 		{
 			Machine m(machineList[i], machineInfo[i], machineShortInfo[i], machinePartNumber[i]);
@@ -455,7 +462,8 @@ Flat::Flat()
 	}
 	machines.push_back(caseta);
 	machines.push_back(bomba);
-	machines.push_back(motor);
+	machines.push_back(soplador);
+	machines.push_back(planta);
 	/*Machine wheel("wheel");
 
 	for (int i = 2; i < 36; i++)

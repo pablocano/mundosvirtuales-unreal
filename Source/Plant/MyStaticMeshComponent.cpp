@@ -65,7 +65,7 @@ void UMyStaticMeshComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * Tou
 bool UMyStaticMeshComponent::setFocus_Implementation(bool focus)
 {
 	selected = focus;
-	int stencilValue = focus ? 255 : 254;
+	int stencilValue = focus ? 252 : 254;
 	this->SetCustomDepthStencilValue(stencilValue);
 	this->SetRenderCustomDepth(focus);
 	return true;
@@ -73,7 +73,10 @@ bool UMyStaticMeshComponent::setFocus_Implementation(bool focus)
 
 bool UMyStaticMeshComponent::setEmissive_Implementation(float emissive)
 {
-	DynMaterial->SetScalarParameterValue("Emissive", emissive);
+	FLinearColor color;
+	DynMaterial->GetVectorParameterValue("BaseColor", color);
+	color = color * emissive;
+	DynMaterial->SetVectorParameterValue("Emissive", color);
 	return true;
 }
 
