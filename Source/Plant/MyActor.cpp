@@ -16,9 +16,9 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	
 }
 
-void AMyActor::init(Machine& machine){
+void AMyActor::init(Machine& _machine){
 
-	this->machine = &machine;
+	this->machine = &_machine;
 
 	USceneComponent* root = NewObject<USceneComponent>(this, TEXT("RootComponent"));
 	this->SetRootComponent(root);
@@ -145,6 +145,8 @@ void AMyActor::BeginPlay()
 	if (widgetInfoComponent)
 	{
 		widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
+
+		widgetInfo->SetMachine(this->machine);
 
 		USensor* sensor1 = NewObject<USensor>();
 		sensor1->SetNameSensor("Temperatura");

@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "WidgetInfoComponent.h"
 #include "Sensor.h"
+#include "PlantCore/Machine.h"
 #include "MyUserWidgetInfo.generated.h"
 
 /**
@@ -19,6 +20,9 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UVerticalBox* ItemWidgetsBox;
 
 	UPROPERTY()
+	UVerticalBox* ItemWidgetsBoxSensors;
+
+	UPROPERTY()
 	UHorizontalBox* ItemButtonBarBox;
 
 	UPROPERTY()
@@ -26,6 +30,9 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 
 	UPROPERTY()
 	UScrollBox* ScrollBox;
+
+	UPROPERTY()
+	UScrollBox* ScrollBoxSensor;
 
 	UPROPERTY()
 	TArray<USensor*> Sensors;
@@ -41,6 +48,10 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 
 	UVerticalBox* ContentWindowBox;
 	UHorizontalBox* TitleBarBox;
+	UTextBlock* textTitle;
+	UTextBlock* textInfo;
+
+	Machine* machine;
 
 	UPROPERTY()
 	float DeltaTime;
@@ -71,6 +82,9 @@ public:
 
 	UFUNCTION()
 	UWidgetInfoComponent* GetParentComponent() { return parentComponent; };
+
+	void SetTitleWindow(FText title);
+	void SetMachine(Machine* _machine);
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;

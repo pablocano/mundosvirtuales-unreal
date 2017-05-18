@@ -7,7 +7,7 @@
 class Machine
 {
 public:
-	Machine(std::string name, std::string info, bool canShowInfo = false);
+	Machine(std::string name, std::string info, std::string shortInfo, std::string pn, bool canShowInfo = false);
 	~Machine();
 
 	std::vector<MachinePart> machineParts;
@@ -17,6 +17,10 @@ public:
 	bool canShowInfo;
 
 	std::string info;
+
+	std::string shortInfo;
+
+	std::string pn;
 
 };
 

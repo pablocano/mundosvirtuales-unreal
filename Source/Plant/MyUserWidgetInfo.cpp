@@ -5,7 +5,7 @@
 
 
 UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f), fPadding(5)
+	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f), fPadding(5), machine(nullptr)
 {
 	widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
 	this->WidgetTree = widgetTree;
@@ -29,7 +29,7 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	ContentWindowBox->AddChildToVerticalBox(TitleBarBox);
 
 	// Generate Title
-	UTextBlock* textTitle = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
+	textTitle = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
 	textTitle->SetText(FText::FromString(TEXT("Información")));
 	textTitle->Font.Size = 12;
 	textTitle->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
@@ -59,17 +59,53 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	buttonOk->WidgetStyle.Hovered.SetResourceObject(ButtonBGHovered);
 	buttonOk->WidgetStyle.Hovered.ImageSize = sizeButton;
 
+	// Delegate click actions
+	buttonOk->OnClicked.AddDynamic(this, &UMyUserWidgetInfo::OnClickButtonOk);
+
 	// Work Space
+	UWidgetSwitcher* widgetSwitcher = NewObject<UWidgetSwitcher>(ContentWindowBox, UWidgetSwitcher::StaticClass(), TEXT("WidgetSwitcher"));
+	ContentWindowBox->AddChildToVerticalBox(widgetSwitcher);
+
 	ScrollBox = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box"));
-	UVerticalBoxSlot* SlotItemVert;
-	SlotItemVert = ContentWindowBox->AddChildToVerticalBox(ScrollBox);
-	SlotItemVert->SetSize(ESlateSizeRule::Fill);
+	UPanelSlot* SlotPanelItem;
+	SlotPanelItem = widgetSwitcher->AddChild(ScrollBox);
+	
 	ItemWidgetsBox = NewObject<UVerticalBox>(ScrollBox, TEXT("Vertical Box"));
 	ScrollBox->AddChild(ItemWidgetsBox);
 	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
 
-	// Delegate click actions
-	buttonOk->OnClicked.AddDynamic(this, &UMyUserWidgetInfo::OnClickButtonOk);
+	// Text Info
+	textInfo = NewObject<UTextBlock>(ContentWindowBox, UTextBlock::StaticClass());
+	textInfo->SetText(FText::FromString(TEXT("Información")));
+	textInfo->Font.Size = 10;
+	textInfo->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
+	UVerticalBoxSlot* SlotItem = ItemWidgetsBox->AddChildToVerticalBox(textInfo);
+	SlotItem->SetPadding(fPadding);
+	SlotItem->SetSize(ESlateSizeRule::Fill);
+
+	// Sensor
+	ScrollBoxSensor = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box Sensor"));
+	SlotPanelItem = widgetSwitcher->AddChild(ScrollBoxSensor);
+
+	ItemWidgetsBoxSensors = NewObject<UVerticalBox>(ScrollBoxSensor, TEXT("Vertical Box Sensor"));
+	ScrollBoxSensor->AddChild(ItemWidgetsBoxSensors);
+	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
+}
+
+void UMyUserWidgetInfo::SetTitleWindow(FText title)
+{
+	textTitle->SetText(title);
+}
+
+void UMyUserWidgetInfo::SetMachine(Machine* _machine)
+{
+	if (_machine)
+	{
+		this->machine = _machine;
+		std::string title = std::string("PN: ") + this->machine->pn;
+		SetTitleWindow(FText::FromString(title.c_str()));
+		textInfo->SetText(FText::FromString(this->machine->info.c_str()));
+	}
 }
 
 void UMyUserWidgetInfo::SetParentComponent(UWidgetInfoComponent* parent)
@@ -85,7 +121,7 @@ void UMyUserWidgetInfo::SetSensors(const TArray<USensor*>& arrSensors)
 	}
 
 	// Empty widget and array of sensors
-	ItemWidgetsBox->ClearChildren();
+	ItemWidgetsBoxSensors->ClearChildren();
 	Sensors.Empty();
 
 	Sensors = arrSensors;
