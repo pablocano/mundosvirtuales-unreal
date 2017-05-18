@@ -148,10 +148,13 @@ void AMyActor::setSelectedPart(UMeshComponent * part)
 		}
 	}
 
-	if (part)
-		widgetInfo->SetMachinePart(((UMyStaticMeshComponent *) part)->part);
-	else
-		widgetInfo->SetMachine(this->machine);
+	if (widgetInfo)
+	{
+		if (part)
+			widgetInfo->SetMachinePart(((UMyStaticMeshComponent *)part)->part);
+		else
+			widgetInfo->SetMachine(this->machine);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -188,8 +191,6 @@ void AMyActor::BeginPlay()
 		widgetInfo->buttonOk->OnClicked.AddDynamic(this, &AMyActor::OnClickButtonOk);
 		widgetInfoComponent->OnClicked.AddDynamic(this, &AMyActor::OnClickWidgetComponent);
 		widgetInfoComponent->DisableWidget();
-
-		widgetInfo->RegisterComponent();
 	}
 }
 
