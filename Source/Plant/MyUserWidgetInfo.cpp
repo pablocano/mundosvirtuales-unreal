@@ -125,7 +125,10 @@ void UMyUserWidgetInfo::SetMachinePart(MachinePart* _machinePart)
 
 void UMyUserWidgetInfo::SetVisibleSensors(bool visible)
 {
-	
+	if (visible)
+		ScrollBoxSensor->Visibility = ESlateVisibility::Visible;
+	else
+		ScrollBoxSensor->Visibility = ESlateVisibility::Collapsed;
 }
 
 void UMyUserWidgetInfo::SetParentComponent(UWidgetInfoComponent* parent)
