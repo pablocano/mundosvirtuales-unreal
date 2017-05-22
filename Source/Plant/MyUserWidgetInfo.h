@@ -3,7 +3,9 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
+#include "WidgetInfoComponent.h"
 #include "Sensor.h"
+#include "PlantCore/Machine.h"
 #include "MyUserWidgetInfo.generated.h"
 
 /**
@@ -18,18 +20,50 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UVerticalBox* ItemWidgetsBox;
 
 	UPROPERTY()
+	UVerticalBox* ItemWidgetsBoxSensors;
+
+	UPROPERTY()
 	UHorizontalBox* ItemButtonBarBox;
+
+	UPROPERTY()
+	UWidgetInfoComponent* parentComponent;
 
 	UPROPERTY()
 	UScrollBox* ScrollBox;
 
 	UPROPERTY()
+	UScrollBox* ScrollBoxSensor;
+
+	UPROPERTY()
 	TArray<USensor*> Sensors;
+
+	UTexture2D* ButtonBG;
+	UTexture2D* ButtonBGPressed;
+	UTexture2D* ButtonBGHovered;
+
+	USizeBox* SizeBox;
+	UScaleBox* ScaleBox;
+	UWidgetTree* widgetTree;
+	FMargin fPadding;
+
+	UVerticalBox* ContentWindowBox;
+	UHorizontalBox* TitleBarBox;
+	UTextBlock* textTitle;
+	UTextBlock* textInfo;
+
+	Machine* machine;
+	MachinePart* machinePart;
 
 	UPROPERTY()
 	float DeltaTime;
 
 	float accTime;
+
+	UFUNCTION()
+	void OnClickButtonOk();
+
+	UFUNCTION()
+	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
 
 public:
 	UPROPERTY()
@@ -43,4 +77,18 @@ public:
 
 	UFUNCTION()
 	void UpdateDataSensors(float InDeltaTime);
+
+	UFUNCTION()
+	void SetParentComponent(UWidgetInfoComponent* parent);
+
+	UFUNCTION()
+	UWidgetInfoComponent* GetParentComponent() { return parentComponent; };
+
+	void SetTitleWindow(FText title);
+	void SetMachine(Machine* _machine);
+	void SetMachinePart(MachinePart* _machinePart);
+	void SetVisibleSensors(bool visible);
+
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 };

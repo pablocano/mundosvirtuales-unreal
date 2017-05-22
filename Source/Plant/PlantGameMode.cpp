@@ -4,11 +4,14 @@
 #include "PlantGameMode.h"
 #include "MyActor.h"
 #include "MyPawn.h"
+#include "MyGameState.h"
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	DefaultPawnClass = AMyPawn::StaticClass();
 	flat = new Flat();
+
+	GameStateClass = AMyGameState::StaticClass();
 }
 
 void APlantGameMode::StartPlay()
@@ -19,8 +22,6 @@ void APlantGameMode::StartPlay()
 
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("HELLO WORLD"));
-
 		APlayerController* MyController = GetWorld()->GetFirstPlayerController();
 
 		MyController->bShowMouseCursor = true;
@@ -45,10 +46,8 @@ void APlantGameMode::initWorld()
 			AMyActor* MyActor = World->SpawnActorDeferred<AMyActor>(AMyActor::StaticClass(), SpawnLocAndRotation);
 			MyActor->init(machine);
 			MyActor->FinishSpawning(SpawnLocAndRotation);
-			MyActor->SetActorLocation(FVector(300, 300, 0));
+			MyActor->SetActorLocationAndRotation(FVector(500, 500, 2),FRotator(0,0,90));
 		}
 
 	}
 }
-
-

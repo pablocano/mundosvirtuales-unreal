@@ -12,8 +12,9 @@ UCLASS()
 class PLANT_API UWidgetInfoComponent : public UWidgetComponent
 {
 	GENERATED_BODY()
-	
-	
+
+	bool bIsMove;
+
 public:
 	UFUNCTION()
 	void EnableWidget();
@@ -21,4 +22,14 @@ public:
 	UFUNCTION()
 	void DisableWidget();
 
+	UFUNCTION()
+	void StartMoveComponent();
+
+	UFUNCTION()
+	void EndMoveComponent();
+
+	UFUNCTION()
+	void MoveWidget();
+
+	virtual void SetWidget(UUserWidget* Widget) override;
 };

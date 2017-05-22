@@ -4,6 +4,7 @@
 
 #include "Components/SkeletalMeshComponent.h"
 #include "PlantCore/Machine.h"
+#include "MeshInterface.h"
 #include "MySkeletalMeshComponent.generated.h"
 
 class AMyActor;
@@ -12,7 +13,7 @@ class AMyActor;
  * 
  */
 UCLASS()
-class PLANT_API UMySkeletalMeshComponent : public USkeletalMeshComponent
+class PLANT_API UMySkeletalMeshComponent : public USkeletalMeshComponent, public IMeshInterface
 {
 	GENERATED_UCLASS_BODY()
 	
@@ -24,6 +25,12 @@ class PLANT_API UMySkeletalMeshComponent : public USkeletalMeshComponent
 
 	UFUNCTION(Category = Default)
 	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
+
+	UFUNCTION()
+	virtual bool setFocus_Implementation(bool focus) override;
+
+	UFUNCTION()
+	virtual bool setEmissive_Implementation(float emissive) override;
 
 	void init(AMyActor* aMyActor, MachinePart* part);
 	
