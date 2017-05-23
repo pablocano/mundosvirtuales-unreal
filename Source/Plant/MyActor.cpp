@@ -4,6 +4,7 @@
 #include "MyActor.h"
 #include "MyGameState.h"
 #include "WidgetInfoComponent.h"
+#include "TestPQ.h"
 
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), Space(EWidgetSpace::World), sizeWidget(800, 600), widgetInfoComponent(nullptr)
@@ -224,6 +225,9 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 			widgetInfoComponent->SetWorldLocation(loc);*/
 
 			widgetInfoComponent->EnableWidget();
+			char buffer[256];
+			query(buffer, 256);
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, buffer);
 		}
 	}
 }
