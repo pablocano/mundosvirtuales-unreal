@@ -3,8 +3,8 @@
 #include "Plant.h"
 #include "MyActor.h"
 #include "MyGameState.h"
+#include "PlantCore/TestPQ.h"
 #include "WidgetInfoComponent.h"
-#include "TestPQ.h"
 
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), Space(EWidgetSpace::World), sizeWidget(800, 600), widgetInfoComponent(nullptr)

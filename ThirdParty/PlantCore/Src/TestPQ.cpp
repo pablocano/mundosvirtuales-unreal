@@ -1,41 +1,32 @@
+#include "TestPQ.h"
+
 #include <iostream>
 #include <sstream>
-#include <pqxx/pqxx>
+
+#include "soci/soci.h"
+#include "soci/postgresql/soci-postgresql.h"
 
 /// Query employees from database.  Return result.
-std::string query()
+void query(char* str, int len)
 {
 	try
 	{
-		pqxx::connection c{ "dbname=dvdrental user=postgres" };
-		pqxx::work txn{ c };
-
-		pqxx::result r = txn.exec("SELECT * FROM actor where first_name='John'");
+		soci::session sql( "postgresql", "dbname=dvdrental user=postgres" );
+		
+		soci::rowset<> rows(sql.prepare << "SELECT * FROM actor where last_name like 'Z%'");
 		std::stringstream ss;
-		for (auto row : r)
+		for (auto it = rows.begin(); it != rows.end(); ++it)
 		{
-			for (auto field : row) ss << field.c_str() << " ";
-			ss << std::endl;
+			ss << it->get<std::string>(1) << " " << it->get<std::string>(2) << std::endl;
 		}
 
-		// Not really needed, since we made no changes, but good habit to be
-		// explicit about when the transaction is done.
-		txn.commit();
-
 		// Connection object goes out of scope here.  It closes automatically.
-		return ss.str();
+		ss.str().copy(str, len, 0);
 	}
 	catch (const std::exception &e)
 	{
 		std::stringstream ss;
 		ss << "Error: " << e.what() << std::endl;
-		return ss.str();
-	}
-	catch (const pqxx::sql_error &e)
-	{
-		std::stringstream ss;
-		ss << "SQL error: " << e.what() << std::endl;
-		ss << "Query was: " << e.query() << std::endl;
-		return ss.str();
+		ss.str().copy(str, len, 0);
 	}
 }

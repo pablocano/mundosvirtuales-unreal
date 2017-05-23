@@ -55,8 +55,8 @@ public class Plant : ModuleRules
     public bool LoadCoreLib(TargetInfo Target)
     {
         bool isLibrarySupported = false;
-		string LibrariesPathPQXX = Path.Combine(ThirdPartyPath, "PlantCore", "Postgres", "Windows");
-		string LibrariesPathLibPQXX = Path.Combine(LibrariesPathPQXX, "lib");
+		string LibrariesPathSOCI = Path.Combine(ThirdPartyPath, "PlantCore", "SOCI", "Windows");
+		string LibrariesPathLibSOCI = Path.Combine(LibrariesPathSOCI, "lib");
 
         if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
         {
@@ -67,33 +67,29 @@ public class Plant : ModuleRules
             string ConfigurationString = (Target.Configuration == UnrealTargetConfiguration.Debug) ? "Debug" : "Release";
 
             Console.WriteLine("... LibrariesPath -> " + Path.Combine(LibrariesPath, PlatformString, ConfigurationString));
-
             PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, PlatformString, ConfigurationString, "plantCorelib.lib"));
+
+			// SOCI Library
 			
-			CopyToBinaries(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxx.dll"), Target);
-            CopyToBinaries(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxxD.dll"), Target);
-			
-            if (Target.Configuration == UnrealTargetConfiguration.Debug)
-            {
-                RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxxD.dll")));
-                //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxxD.dll"));
-                //PublicDelayLoadDLLs.Add(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxxD.dll"));
-                PublicAdditionalLibraries.Add(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxxD.lib"));
-            }
-            else
-            {
-                RuntimeDependencies.Add(new RuntimeDependency(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxx.dll")));
-                //PublicAdditionalLibraries.Add(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxx.dll"));
-                //PublicDelayLoadDLLs.Add(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxx.dll"));
-                PublicAdditionalLibraries.Add(Path.Combine(LibrariesPathLibPQXX, PlatformString, "libpqxx.lib"));
-            }
+			// Added DLLs
+			Console.WriteLine("... Copy SOCI Libraries");
+			CopyToBinaries(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_core_4_0.dll"), Target);
+			CopyToBinaries(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_empty_4_0.dll"), Target);
+			CopyToBinaries(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_odbc_4_0.dll"), Target);
+			CopyToBinaries(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_postgresql_4_0.dll"), Target);
+
+            // Added libray SOCI
+            Console.WriteLine("... LibrariesPath -> " + Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString));
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "libsoci_core_4_0.lib"));
         }
 
         if (isLibrarySupported)
         {
             // Include path
             PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "PlantCore", "Includes"));
-            PublicIncludePaths.Add(Path.Combine(LibrariesPathPQXX, "include"));
+            
+			// Include SOCI library
+			PublicIncludePaths.Add(Path.Combine(LibrariesPathSOCI, "include"));
         }
 
         Definitions.Add(string.Format("WITH_PLANT_CORE_BINDING={0}", isLibrarySupported ? 1 : 0));
