@@ -40,7 +40,7 @@ public class Plant : ModuleRules
         return Directory.GetParent(Directory.GetParent(ModuleDirectory).ToString()).ToString();
     }
 
-    private void CopyToBinaries(string Filepath, TargetInfo Target)
+    private void addedDLL(string Filepath, TargetInfo Target)
     {
         string binariesDir = Path.Combine(GetUProjectPath(), "Binaries", Target.Platform.ToString());
         string filename = Path.GetFileName(Filepath);
@@ -50,6 +50,8 @@ public class Plant : ModuleRules
 
         if (!File.Exists(Path.Combine(binariesDir, filename)))
             File.Copy(Filepath, Path.Combine(binariesDir, filename), true);
+
+        RuntimeDependencies.Add(new RuntimeDependency(Filepath));
     }
 
     public bool LoadCoreLib(TargetInfo Target)
@@ -64,7 +66,7 @@ public class Plant : ModuleRules
 
             string LibrariesPath = Path.Combine(ThirdPartyPath, "PlantCore", "Libraries");
             string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x64" : "x86";
-            string ConfigurationString = (Target.Configuration == UnrealTargetConfiguration.Debug) ? "Debug" : "Release";
+            string ConfigurationString = (Target.Configuration == UnrealTargetConfiguration.DebugGame) ? "Debug" : "Release";
 
             Console.WriteLine("... LibrariesPath -> " + Path.Combine(LibrariesPath, PlatformString, ConfigurationString));
             PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, PlatformString, ConfigurationString, "plantCorelib.lib"));
@@ -73,10 +75,10 @@ public class Plant : ModuleRules
 			
 			// Added DLLs
 			Console.WriteLine("... Copy SOCI Libraries");
-			CopyToBinaries(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_core_4_0.dll"), Target);
-			CopyToBinaries(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_empty_4_0.dll"), Target);
-			CopyToBinaries(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_odbc_4_0.dll"), Target);
-			CopyToBinaries(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_postgresql_4_0.dll"), Target);
+            addedDLL(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_core_4_0.dll"), Target);
+            addedDLL(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_empty_4_0.dll"), Target);
+            addedDLL(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_odbc_4_0.dll"), Target);
+            addedDLL(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_postgresql_4_0.dll"), Target);
 
             // Added libray SOCI
             Console.WriteLine("... LibrariesPath -> " + Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString));

@@ -3,7 +3,6 @@
 #include "Plant.h"
 #include "MyActor.h"
 #include "MyGameState.h"
-#include "PlantCore/TestPQ.h"
 #include "WidgetInfoComponent.h"
 
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
@@ -225,9 +224,6 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 			widgetInfoComponent->SetWorldLocation(loc);*/
 
 			widgetInfoComponent->EnableWidget();
-			char buffer[256];
-			query(buffer, 256);
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, buffer);
 		}
 	}
 }
