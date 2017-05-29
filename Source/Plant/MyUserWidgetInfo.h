@@ -52,7 +52,6 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UTextBlock* textInfo;
 
 	Machine* machine;
-	MachinePart* machinePart;
 
 	UPROPERTY()
 	float DeltaTime;
@@ -86,8 +85,6 @@ public:
 
 	void SetTitleWindow(FText title);
 	void SetMachine(Machine* _machine);
-	void SetMachinePart(MachinePart* _machinePart);
-	void SetVisibleSensors(bool visible);
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;

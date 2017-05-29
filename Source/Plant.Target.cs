@@ -5,21 +5,22 @@ using System.Collections.Generic;
 
 public class PlantTarget : TargetRules
 {
-	public PlantTarget(TargetInfo Target)
+	public PlantTarget(TargetInfo Target): base(Target)
 	{
 		Type = TargetType.Game;
-	}
+        ExtraModuleNames.Add("Plant");
+    }
 
 	//
 	// TargetRules interface.
 	//
 
-	public override void SetupBinaries(
+	/*public override void SetupBinaries(
 		TargetInfo Target,
 		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
 		ref List<string> OutExtraModuleNames
 		)
 	{
 		OutExtraModuleNames.AddRange( new string[] { "Plant" } );
-	}
+	}*/
 }

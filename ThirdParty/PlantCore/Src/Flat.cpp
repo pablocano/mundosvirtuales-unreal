@@ -451,7 +451,8 @@ Flat::Flat()
 		}
 		else
 		{
-			Machine m(machineList[i], machineInfo[i], machineShortInfo[i], machinePartNumber[i]);
+			bool selectable = machineList[i].find("__Estanque_") != std::string::npos;
+			Machine m(machineList[i], machineInfo[i], machineShortInfo[i], machinePartNumber[i],selectable);
 			machines.push_back(m);
 			machine = &machines.back();
 		}

@@ -5,10 +5,8 @@
 
 
 UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f), fPadding(5), machine(nullptr), machinePart(nullptr)
+	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f), fPadding(5), machine(nullptr)
 {
-	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
-
 	widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
 	this->WidgetTree = widgetTree;
 
@@ -61,6 +59,9 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	buttonOk->WidgetStyle.Hovered.SetResourceObject(ButtonBGHovered);
 	buttonOk->WidgetStyle.Hovered.ImageSize = sizeButton;
 
+	// Delegate click actions
+	buttonOk->OnClicked.AddDynamic(this, &UMyUserWidgetInfo::OnClickButtonOk);
+
 	// Work Space
 	UWidgetSwitcher* widgetSwitcher = NewObject<UWidgetSwitcher>(ContentWindowBox, UWidgetSwitcher::StaticClass(), TEXT("WidgetSwitcher"));
 	ContentWindowBox->AddChildToVerticalBox(widgetSwitcher);
@@ -71,6 +72,7 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	
 	ItemWidgetsBox = NewObject<UVerticalBox>(ScrollBox, TEXT("Vertical Box"));
 	ScrollBox->AddChild(ItemWidgetsBox);
+	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
 
 	// Text Info
 	textInfo = NewObject<UTextBlock>(ContentWindowBox, UTextBlock::StaticClass());
@@ -88,11 +90,6 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	ItemWidgetsBoxSensors = NewObject<UVerticalBox>(ScrollBoxSensor, TEXT("Vertical Box Sensor"));
 	ScrollBoxSensor->AddChild(ItemWidgetsBoxSensors);
 	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
-
-	// widgetSwitcher->SetActiveWidget(ScrollBox);
-
-	// Delegate click actions
-	buttonOk->OnClicked.AddDynamic(this, &UMyUserWidgetInfo::OnClickButtonOk);  // TODO: It's important this line code is here for the buttonOk works
 }
 
 void UMyUserWidgetInfo::SetTitleWindow(FText title)
@@ -109,23 +106,6 @@ void UMyUserWidgetInfo::SetMachine(Machine* _machine)
 		SetTitleWindow(FText::FromString(title.c_str()));
 		textInfo->SetText(FText::FromString(this->machine->info.c_str()));
 	}
-}
-
-void UMyUserWidgetInfo::SetMachinePart(MachinePart* _machinePart)
-{
-	if (_machinePart)
-	{
-		this->machinePart = _machinePart;
-		std::string title = std::string("PN: ") + this->machinePart->pn;
-		SetTitleWindow(FText::FromString(title.c_str()));
-		textInfo->SetText(FText::FromString(this->machinePart->info.c_str()));
-		SetVisibleSensors(false);
-	}
-}
-
-void UMyUserWidgetInfo::SetVisibleSensors(bool visible)
-{
-	
 }
 
 void UMyUserWidgetInfo::SetParentComponent(UWidgetInfoComponent* parent)
