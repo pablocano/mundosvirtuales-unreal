@@ -208,7 +208,14 @@ std::string Flat::machineInfo[82] = {
 	"Filtro",
 	"Filtro tapa",
 	"Golilla",
-	"Motor",
+	"MOTOR ELECTRICO\n \
+	Tipo: Trifásico\n \
+	Clase : IE2 - 225M - 4\n \
+	Potencia : 4,1 kw(5.5 Hp)\n \
+	RPM : 1470\n \
+	Consumo : 8.1 Amp\n \
+	Eficiencia : 86.6%\n \
+	Factor de Potencia : 0.81",
 	"Perno",
 	"Reduccion Bomba",
 	"Soplador",
@@ -229,7 +236,15 @@ std::string Flat::machineInfo[82] = {
 	"Tuberia A7",
 	"Tuerca",
 	"Valvulas",
-	"Valvulas bola",
+	"VALVULA BOLA\n \
+	Clase: 150\n \
+	Bola Acero Inoxidable\n \
+	Asientos PTFE\n \
+	Para Instalación Vertical u Horizontal\n \
+	Asientos recambiables\n \
+	Extremos flangeados\n \
+	Peso(aprox) 17 kg\n \
+	",
 	"Valvulas golillas",
 	"Valvulas manilla",
 	"Valvulas pernos",
@@ -280,10 +295,10 @@ std::string Flat::machineShortInfo[82] = {
 	"Alma Metálica",
 	"Pasador Impulsor",
 	"Impulsor",
-	"Esparrago - Espárrago 3/8",
+	"Esparrago 3/8",
 	"Golilla",
 	"Tuerca",
-	"Espárrago 1/2",
+	"Esparrago 1/2",
 	"Golilla",
 	"Tuerca",
 	"Caja Recolectora",
@@ -426,8 +441,14 @@ std::string Flat::machinePartNumber[82] = {
 
 Flat::Flat()
 {
+	std::string bombaInfo = "BOMBA\n \
+		Fabricante: Reifox\n \
+		Tipo : centrifuga horizontal\n \
+		Modelo : 1 - 210 - 5.5 hp 1470 RPM\n \
+		Q : 55 mt3 / h\n \
+		H : 12 mca";
 	Machine caseta("Caseta", "Nada de info", "Caseta",  "NA", true);
-	Machine bomba("Bomba", "Nada de info", "Bomba", "PR0501-3", true,true);
+	Machine bomba("Bomba", bombaInfo, "Bomba", "PR0501-3", true,true);
 	Machine soplador("Soplador", "Nada de Info", "Soplador","NA", true);
 	Machine planta("Planta", "", "Planta","NA", true);
 	Machine *machine;

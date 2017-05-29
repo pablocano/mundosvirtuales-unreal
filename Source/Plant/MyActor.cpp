@@ -203,7 +203,7 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, this->machine->info.c_str());
+		// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, this->machine->shortInfo.c_str());
 
 		if (widgetInfoComponent)
 		{
