@@ -52,8 +52,8 @@ void AMyActor::init(Machine& _machine){
 		widgetInfoComponent->SetOnlyOwnerSee(false);
 		widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		widgetInfoComponent->SetDrawSize(sizeWidget);
-		widgetInfoComponent->SetRelativeLocation(FVector(100.f, 0.f, 300.f));
-		widgetInfoComponent->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+		widgetInfoComponent->SetWorldLocation(FVector(-9500.f, -1000.f, -2200.f));
+		widgetInfoComponent->SetWorldRotation(FRotator(90.f, 90.f, 0.f));
 		widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 		widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
@@ -147,6 +147,14 @@ void AMyActor::setSelectedPart(UMeshComponent * part)
 			partInterface->Execute_setFocus(selectedPart, true);
 		}
 	}
+
+	if (widgetInfo)
+	{
+		if (part)
+			widgetInfo->SetMachinePart(((UMyStaticMeshComponent *)part)->part);
+		else
+			widgetInfo->SetMachine(this->machine);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -195,15 +203,13 @@ void AMyActor::Tick(float DeltaTime)
 	{
 		widgetInfo->UpdateWidgetSensors(DeltaTime);
 	}
-
-	
 }
 
 void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key)
 {
 	if (GEngine)
 	{
-		// GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, this->machine->shortInfo.c_str());
+		GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, this->machine->info.c_str());
 
 		if (widgetInfoComponent)
 		{
@@ -211,11 +217,11 @@ void AMyActor::CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, 
 			rotCamera.Yaw -= 180;
 			rotCamera.Pitch = 0;
 
-			widgetInfoComponent->SetWorldRotation(rotCamera);
+			/*widgetInfoComponent->SetWorldRotation(rotCamera);
 			FVector mouseLocation, mouseDirection, loc;
 			GEngine->GetFirstLocalPlayerController(GetWorld())->DeprojectMousePositionToWorld(mouseLocation, mouseDirection);
 			TouchedComponent->GetClosestPointOnCollision(mouseLocation, loc);
-			widgetInfoComponent->SetWorldLocation(loc);
+			widgetInfoComponent->SetWorldLocation(loc);*/
 
 			widgetInfoComponent->EnableWidget();
 		}

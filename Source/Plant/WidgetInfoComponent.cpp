@@ -8,19 +8,17 @@ void UWidgetInfoComponent::SetWidget(UUserWidget* InWidget)
 {
 	Super::SetWidget(InWidget);
 
-	((UMyUserWidgetInfo*) this->Widget)->SetParentComponent(this);
+	((UMyUserWidgetInfo*) InWidget)->SetParentComponent(this);
 }
 
 void UWidgetInfoComponent::EnableWidget()
 {
 	SetVisibility(true);
-	this->Widget->Visibility = ESlateVisibility::Visible;
 }
 
 void UWidgetInfoComponent::DisableWidget()
 {
 	SetVisibility(false);
-	this->Widget->Visibility = ESlateVisibility::Collapsed;
 }
 
 void UWidgetInfoComponent::StartMoveComponent()
