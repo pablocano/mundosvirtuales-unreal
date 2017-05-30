@@ -1,19 +1,39 @@
 cmake_minimum_required(VERSION 2.8) 
 
 PROJECT (PlantCore)
-set( NAME_SRC
+set( CORE_SRC
     Src/Flat.cpp
-    Src/Flat.h
     Src/Machine.cpp
-    Src/Machine.h
     Src/MachinePart.cpp
-    Src/MachinePart.h
-	Src/Loader.cpp
-    Src/Loader.h
+	Src/ClientPlant.cpp
 )
 
-set( TEST_SRC
-	Src/Test/test_flat.cpp
+set( CORE_INCLUDE
+    Src/Flat.h
+    Src/Machine.h
+    Src/MachinePart.h
+	Src/ClientPlant.h
+)
+
+set( SERVER_SRC
+	Src/Server/main.cpp
+	Src/Server/Serverdata.cpp
+	Src/Server/Serverdata.h
+)
+
+set( UTILS_SRC
+	Src/Utils/Loader.cpp
+	Src/Utils/network/TcpComm.cpp
+	Src/Utils/network/UdpComm.cpp
+	Src/Utils/SystemCall.cpp
+)
+
+set ( UTILS_INCLUDE
+	Src/Utils/Loader.h
+	Src/Utils/network/UdpComm.h
+	Src/Utils/network/TcpComm.h
+	Src/Utils/SystemCall.h
+	Src/Utils/util.h
 )
 
 if (WIN32)
@@ -34,12 +54,21 @@ else("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
 	set(LIBSOCI_LIB "${LIBSOCI}/lib/x86")
 endif("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
 
-add_library( plantCorelib ${NAME_SRC} )
+add_library( utilsCore ${UTILS_SRC} ${UTILS_INCLUDE})
+if(WIN32)
+	target_link_libraries( utilsCore "${LIBSOCI_LIB}/Debug/soci_core_4_0.lib" "${LIBSOCI_LIB}/Release/soci_core_4_0.lib" wsock32 ws2_32)
+else()
+	target_link_libraries( utilsCore "${LIBSOCI_LIB}/Debug/soci_core_4_0.lib" "${LIBSOCI_LIB}/Release/soci_core_4_0.lib" )
+endif()
 
-message("${LIBSOCI_LIB}")
+add_library( plantCorelib ${CORE_SRC} ${CORE_INCLUDE})
+target_link_libraries( plantCorelib utilsCore)
 
-target_link_libraries( plantCorelib "${LIBSOCI_LIB}/Debug/soci_core_4_0.lib" "${LIBSOCI_LIB}/Release/soci_core_4_0.lib")
+add_executable ( Server ${SERVER_SRC} ${UTILS_INCLUDE} ${CORE_INCLUDE})
+target_link_libraries( Server plantCorelib utilsCore )
 
-add_executable ( Test_Flat ${TEST_SRC} )
+add_executable ( Test_Flat Src/Test/test_flat.cpp ${UTILS_INCLUDE} ${CORE_INCLUDE})
+target_link_libraries( Test_Flat plantCorelib utilsCore )
 
-target_link_libraries( Test_Flat plantCorelib )
+add_executable ( Test_Server Src/Test/test_server.cpp ${UTILS_INCLUDE} ${CORE_INCLUDE})
+target_link_libraries( Test_Server plantCorelib utilsCore )
