@@ -16,7 +16,7 @@ public class Plant : ModuleRules
         get { return Path.GetFullPath(Path.Combine(ModulePath, "../../ThirdParty/")); }
     }
 
-    public Plant(ReadOnlyTargetRules ROTargetRules) : base(ROTargetRules)
+    public Plant(TargetInfo ROTargetRules)// : base(ROTargetRules)
     {
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG" });
 
@@ -33,7 +33,7 @@ public class Plant : ModuleRules
         LoadCoreLib(ROTargetRules);
     }
 
-    public bool LoadCoreLib(ReadOnlyTargetRules Target)
+    public bool LoadCoreLib(TargetInfo Target)
     {
         bool isLibrarySupported = false;
 
@@ -57,33 +57,6 @@ public class Plant : ModuleRules
         }
 
         Definitions.Add(string.Format("WITH_PLANT_CORE_BINDING={0}", isLibrarySupported ? 1 : 0));
-
-        return isLibrarySupported;
-    }
-
-    public bool LoadThirdPartyLibrary(TargetInfo Target, string LibName)
-    {
-        bool isLibrarySupported = false;
-
-        string LibrariesPath = Path.Combine(ThirdPartyPath, LibName, "Libraries");
-        string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x64" : "x86";
-        string ConfigurationString = (Target.Configuration == UnrealTargetConfiguration.Debug) ? "Debug" : "Release";
-
-
-        if (Target.Platform == UnrealTargetPlatform.Win64)
-        {
-            isLibrarySupported = true;
-
-            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, PlatformString, ConfigurationString, LibName + ".lib"));
-        }
-
-        if (isLibrarySupported)
-        {
-            // Include path
-            PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, LibName, "Includes"));
-        }
-
-        Definitions.Add(string.Format("WITH_" + LibName.ToUpper() + "_BINDING={0}", isLibrarySupported ? 1 : 0));
 
         return isLibrarySupported;
     }
