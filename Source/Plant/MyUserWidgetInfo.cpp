@@ -44,22 +44,25 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(buttonOk);
 	SlotItemHorz->SetPadding(fPadding);
 
-	FVector2D sizeButton(32, 32);
+	FVector2D sizeButton(16, 16);
 
 	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGObj(TEXT("/Game/WidgetTextures/close-button.close-button"));
 	ButtonBG = ButtonBGObj.Object;
 	buttonOk->WidgetStyle.Normal.SetResourceObject(ButtonBG);
 	buttonOk->WidgetStyle.Normal.ImageSize = sizeButton;
+	buttonOk->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
 
 	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGPressedObj(TEXT("/Game/WidgetTextures/close-button-pressed.close-button-pressed"));
 	ButtonBGPressed = ButtonBGPressedObj.Object;
 	buttonOk->WidgetStyle.Pressed.SetResourceObject(ButtonBGPressed);
 	buttonOk->WidgetStyle.Pressed.ImageSize = sizeButton;
+	buttonOk->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
 
 	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGHoveredObj(TEXT("/Game/WidgetTextures/close-button-hovered.close-button-hovered"));
 	ButtonBGHovered = ButtonBGHoveredObj.Object;
 	buttonOk->WidgetStyle.Hovered.SetResourceObject(ButtonBGHovered);
 	buttonOk->WidgetStyle.Hovered.ImageSize = sizeButton;
+	buttonOk->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
 
 	// Work Space
 	UWidgetSwitcher* widgetSwitcher = NewObject<UWidgetSwitcher>(ContentWindowBox, UWidgetSwitcher::StaticClass(), TEXT("WidgetSwitcher"));
