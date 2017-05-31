@@ -13,12 +13,14 @@ void UWidgetInfoComponent::SetWidget(UUserWidget* InWidget)
 
 void UWidgetInfoComponent::EnableWidget()
 {
+	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	SetVisibility(true);
 }
 
 void UWidgetInfoComponent::DisableWidget()
 {
 	SetVisibility(false);
+	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 }
 
 void UWidgetInfoComponent::StartMoveComponent()

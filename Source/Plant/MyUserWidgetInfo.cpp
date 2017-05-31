@@ -44,19 +44,19 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(buttonOk);
 	SlotItemHorz->SetPadding(fPadding);
 
-	FVector2D sizeButton(16, 16);
+	FVector2D sizeButton(32, 32);
 
-	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGObj(TEXT("/Game/WidgetTextures/close_button"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGObj(TEXT("/Game/WidgetTextures/close-button.close-button"));
 	ButtonBG = ButtonBGObj.Object;
 	buttonOk->WidgetStyle.Normal.SetResourceObject(ButtonBG);
 	buttonOk->WidgetStyle.Normal.ImageSize = sizeButton;
 
-	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGPressedObj(TEXT("/Game/WidgetTextures/close_button_pressed"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGPressedObj(TEXT("/Game/WidgetTextures/close-button-pressed.close-button-pressed"));
 	ButtonBGPressed = ButtonBGPressedObj.Object;
 	buttonOk->WidgetStyle.Pressed.SetResourceObject(ButtonBGPressed);
 	buttonOk->WidgetStyle.Pressed.ImageSize = sizeButton;
 
-	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGHoveredObj(TEXT("/Game/WidgetTextures/close_button_hovered"));
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGHoveredObj(TEXT("/Game/WidgetTextures/close-button-hovered.close-button-hovered"));
 	ButtonBGHovered = ButtonBGHoveredObj.Object;
 	buttonOk->WidgetStyle.Hovered.SetResourceObject(ButtonBGHovered);
 	buttonOk->WidgetStyle.Hovered.ImageSize = sizeButton;
