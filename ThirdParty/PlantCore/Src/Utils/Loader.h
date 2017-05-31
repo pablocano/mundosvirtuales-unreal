@@ -9,6 +9,8 @@ protected:
 	std::string db_password;
 	std::string db_engine;
 	std::string db_name;
+	std::string db_host;
+	int db_port;
 
 	int current_language_id;
 
@@ -27,7 +29,7 @@ public:
 	const std::string tbl_stock_translation		= "stocktranslation";
 
 public:
-	Loader(std::string _db_name, std::string _db_user,  std::string _db_password = "", std::string _db_engine = "postgresql");
+	Loader(std::string _db_name, std::string _db_user,  std::string _db_host = "", int _db_port = 5432, std::string _db_password = "", std::string _db_engine = "postgresql");
 
 	std::string get_str_connection(); /* returns string connection for library SOCI */
 

@@ -1,23 +1,21 @@
 #include <list>
 #include <thread>
+#include <mutex>
+#include <condition_variable> 
 
-using namespace std;
+template <typename T> class Queue
+{
+protected:
+	std::list<T> m_queue;
+	std::mutex m_mutex;
+	std::condition_variable m_condv;
 
-//template <typename T> class Queue
-//{
-//protected:
-//	list<T> queue;
-//	pthread_mutex_t mutex;
-//	pthread_cond_t condv;
-//
-//public:
-//	Queue();
-//
-//	~Queue();
-//
-//	void add(T item);
-//
-//	T remove();
-//
-//	int size();
-//};
+public:
+	Queue();
+
+	void add(T item);
+
+	T remove();
+
+	int size();
+};

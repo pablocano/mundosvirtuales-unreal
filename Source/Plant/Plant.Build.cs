@@ -80,6 +80,8 @@ public class Plant : ModuleRules
             addedDLL(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_empty_4_0.dll"), Target);
             addedDLL(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_odbc_4_0.dll"), Target);
             addedDLL(Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString, "soci_postgresql_4_0.dll"), Target);
+			addedDLL(Path.Combine(ThirdPartyPath, "PlantCore", "Utils", "PostgreSQL", "lib",  "libpq.dll"), Target);
+			
 
             // Added libray SOCI
             Console.WriteLine("... LibrariesPath -> " + Path.Combine(LibrariesPathLibSOCI, PlatformString, ConfigurationString));

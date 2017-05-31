@@ -7,8 +7,8 @@
 #include "soci/postgresql/soci-postgresql.h"
 
 
-Loader::Loader(std::string _db_name, std::string _db_user, std::string _db_password, std::string _db_engine) :
-	db_name(_db_name), db_user(_db_user), db_password(_db_password), db_engine(_db_engine), 
+Loader::Loader(std::string _db_name, std::string _db_user, std::string _db_host, int _db_port, std::string _db_password, std::string _db_engine) :
+	db_name(_db_name), db_user(_db_user), db_host(_db_host), db_port(_db_port), db_password(_db_password), db_engine(_db_engine), 
 	current_language_id(1), // Default language
 	strError("")
 {
@@ -18,10 +18,17 @@ Loader::Loader(std::string _db_name, std::string _db_user, std::string _db_passw
 std::string Loader::get_str_connection()
 {
 	std::stringstream ss;
+	
+	ss.str("");
+	if (!db_host.empty())
+	{
+		ss << "host=" << db_host << " ";
+		ss << "port=" << db_port << " ";
+	}
 	ss << "dbname=" << db_name << " ";
 	ss << "user=" << db_user;
 	if (!db_password.empty())
-		ss << " password=" << db_password << " ";
+		ss << " password=" << db_password;
 
 	return ss.str();
 }

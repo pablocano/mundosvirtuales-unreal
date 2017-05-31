@@ -1,41 +1,35 @@
 #include "Queue.h"
 
-//template<typename T>
-//Queue::Queue() {
-//	pthread_mutex_init(&mutex, NULL);
-//	pthread_cond_init(&condv, NULL);
-//}
-//
-//template<typename T>
-//Queue::~Queue() {
-//	pthread_mutex_destroy(&mutex);
-//	pthread_cond_destroy(&condv);
-//}
-//
-//template<typename T>
-//void Queue::add(T item) {
-//	pthread_mutex_lock(&mutex);
-//	queue.push_back(item);
-//	pthread_cond_signal(&condv);
-//	pthread_mutex_unlock(&mutex);
-//}
-//
-//template<typename T>
-//T Queue::remove() {
-//	pthread_mutex_lock(&mutex);
-//	while (queue.size() == 0) {
-//		pthread_cond_wait(&condv, &mutex);
-//	}
-//	T item = queue.front();
-//	queue.pop_front();
-//	pthread_mutex_unlock(&mutex);
-//	return item;
-//}
-//
-//template<typename T>
-//int Queue::size() {
-//	pthread_mutex_lock(&mutex);
-//	int size = queue.size();
-//	pthread_mutex_unlock(&mutex);
-//	return size;
-//}
+template<typename T>
+Queue<T>::Queue() : m_mutex(), m_condv()
+{
+}
+
+template<typename T>
+void Queue<T>::add(T item)
+{
+	std::unique_lock<std::mutex> lock(m_mutex);
+	m_queue.push_back(item);
+	m_condv.notify_one();
+}
+
+template<typename T>
+T Queue<T>::remove()
+{
+	std::unique_lock<std::mutex> lock(m_mutex);
+	while (m_queue.size() == 0)
+	{
+		m_condv.wait(lock);
+	}
+	T item = m_queue.front();
+	m_queue.pop_front();
+	return item;
+}
+
+template<typename T>
+int Queue<T>::size()
+{
+	std::unique_lock<std::mutex> lock(m_mutex);
+	int size = queue.size();
+	return size;
+}
