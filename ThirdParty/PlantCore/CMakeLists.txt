@@ -27,7 +27,6 @@ set( UTILS_SRC
 	Src/Utils/network/UdpComm.cpp
 	Src/Utils/SystemCall.cpp
 	Src/Utils/Queue.cpp
-	Src/Utils/Thread.cpp
 )
 
 set ( UTILS_INCLUDE
