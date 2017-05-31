@@ -26,6 +26,8 @@ set( UTILS_SRC
 	Src/Utils/network/TcpComm.cpp
 	Src/Utils/network/UdpComm.cpp
 	Src/Utils/SystemCall.cpp
+	Src/Utils/Queue.cpp
+	Src/Utils/Thread.cpp
 )
 
 set ( UTILS_INCLUDE
@@ -33,6 +35,8 @@ set ( UTILS_INCLUDE
 	Src/Utils/network/UdpComm.h
 	Src/Utils/network/TcpComm.h
 	Src/Utils/SystemCall.h
+	Src/Utils/Queue.h
+	Src/Utils/Thread.h
 	Src/Utils/util.h
 )
 
@@ -54,6 +58,10 @@ else("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
 	set(LIBSOCI_LIB "${LIBSOCI}/lib/x86")
 endif("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
 
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 add_library( utilsCore ${UTILS_SRC} ${UTILS_INCLUDE})
 if(WIN32)
 	target_link_libraries( utilsCore "${LIBSOCI_LIB}/Debug/soci_core_4_0.lib" "${LIBSOCI_LIB}/Release/soci_core_4_0.lib" wsock32 ws2_32)
@@ -64,10 +72,10 @@ endif()
 find_package (Threads REQUIRED)
 
 add_library( plantCorelib ${CORE_SRC} ${CORE_INCLUDE})
-target_link_libraries( plantCorelib utilsCore)
+target_link_libraries( plantCorelib utilsCore ${CMAKE_THREAD_LIBS_INIT} )
 
 add_executable ( Server ${SERVER_SRC} ${UTILS_INCLUDE} ${CORE_INCLUDE})
-target_link_libraries( Server plantCorelib utilsCore ${CMAKE_THREAD_LIBS_INIT} )
+target_link_libraries( Server plantCorelib utilsCore )
 
 add_executable ( Test_Flat Src/Test/test_flat.cpp ${UTILS_INCLUDE} ${CORE_INCLUDE})
 target_link_libraries( Test_Flat plantCorelib utilsCore )

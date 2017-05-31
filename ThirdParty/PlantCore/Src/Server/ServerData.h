@@ -1,51 +1,8 @@
 #include "../Utils/network/TcpComm.h"
-#include <list>
-#include <thread>
+#include "../Utils/Queue.h"
+#include "../Utils/Thread.h" 
 
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <pthread.h>
-#endif
-
-//template <typename T> class queueClients
-//{
-//protected:
-//	std::list<T> queue;
-//	pthread_mutex_t mutex;
-//	pthread_cond_t condv;
-//public:
-//	queueClients() {
-//		pthread_mutex_init(&mutex, NULL);
-//		pthread_cond_init(&condv, NULL);
-//	}
-//	~queueClients() {
-//		pthread_mutex_destroy(&mutex);
-//		pthread_cond_destroy(&condv);
-//	}
-//	void add(T item) {
-//		pthread_mutex_lock(&mutex);
-//		queue.push_back(item);
-//		pthread_cond_signal(&condv);
-//		pthread_mutex_unlock(&mutex);
-//	}
-//	T remove() {
-//		pthread_mutex_lock(&mutex);
-//		while (queue.size() == 0) {
-//			pthread_cond_wait(&condv, &mutex);
-//		}
-//		T item = queue.front();
-//		queue.pop_front();
-//		pthread_mutex_unlock(&mutex);
-//		return item;
-//	}
-//	int size() {
-//		pthread_mutex_lock(&mutex);
-//		int size = queue.size();
-//		pthread_mutex_unlock(&mutex);
-//		return size;
-//	}
-//};
+using namespace std;
 
 //class WorkItem
 //{

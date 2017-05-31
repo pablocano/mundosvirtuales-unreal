@@ -57,7 +57,7 @@ public class Plant : ModuleRules
     public bool LoadCoreLib(TargetInfo Target)
     {
         bool isLibrarySupported = false;
-		string LibrariesPathSOCI = Path.Combine(ThirdPartyPath, "PlantCore", "SOCI", "Windows");
+		string LibrariesPathSOCI = Path.Combine(ThirdPartyPath, "PlantCore", "Utils", "SOCI", "Windows");
 		string LibrariesPathLibSOCI = Path.Combine(LibrariesPathSOCI, "lib");
 
         if ((Target.Platform == UnrealTargetPlatform.Win64) || (Target.Platform == UnrealTargetPlatform.Win32))
