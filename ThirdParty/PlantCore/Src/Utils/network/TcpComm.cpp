@@ -75,9 +75,9 @@ TcpComm::TcpComm(const char* ip, int port, int maxPackageSendSize, int maxPackag
 		int val = 1;
 		setsockopt(createSocket, SOL_SOCKET, SO_REUSEADDR, (char*) &val, sizeof(val));
 		address.sin_addr.s_addr = INADDR_ANY;
-		if(bind(createSocket, (sockaddr*) &address, sizeof(sockaddr_in)) == 0)
+		if(bindSocket())
 			std::cerr << "Problem Binding" << std::endl;
-		if(listen(createSocket, SOMAXCONN) == 0)
+		if(listenToClient())
 			std::cerr << "Problem Listening" << std::endl;
 		NON_BLOCK(createSocket);
 	}
@@ -252,4 +252,24 @@ bool TcpComm::send(const char* buffer, int size)
     closeTransferSocket();
     return false;
   }
+}
+
+bool TcpComm::bindSocket()
+{
+	if (bind(createSocket, (sockaddr*)&address, sizeof(sockaddr_in)) < 0)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool TcpComm::listenToClient()
+{
+	if(listen(createSocket, SOMAXCONN) < 0)
+	{
+		return false;
+	}
+
+	return true;
 }

@@ -37,12 +37,12 @@ set ( UTILS_INCLUDE
 )
 
 if (WIN32)
-    set(LIBSOCI "E:/mundosvirtuales-unreal/ThirdParty/PlantCore/SOCI/Windows")
+    set(LIBSOCI "${CMAKE_CURRENT_SOURCE_DIR}/Utils/SOCI/Windows")
 endif (WIN32)
 
 include_directories("${LIBSOCI}/include")
 
-include_directories("C:/PostgreSQL/pg96/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/Utils/PostgreSQL/include")
 
 if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x64)
@@ -61,11 +61,13 @@ else()
 	target_link_libraries( utilsCore "${LIBSOCI_LIB}/Debug/soci_core_4_0.lib" "${LIBSOCI_LIB}/Release/soci_core_4_0.lib" )
 endif()
 
+find_package (Threads REQUIRED)
+
 add_library( plantCorelib ${CORE_SRC} ${CORE_INCLUDE})
 target_link_libraries( plantCorelib utilsCore)
 
 add_executable ( Server ${SERVER_SRC} ${UTILS_INCLUDE} ${CORE_INCLUDE})
-target_link_libraries( Server plantCorelib utilsCore )
+target_link_libraries( Server plantCorelib utilsCore ${CMAKE_THREAD_LIBS_INIT} )
 
 add_executable ( Test_Flat Src/Test/test_flat.cpp ${UTILS_INCLUDE} ${CORE_INCLUDE})
 target_link_libraries( Test_Flat plantCorelib utilsCore )
