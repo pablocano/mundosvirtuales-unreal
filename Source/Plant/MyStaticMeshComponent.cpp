@@ -90,7 +90,6 @@ void UMyStaticMeshComponent::init(AMyActor * aMyActor, MachinePart * machinePart
 
 	mesh = LoadObject<UStaticMesh>(NULL, *meshName, NULL, LOAD_None, NULL);
 	material = LoadObject<UMaterialInterface>(NULL, *materialName, NULL, LOAD_None, NULL);
-
 	ensureMsgf(mesh != nullptr, TEXT("Node is invalid"));
 	ensureMsgf(material != nullptr, TEXT("Node is invalid"));
 

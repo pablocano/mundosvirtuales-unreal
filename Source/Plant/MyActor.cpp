@@ -6,7 +6,7 @@
 #include "WidgetInfoComponent.h"
 
 AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), Space(EWidgetSpace::World), sizeWidget(800, 600), widgetInfoComponent(nullptr)
+	: Super(ObjectInitializer), Space(EWidgetSpace::World), sizeWidget(1920, 1080), widgetInfoComponent(nullptr)
 {
 	// Create Root
 	RootComponent = ObjectInitializer.CreateDefaultSubobject<USceneComponent>(this, TEXT("Root Component"));
@@ -52,7 +52,7 @@ void AMyActor::init(Machine& _machine){
 		widgetInfoComponent->SetOnlyOwnerSee(false);
 		widgetInfoComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		widgetInfoComponent->SetDrawSize(sizeWidget);
-		widgetInfoComponent->SetWorldLocation(FVector(-9500.f, -1000.f, -2200.f));
+		widgetInfoComponent->SetWorldLocation(FVector(-950.f, -100.f, -220.f));
 		widgetInfoComponent->SetWorldRotation(FRotator(90.f, 90.f, 0.f));
 		widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -62,6 +62,7 @@ void AMyActor::init(Machine& _machine){
 		widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .95f));
 		widgetInfoComponent->SetBlendMode(EWidgetBlendMode::Transparent);
 		widgetInfoComponent->SetWidgetSpace(Space);
+		widgetInfoComponent->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
 
 		if (Space == EWidgetSpace::World)
 		{
