@@ -426,10 +426,10 @@ std::string Flat::machinePartNumber[82] = {
 
 Flat::Flat()
 {
-	Machine caseta("Caseta", "Nada de info", "Caseta",  "NA", true);
-	Machine bomba("Bomba", "Nada de info", "Bomba", "PR0501-3", true,true);
-	Machine soplador("Soplador", "Nada de Info", "Soplador","NA", true);
-	Machine planta("Planta", "", "Planta","NA", true);
+	Machine caseta(100,"Caseta", "Nada de info", "Caseta",  "NA", true);
+	Machine bomba(101,"Bomba", "Nada de info", "Bomba", "PR0501-3", true,true);
+	Machine soplador(102,"Soplador", "Nada de Info", "Soplador","NA", true);
+	Machine planta(103,"Planta", "", "Planta","NA", true);
 	Machine *machine;
 
 	for (size_t i = 0; i < 82; i++)
@@ -451,12 +451,12 @@ Flat::Flat()
 		}
 		else
 		{
-			Machine m(machineList[i], machineInfo[i], machineShortInfo[i], machinePartNumber[i]);
+			Machine m(i,machineList[i], machineInfo[i], machineShortInfo[i], machinePartNumber[i]);
 			machines.push_back(m);
 			machine = &machines.back();
 		}
 
-		MachinePart p(machineList[i], materialList[i], machineShortInfo[i], machineInfo[i], machinePartNumber[i]);
+		MachinePart p(i,machineList[i], materialList[i], machineShortInfo[i], machineInfo[i], machinePartNumber[i]);
 		machine->machineParts.push_back(p);
 		
 	}

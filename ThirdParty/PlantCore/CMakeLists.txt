@@ -1,23 +1,46 @@
 cmake_minimum_required(VERSION 2.8) 
 
 PROJECT (PlantCore)
-set( NAME_SRC
+set( CORE_SRC
     Src/Flat.cpp
-    Src/Flat.h
     Src/Machine.cpp
-    Src/Machine.h
     Src/MachinePart.cpp
+)
+
+set( CORE_INCLUDE
+    Src/Flat.h
+    Src/Machine.h
     Src/MachinePart.h
 )
 
+set( UTILS_SRC
+	Src/Utils/network/TcpComm.cpp
+	Src/Utils/network/UdpComm.cpp
+	Src/Utils/SystemCall.cpp
+)
 
+set ( UTILS_INCLUDE
+	Src/Utils/network/UdpComm.h
+	Src/Utils/network/TcpComm.h
+	Src/Utils/SystemCall.h
+	Src/Utils/util.h
+)
 
-if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x64)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x64)
-else("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x86)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x86)
-endif("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+#if("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+#    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x64)
+#    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x64)
+#else("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
+#    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x86)
+#    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/x86)
+#endif("${CMAKE_GENERATOR}" MATCHES "(Win64|IA64)")
 
-add_library( plantCorelib ${NAME_SRC} )
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_library( utilsCore ${UTILS_SRC} ${UTILS_INCLUDE})
+
+add_library( plantCorelib ${CORE_SRC} ${CORE_INCLUDE})
+target_link_libraries( plantCorelib utilsCore )
+
+add_executable ( Test_Flat Src/Test/test.cpp)
+target_link_libraries( Test_Flat plantCorelib utilsCore )
