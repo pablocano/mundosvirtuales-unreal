@@ -65,7 +65,7 @@ public:
   * @param size The number of bytes to send.
   * @return Was the data successfully sent?
   */
-  bool send(const char* buffer, int size);
+  bool send(const unsigned char* buffer, int size);
 
   /**
   * The function receives a block of bytes.

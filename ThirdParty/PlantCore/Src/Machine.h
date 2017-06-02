@@ -1,8 +1,11 @@
 #pragma once
 
+#include "Utils\Serialization\json.hpp"
 #include "MachinePart.h"
 #include <vector>
 #include <string>
+
+using json = nlohmann::json;
 
 class Machine
 {
@@ -31,3 +34,7 @@ public:
 };
 
 typedef std::vector<Machine> Machines;
+
+void to_json(json& j, const Machine& m);
+
+void from_json(const json& j, Machine& m);

@@ -214,7 +214,7 @@ int TcpComm::receiveSys(void* buffer, unsigned int len, int flags)
   return recv(transferSocket, (char*) buffer, len, flags);
 }
 
-bool TcpComm::send(const char* buffer, int size)
+bool TcpComm::send(const unsigned char* buffer, int size)
 {
   if(!checkConnection())
     return false;
