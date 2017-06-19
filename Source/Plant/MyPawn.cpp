@@ -15,12 +15,12 @@ AMyPawn::AMyPawn(const FObjectInitializer& ObjectInitializer)
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	OurCameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	OurCameraSpringArm->SetupAttachment(RootComponent);
-	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 50.f), FRotator(-60.f, 0.f, 0.f));
-	OurCameraSpringArm->TargetArmLength = 400.f;
-	ZoomFactor = 1.f;
+	OurCameraSpringArm->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 0.f), FRotator(-30.f, 0.f, 0.f));
+	OurCameraSpringArm->TargetArmLength = 600.f;
+	ZoomFactor = 0.f;
 	OurCameraSpringArm->bDoCollisionTest = false;
 	OurCameraSpringArm->bEnableCameraLag = true;
-	OurCameraSpringArm->CameraLagSpeed = 3.f;
+	OurCameraSpringArm->CameraLagSpeed = 10.f;
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
@@ -65,7 +65,7 @@ void AMyPawn::Tick(float DeltaTime)
 		ZoomFactor = FMath::Clamp<float>(ZoomFactor, 0.0f, 1.0f);*/
 		//Blend our camera's FOV and our SpringArm's length based on ZoomFactor
 		//OurCamera->FieldOfView = FMath::Lerp<float>(90.0f, 60.0f, ZoomFactor);
-		OurCameraSpringArm->TargetArmLength = FMath::Lerp<float>(2000.0f, 200.0f, ZoomFactor);
+		OurCameraSpringArm->TargetArmLength = FMath::Lerp<float>(2000.0f, 10.0f, ZoomFactor);
 	}
 
 	//Rotate our actor's yaw, which will turn our camera because we're attached to it
@@ -87,11 +87,15 @@ void AMyPawn::Tick(float DeltaTime)
 		if (!MovementInput.IsZero())
 		{
 			//Scale our movement input axis values by 100 units per second
-			MovementInput = MovementInput.SafeNormal() * 100.0f;
+			MovementInput = MovementInput.GetSafeNormal() * (1.02f  - ZoomFactor) * 500.0f;
 			FVector NewLocation = GetActorLocation();
 			NewLocation += GetActorForwardVector() * MovementInput.X * DeltaTime * 5.f;
 			NewLocation += GetActorRightVector() * MovementInput.Y * DeltaTime * 5.f;
 			NewLocation += GetActorUpVector() * MovementInput.Z * DeltaTime * 5.f;
+			if (NewLocation.Z < 0.f)
+			{
+				NewLocation.Z = 0.f;
+			}
 			SetActorLocation(NewLocation);
 		}
 	}
@@ -147,12 +151,16 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 //Input functions
 void AMyPawn::MoveForward(float AxisValue)
 {
-	MovementInput.X = FMath::Clamp<float>(3*AxisValue, -3.f, 3.f);
+	MovementInput.X = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
+	/*if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::SanitizeFloat(AxisValue));
+	}*/
 }
 
 void AMyPawn::MoveRight(float AxisValue)
 {
-	MovementInput.Y = FMath::Clamp<float>(3*AxisValue, -3.f, 3.f);
+	MovementInput.Y = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 
 void AMyPawn::PitchCamera(float AxisValue)
@@ -167,12 +175,12 @@ void AMyPawn::YawCamera(float AxisValue)
 
 void AMyPawn::Zoom(float AxisValue)
 {
-	ZoomFactor += 0.05f*AxisValue;
+	ZoomFactor += 0.02f*AxisValue;
 	ZoomFactor = FMath::Clamp(ZoomFactor, 0.0f, 1.0f);
 }
 
 void AMyPawn::MoveUp(float AxisValue)
 {
-	MovementInput.Z = FMath::Clamp<float>(3 * AxisValue, -3.0f, 3.0f);
+	MovementInput.Z = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
 }
 

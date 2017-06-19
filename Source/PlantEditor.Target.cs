@@ -5,10 +5,11 @@ using System.Collections.Generic;
 
 public class PlantEditorTarget : TargetRules
 {
-	public PlantEditorTarget(TargetInfo Target)
-	{
+	public PlantEditorTarget(TargetInfo Target)//: base(Target)
+    {
 		Type = TargetType.Editor;
-	}
+        //ExtraModuleNames.Add("Plant");
+    }
 
 	//
 	// TargetRules interface.

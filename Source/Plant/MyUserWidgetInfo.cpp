@@ -5,61 +5,146 @@
 
 
 UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f)
+	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f), fPadding(5), machine(nullptr), machinePart(nullptr)
 {
-	static FMargin fPadding(5);
+	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
 
-	UWidgetTree* widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
+	widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
 	this->WidgetTree = widgetTree;
-	
+
+	ScaleBox = NewObject<UScaleBox>(widgetTree, UScaleBox::StaticClass());
+	ScaleBox->SetUserSpecifiedScale(1.0f);
+	ScaleBox->SetStretch(EStretch::ScaleToFit);
+	this->WidgetTree->RootWidget = ScaleBox;
+
+	SizeBox = NewObject<USizeBox>(ScaleBox, USizeBox::StaticClass());
+	SizeBox->SetHeightOverride(180.f);
+	SizeBox->SetWidthOverride(240.f);
+	ScaleBox->AddChild(SizeBox);
+
 	// Content Window
-	UVerticalBox* ContentWindowBox = NewObject<UVerticalBox>(widgetTree, TEXT("Content Windows"));
-	this->WidgetTree->RootWidget = ContentWindowBox;
+	ContentWindowBox = NewObject<UVerticalBox>(SizeBox, TEXT("Content Windows"));
+	SizeBox->AddChild(ContentWindowBox);
 
 	// Title Bar and Buttons
-	UHorizontalBox* TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("Title Bar"));
+	TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("Title Bar"));
 	ContentWindowBox->AddChildToVerticalBox(TitleBarBox);
 
 	// Generate Title
-	UTextBlock* textTitle = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
+	textTitle = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
 	textTitle->SetText(FText::FromString(TEXT("Información")));
-	textTitle->Font.Size = 8;
+	textTitle->Font.Size = 12;
 	textTitle->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
 	UHorizontalBoxSlot* SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(textTitle);
 	SlotItemHorz->SetPadding(fPadding);
 	SlotItemHorz->SetSize(ESlateSizeRule::Fill);
-	textTitle->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	// Generate Button Ok
 	buttonOk = NewObject<UButton>(TitleBarBox, UButton::StaticClass());
-	UTextBlock* textButtonOk = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
-	textButtonOk->SetText(FText::FromString(TEXT("X")));
-	textButtonOk->Font.Size = 8;
-	textButtonOk->SetColorAndOpacity(FSlateColor(FLinearColor(.0f, .0f, .0f, 1.0f)));
-	buttonOk->AddChild(textButtonOk);
 	SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(buttonOk);
+	SlotItemHorz->SetPadding(fPadding);
+
+	FVector2D sizeButton(16, 16);
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGObj(TEXT("/Game/WidgetTextures/close-button.close-button"));
+	ButtonBG = ButtonBGObj.Object;
+	buttonOk->WidgetStyle.Normal.SetResourceObject(ButtonBG);
+	buttonOk->WidgetStyle.Normal.ImageSize = sizeButton;
+	buttonOk->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGPressedObj(TEXT("/Game/WidgetTextures/close-button-pressed.close-button-pressed"));
+	ButtonBGPressed = ButtonBGPressedObj.Object;
+	buttonOk->WidgetStyle.Pressed.SetResourceObject(ButtonBGPressed);
+	buttonOk->WidgetStyle.Pressed.ImageSize = sizeButton;
+	buttonOk->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
+
+	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGHoveredObj(TEXT("/Game/WidgetTextures/close-button-hovered.close-button-hovered"));
+	ButtonBGHovered = ButtonBGHoveredObj.Object;
+	buttonOk->WidgetStyle.Hovered.SetResourceObject(ButtonBGHovered);
+	buttonOk->WidgetStyle.Hovered.ImageSize = sizeButton;
+	buttonOk->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
 
 	// Work Space
+	UWidgetSwitcher* widgetSwitcher = NewObject<UWidgetSwitcher>(ContentWindowBox, UWidgetSwitcher::StaticClass(), TEXT("WidgetSwitcher"));
+	ContentWindowBox->AddChildToVerticalBox(widgetSwitcher);
+
 	ScrollBox = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box"));
-	UVerticalBoxSlot* SlotItemVert;
-	SlotItemVert = ContentWindowBox->AddChildToVerticalBox(ScrollBox);
-	SlotItemVert->SetSize(ESlateSizeRule::Fill);
+	UPanelSlot* SlotPanelItem;
+	SlotPanelItem = widgetSwitcher->AddChild(ScrollBox);
+	
 	ItemWidgetsBox = NewObject<UVerticalBox>(ScrollBox, TEXT("Vertical Box"));
 	ScrollBox->AddChild(ItemWidgetsBox);
+
+	// Text Info
+	textInfo = NewObject<UTextBlock>(ContentWindowBox, UTextBlock::StaticClass());
+	textInfo->SetText(FText::FromString(TEXT("Información")));
+	textInfo->Font.Size = 10;
+	textInfo->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
+	UVerticalBoxSlot* SlotItem = ItemWidgetsBox->AddChildToVerticalBox(textInfo);
+	SlotItem->SetPadding(fPadding);
+	SlotItem->SetSize(ESlateSizeRule::Fill);
+
+	// Sensor
+	ScrollBoxSensor = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box Sensor"));
+	SlotPanelItem = widgetSwitcher->AddChild(ScrollBoxSensor);
+
+	ItemWidgetsBoxSensors = NewObject<UVerticalBox>(ScrollBoxSensor, TEXT("Vertical Box Sensor"));
+	ScrollBoxSensor->AddChild(ItemWidgetsBoxSensors);
 	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
+
+	// widgetSwitcher->SetActiveWidget(ScrollBox);
+
+	// Delegate click actions
+	buttonOk->OnClicked.AddDynamic(this, &UMyUserWidgetInfo::OnClickButtonOk);  // TODO: It's important this line code is here for the buttonOk works
+}
+
+void UMyUserWidgetInfo::SetTitleWindow(FText title)
+{
+	textTitle->SetText(title);
+}
+
+void UMyUserWidgetInfo::SetMachine(Machine* _machine)
+{
+	if (_machine)
+	{
+		this->machine = _machine;
+		std::string title = std::string("PN: ") + this->machine->pn;
+		SetTitleWindow(FText::FromString(title.c_str()));
+		textInfo->SetText(FText::FromString(this->machine->info.c_str()));
+	}
+}
+
+void UMyUserWidgetInfo::SetMachinePart(MachinePart* _machinePart)
+{
+	if (_machinePart)
+	{
+		this->machinePart = _machinePart;
+		std::string title = std::string("PN: ") + this->machinePart->pn;
+		SetTitleWindow(FText::FromString(title.c_str()));
+		textInfo->SetText(FText::FromString(this->machinePart->info.c_str()));
+		SetVisibleSensors(false);
+	}
+}
+
+void UMyUserWidgetInfo::SetVisibleSensors(bool visible)
+{
+	
+}
+
+void UMyUserWidgetInfo::SetParentComponent(UWidgetInfoComponent* parent)
+{
+	parentComponent = parent;
 }
 
 void UMyUserWidgetInfo::SetSensors(const TArray<USensor*>& arrSensors)
 {
-	static FMargin fPadding(5);
-
 	if (!ItemWidgetsBox)
 	{
 		return;
 	}
 
 	// Empty widget and array of sensors
-	ItemWidgetsBox->ClearChildren();
+	ItemWidgetsBoxSensors->ClearChildren();
 	Sensors.Empty();
 
 	Sensors = arrSensors;
@@ -92,3 +177,29 @@ void UMyUserWidgetInfo::UpdateDataSensors(float InDeltaTime)
 	}
 }
 
+void UMyUserWidgetInfo::OnClickButtonOk()
+{
+	parentComponent->DisableWidget();
+}
+
+void UMyUserWidgetInfo::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click on Component"));
+	}
+}
+
+FReply UMyUserWidgetInfo::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	parentComponent->StartMoveComponent();
+
+	return FReply::Handled();
+}
+
+FReply UMyUserWidgetInfo::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	parentComponent->EndMoveComponent();
+
+	return FReply::Handled();
+}

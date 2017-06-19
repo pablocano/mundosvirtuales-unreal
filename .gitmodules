@@ -1,0 +1,3 @@
+[submodule "ThirdParty/Client"]
+	path = ThirdParty/Client
+	url = https://github.com/pablocano/mundosvirtuales-server.git

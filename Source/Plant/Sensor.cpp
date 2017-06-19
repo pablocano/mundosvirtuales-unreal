@@ -29,8 +29,7 @@ void USensor::CreateWidget()
 {
 	textBlock = NewObject<UTextBlock>(this, UTextBlock::StaticClass());
 	textBlock->SetText(FText::FromString(nameSensor));
-	textBlock->Font.Size = 8;
-	textBlock->MinDesiredWidth = 100.0f;
+	textBlock->Font.Size = 10;
 	textBlock->SetJustification(ETextJustify::Left);
 	textBlock->SetRenderTranslation(FVector2D(0.0, 0.0f));
 
