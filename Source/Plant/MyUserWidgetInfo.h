@@ -5,7 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "WidgetInfoComponent.h"
 #include "Sensor.h"
-#include "PlantCore/Machine.h"
+#include "plant/Machine.h"
 #include "MyUserWidgetInfo.generated.h"
 
 /**

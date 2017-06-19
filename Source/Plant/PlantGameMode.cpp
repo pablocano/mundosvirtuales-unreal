@@ -5,11 +5,11 @@
 #include "MyActor.h"
 #include "MyPawn.h"
 #include "MyGameState.h"
+#include "ClientPlant.h"
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	DefaultPawnClass = AMyPawn::StaticClass();
-	flat = new Flat();
 
 	GameStateClass = AMyGameState::StaticClass();
 }
@@ -34,13 +34,24 @@ void APlantGameMode::StartPlay()
 
 void APlantGameMode::initWorld()
 {
+	ClientPlant client("10.0.42.8");
+
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString(TEXT("Starting Client")));
+	}
+
+	client.start();
+
+	machines = client.requestMachines();
+
 	FActorSpawnParameters SpawnInfo;
 	// Spawninfo has additional info you might want to modify such as the name of the spawned actor.
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	UWorld* const World = GetWorld();
 	if (World)
 	{
-		for(Machine& machine : flat->machines)
+		for(Machine& machine : machines)
 		{
 			FTransform SpawnLocAndRotation;
 			AMyActor* MyActor = World->SpawnActorDeferred<AMyActor>(AMyActor::StaticClass(), SpawnLocAndRotation);
@@ -50,4 +61,7 @@ void APlantGameMode::initWorld()
 		}
 
 	}
+
+	client.stop();
+	
 }

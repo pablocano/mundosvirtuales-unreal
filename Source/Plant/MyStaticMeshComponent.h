@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Components/StaticMeshComponent.h"
-#include "PlantCore/Machine.h"
+#include "plant/Machine.h"
 #include "MeshInterface.h"
 #include "MyStaticMeshComponent.generated.h"
 

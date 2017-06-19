@@ -30,10 +30,12 @@ public class Plant : ModuleRules
 
         // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
 
-        LoadCoreLib(ROTargetRules);
+        LoadClientLib(ROTargetRules);
+
+        UEBuildConfiguration.bForceEnableExceptions = true;
     }
 
-    public bool LoadCoreLib(TargetInfo Target)
+    public bool LoadClientLib(TargetInfo Target)
     {
         bool isLibrarySupported = false;
 
@@ -41,22 +43,23 @@ public class Plant : ModuleRules
         {
             isLibrarySupported = true;
 
-            string LibrariesPath = Path.Combine(ThirdPartyPath, "PlantCore", "Libraries");
+            string LibrariesPath = Path.Combine(ThirdPartyPath, "Client", "lib");
             string PlatformString = (Target.Platform == UnrealTargetPlatform.Win64) ? "x64" : "x86";
             string ConfigurationString = (Target.Configuration == UnrealTargetConfiguration.Debug) ? "Debug" : "Release";
-  
+
             Console.WriteLine("... LibrariesPath -> " + Path.Combine(LibrariesPath, PlatformString, ConfigurationString));
-            
-            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, PlatformString, ConfigurationString, "plantCorelib.lib"));
+
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, PlatformString, ConfigurationString, "clientPlant.lib"));
+            PublicAdditionalLibraries.Add(Path.Combine(LibrariesPath, PlatformString, ConfigurationString, "utilsCore.lib"));
         }
 
         if (isLibrarySupported)
         {
             // Include path
-            PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "PlantCore", "Includes"));
+            PublicIncludePaths.Add(Path.Combine(ThirdPartyPath, "Client", "src"));
         }
 
-        Definitions.Add(string.Format("WITH_PLANT_CORE_BINDING={0}", isLibrarySupported ? 1 : 0));
+        Definitions.Add(string.Format("WITH_CLIENT_BINDING={0}", isLibrarySupported ? 1 : 0));
 
         return isLibrarySupported;
     }

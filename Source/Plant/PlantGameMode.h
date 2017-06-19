@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GameFramework/GameMode.h"
-#include "PlantCore/Flat.h"
+#include "plant/Machine.h" 
 #include "PlantGameMode.generated.h"
 
 /**
@@ -18,5 +18,6 @@ class PLANT_API APlantGameMode : public AGameMode
 
 	void initWorld();
 
-	Flat* flat;
+	Machines machines;
+
 };

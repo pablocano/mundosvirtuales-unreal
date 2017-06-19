@@ -5,7 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/WidgetComponent.h"
 #include "MyUserWidgetInfo.h"
-#include "PlantCore/Machine.h"
+#include "plant/Machine.h"
 #include "MySkeletalMeshComponent.h"
 #include "MyStaticMeshComponent.h"
 #include "MeshInterface.h"
