@@ -3,7 +3,8 @@
 #pragma once
 
 #include "GameFramework/GameMode.h"
-#include "plant/Machine.h" 
+#include "plant/Machine.h"
+#include "ClientPlant.h"
 #include "PlantGameMode.generated.h"
 
 /**
@@ -20,4 +21,11 @@ class PLANT_API APlantGameMode : public AGameMode
 
 	Machines machines;
 
+	ClientPlant* clientPlant;
+
+	void asyncSpawnMachine(Machine &machine);
+
+public:
+
+	~APlantGameMode();
 };
