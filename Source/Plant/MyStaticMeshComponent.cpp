@@ -81,7 +81,7 @@ bool UMyStaticMeshComponent::setEmissive_Implementation(float emissive)
 }
 
 
-void UMyStaticMeshComponent::init(AMyActor * aMyActor, MachinePart * machinePart)
+void UMyStaticMeshComponent::init(AMyActor * aMyActor, Part * machinePart)
 {
 	parent = aMyActor;
 	part = machinePart;

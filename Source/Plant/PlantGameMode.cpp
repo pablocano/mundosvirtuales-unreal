@@ -6,7 +6,7 @@
 #include "MyPawn.h"
 #include "MyGameState.h"
 #include "Async.h"
-#include "utils/Concurrency.h" 
+#include "utils/Concurrency/Concurrency.h" 
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -40,8 +40,10 @@ void APlantGameMode::StartPlay()
 	}
 
 	APlantGameMode* hInstance = this;
-	static Concurrency con([hInstance]() -> bool { FPlatformProcess::Sleep(5); hInstance->machines = hInstance->clientPlant->requestMachines(); return hInstance->machines.size() > 0; },
-		std::bind(&APlantGameMode::initWorld, this), 100);
+	//static Concurrency con([hInstance]() -> bool { FPlatformProcess::Sleep(1); hInstance->machines = hInstance->clientPlant->requestMachines(); return hInstance->machines.size() > 0; }, std::bind(&APlantGameMode::initWorld, this), 10);
+
+	hInstance->machines = hInstance->clientPlant->requestMachines();
+	initWorld();
 }
 
 void APlantGameMode::initWorld()
@@ -51,14 +53,14 @@ void APlantGameMode::initWorld()
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (GetWorld())
 	{
-		for(Machine& machine : machines)
+		for(Assembly& machine : machines)
 		{
 			asyncSpawnMachine(machine);
 		}
 	}	
 }
 
-void APlantGameMode::asyncSpawnMachine(Machine &machine)
+void APlantGameMode::asyncSpawnMachine(Assembly &machine)
 {
 	UWorld* const World = GetWorld();
 	AsyncTask(ENamedThreads::GameThread, [&machine, World]()

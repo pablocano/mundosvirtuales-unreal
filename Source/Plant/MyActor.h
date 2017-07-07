@@ -5,7 +5,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/WidgetComponent.h"
 #include "MyUserWidgetInfo.h"
-#include "plant/Machine.h"
+#include "plant/Assembly.h"
 #include "MySkeletalMeshComponent.h"
 #include "MyStaticMeshComponent.h"
 #include "MeshInterface.h"
@@ -33,7 +33,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
-	void init(Machine& machine);
+	void init(Assembly& machine);
 
 	void setHover(bool hover);
 
@@ -65,7 +65,7 @@ private:
 
 	UMeshComponent* selectedPart;
 
-	Machine* machine;
+	Assembly* machine;
 
 	bool selected;
 

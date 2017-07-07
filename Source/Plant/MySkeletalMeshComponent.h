@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Components/SkeletalMeshComponent.h"
-#include "plant/Machine.h"
+#include "plant/Part.h"
 #include "MeshInterface.h"
 #include "MySkeletalMeshComponent.generated.h"
 
@@ -32,14 +32,14 @@ class PLANT_API UMySkeletalMeshComponent : public USkeletalMeshComponent, public
 	UFUNCTION()
 	virtual bool setEmissive_Implementation(float emissive) override;
 
-	void init(AMyActor* aMyActor, MachinePart* part);
+	void init(AMyActor* aMyActor, Part* part);
 	
 	USkeletalMesh* mesh;
 	UAnimSequence* animation;
 
 	AMyActor* parent;
 
-	MachinePart* part;
+	Part* part;
 
 	bool selected;
 };

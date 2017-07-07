@@ -5,7 +5,8 @@
 #include "Blueprint/UserWidget.h"
 #include "WidgetInfoComponent.h"
 #include "Sensor.h"
-#include "plant/Machine.h"
+#include "plant/Assembly.h"
+#include "plant/Part.h"
 #include "MyUserWidgetInfo.generated.h"
 
 /**
@@ -51,8 +52,8 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UTextBlock* textTitle;
 	UTextBlock* textInfo;
 
-	Machine* machine;
-	MachinePart* machinePart;
+	Assembly* machine;
+	Part* machinePart;
 
 	UPROPERTY()
 	float DeltaTime;
@@ -85,8 +86,8 @@ public:
 	UWidgetInfoComponent* GetParentComponent() { return parentComponent; };
 
 	void SetTitleWindow(FText title);
-	void SetMachine(Machine* _machine);
-	void SetMachinePart(MachinePart* _machinePart);
+	void SetMachine(Assembly* _machine);
+	void SetMachinePart(Part* _machinePart);
 	void SetVisibleSensors(bool visible);
 
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
