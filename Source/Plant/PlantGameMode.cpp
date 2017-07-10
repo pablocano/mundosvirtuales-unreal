@@ -40,10 +40,7 @@ void APlantGameMode::StartPlay()
 	}
 
 	APlantGameMode* hInstance = this;
-	//static Concurrency con([hInstance]() -> bool { FPlatformProcess::Sleep(1); hInstance->machines = hInstance->clientPlant->requestMachines(); return hInstance->machines.size() > 0; }, std::bind(&APlantGameMode::initWorld, this), 10);
-
-	hInstance->machines = hInstance->clientPlant->requestMachines();
-	initWorld();
+	static Concurrency con([hInstance]() -> bool { hInstance->machines = hInstance->clientPlant->requestMachines(); return hInstance->machines.size() > 0; }, std::bind(&APlantGameMode::initWorld, this), 100);
 }
 
 void APlantGameMode::initWorld()
