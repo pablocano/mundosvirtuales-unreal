@@ -11,7 +11,7 @@ UMySkeletalMeshComponent::UMySkeletalMeshComponent(const FObjectInitializer& Obj
 {
 }
 
-void UMySkeletalMeshComponent::init(AMyActor* aMyActor, MachinePart* machinePart)
+void UMySkeletalMeshComponent::init(AMyActor* aMyActor, Part* machinePart)
 {
 	parent = aMyActor;
 	part = machinePart;
@@ -21,8 +21,8 @@ void UMySkeletalMeshComponent::init(AMyActor* aMyActor, MachinePart* machinePart
 	mesh = LoadObject<USkeletalMesh>(NULL, *meshName, NULL, LOAD_None, NULL);
 	//animation = LoadObject<UAnimSequence>(NULL, *animationName, NULL, LOAD_None, NULL);
 
-	ensureMsgf(mesh != nullptr, TEXT("Node is invalid"));
-	ensureMsgf(animation != nullptr, TEXT("Node is invalid"));
+	//ensureMsgf(mesh != nullptr, TEXT("Node is invalid"));
+	//ensureMsgf(animation != nullptr, TEXT("Node is invalid"));
 
 	this->OnBeginCursorOver.AddDynamic(this, &UMySkeletalMeshComponent::CustomOnBeginMouseOver);
 	this->OnEndCursorOver.AddDynamic(this, &UMySkeletalMeshComponent::CustomOnEndMouseOver);

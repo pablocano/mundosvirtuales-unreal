@@ -16,13 +16,13 @@ AMyActor::AMyActor(const FObjectInitializer& ObjectInitializer)
 	
 }
 
-void AMyActor::init(Machine& _machine){
+void AMyActor::init(Assembly& _machine){
 
 	this->machine = &_machine;
 
 	USceneComponent* root = NewObject<USceneComponent>(this, TEXT("RootComponent"));
 	this->SetRootComponent(root);
-	for (MachinePart& machinePart : this->machine->machineParts)
+	for (Part& machinePart : this->machine->parts)
 	{
 		FString name(machinePart.name.c_str());
 		if (machinePart.animated)

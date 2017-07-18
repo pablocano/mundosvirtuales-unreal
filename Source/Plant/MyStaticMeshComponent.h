@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Components/StaticMeshComponent.h"
-#include "plant/Machine.h"
+#include "plant/Part.h"
 #include "MeshInterface.h"
 #include "MyStaticMeshComponent.generated.h"
 
@@ -29,7 +29,7 @@ class PLANT_API UMyStaticMeshComponent : public UStaticMeshComponent, public IMe
 	UFUNCTION()
 	virtual bool setEmissive_Implementation(float emissive) override;
 
-	void init(AMyActor* aMyActor, MachinePart* part);
+	void init(AMyActor* aMyActor, Part* part);
 
 	UStaticMesh* mesh;
 	UMaterialInterface* material;
@@ -37,7 +37,7 @@ class PLANT_API UMyStaticMeshComponent : public UStaticMeshComponent, public IMe
 
 	AMyActor* parent;
 
-	MachinePart* part;
+	Part* part;
 
 	bool selected;
 	

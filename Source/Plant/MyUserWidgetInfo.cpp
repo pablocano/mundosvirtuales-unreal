@@ -2,6 +2,7 @@
 
 #include "Plant.h"
 #include "MyUserWidgetInfo.h"
+#include "plant/Assembly.h"
 
 
 UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer)
@@ -103,7 +104,7 @@ void UMyUserWidgetInfo::SetTitleWindow(FText title)
 	textTitle->SetText(title);
 }
 
-void UMyUserWidgetInfo::SetMachine(Machine* _machine)
+void UMyUserWidgetInfo::SetMachine(Assembly* _machine)
 {
 	if (_machine)
 	{
@@ -114,7 +115,7 @@ void UMyUserWidgetInfo::SetMachine(Machine* _machine)
 	}
 }
 
-void UMyUserWidgetInfo::SetMachinePart(MachinePart* _machinePart)
+void UMyUserWidgetInfo::SetMachinePart(Part* _machinePart)
 {
 	if (_machinePart)
 	{

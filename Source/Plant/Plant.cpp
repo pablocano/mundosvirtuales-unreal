@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Plant.h"
-#include "plant/Machine.h"
+#include "plant/Assembly.h"
 
 IMPLEMENT_PRIMARY_GAME_MODULE( FDefaultGameModuleImpl, Plant, "Plant" );
 
