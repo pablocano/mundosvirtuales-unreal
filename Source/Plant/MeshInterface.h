@@ -26,4 +26,8 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	bool setEmissive(float emissive);
+
+	virtual bool IsSelected() = 0;
+
+	virtual bool SetSelected(bool select) = 0;
 };
