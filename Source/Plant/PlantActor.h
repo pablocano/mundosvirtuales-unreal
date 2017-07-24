@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "AssemblyComponent.h" 
 #include "GameFramework/Actor.h"
 #include "PlantActor.generated.h"
 
@@ -22,10 +23,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-  void init(StockPlant* stock);
+  void init(const StockPlant* stock);
   
   UMeshComponent* selectedStock;
   
   UAssemblyComponent* rootStock;
+
+  bool comodinUsed;
 	
 };

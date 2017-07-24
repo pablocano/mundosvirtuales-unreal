@@ -2,11 +2,13 @@
 
 #include "Plant.h"
 #include "PlantGameMode.h"
-#include "MyActor.h"
+#include "PlantActor.h"
 #include "MyPawn.h"
 #include "MyGameState.h"
 #include "Async.h"
+#include "ClientPlant.h"
 #include "utils/Concurrency/Concurrency.h" 
+#include <functional>
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -16,12 +18,11 @@ APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Su
 
 	clientPlant = new ClientPlant("10.0.42.8");
 	
-	clientPlant->start(); // Starting response packet.
+	clientPlant->start();
 }
 
 APlantGameMode::~APlantGameMode()
 {
-	delete clientPlant; // Stop thread.
 }
 
 void APlantGameMode::StartPlay()
@@ -38,9 +39,20 @@ void APlantGameMode::StartPlay()
 		MyController->bEnableClickEvents = true;
 		MyController->bEnableMouseOverEvents = true;
 	}
+	
+	static Assemblies &assemblies = Assemblies::getInstance();
+	static Plant &plant = Plant::getInstance();
 
 	APlantGameMode* hInstance = this;
-	static Concurrency con([hInstance]() -> bool { hInstance->machines = hInstance->clientPlant->requestMachines(); return hInstance->machines.size() > 0; }, std::bind(&APlantGameMode::initWorld, this), 100);
+	static Concurrency con([hInstance]() -> bool {
+		if (hInstance->clientPlant->requestAssemblies(assemblies))
+		{
+			return hInstance->clientPlant->requestPlant(plant);
+		}
+		else
+			return false;
+	}, std::bind(&APlantGameMode::initWorld,this) , 100);
+
 }
 
 void APlantGameMode::initWorld()
@@ -50,22 +62,19 @@ void APlantGameMode::initWorld()
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (GetWorld())
 	{
-		for(Assembly& machine : machines)
-		{
-			asyncSpawnMachine(machine);
-		}
+		asyncSpawnMachine(Plant::getInstance().getPlant());
 	}	
 }
 
-void APlantGameMode::asyncSpawnMachine(Assembly &machine)
+void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 {
 	UWorld* const World = GetWorld();
-	AsyncTask(ENamedThreads::GameThread, [&machine, World]()
+	AsyncTask(ENamedThreads::GameThread, [&stock, World]()
 	{
 		FTransform SpawnLocAndRotation;
-		AMyActor* MyActor = World->SpawnActorDeferred<AMyActor>(AMyActor::StaticClass(), SpawnLocAndRotation);
-		MyActor->init(machine);
-		MyActor->FinishSpawning(SpawnLocAndRotation);
-		MyActor->SetActorLocationAndRotation(FVector(50, 50, 2), FRotator(0, 0, 90));
+		APlantActor* plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
+		plantActor->init(&stock);
+		plantActor->FinishSpawning(SpawnLocAndRotation);
+		plantActor->SetActorLocationAndRotation(FVector(50, 50, 2), FRotator(0, 0, 90));
 	});
 }

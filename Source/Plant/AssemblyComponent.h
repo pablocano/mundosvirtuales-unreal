@@ -16,38 +16,48 @@ class PLANT_API UAssemblyComponent : public UStaticMeshComponent, public IMeshIn
 {
 public:
   
-  enum(BorderStatus)
-  {
-    NOTHING,
-    HOVER,
-    FOCUS
-  }
+	enum BorderStatus
+	{
+		NOTHING,
+		HOVER,
+		FOCUS
+	};
 
 	GENERATED_UCLASS_BODY()
 
 	UFUNCTION()
-		void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
+	void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
 
 	UFUNCTION()
-		void CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent);
+	void CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent);
   
-  UFUNCTION()
-		void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
+	UFUNCTION()
+	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
   
-  virtual bool IsSelected_Implementation(bool focus) override { return selected; }
+	UFUNCTION()
+	virtual bool IsSelected_Implementation() override;
   
-  virtual void SetSelected_Implementation(bool select) override { selected = select; }
+	UFUNCTION()
+	virtual void SetSelected_Implementation(bool select) override;
   
-  virtual void Collapse_Implementation() override;
+	UFUNCTION()
+	virtual void Collapse_Implementation() override;
 
-  void init(APlantActor* actor, UMeshComponent* parentComponent, StockPlant* stock);
+	UFUNCTION()
+	virtual void UnregisterStock_Implementation() override;
+
+	UFUNCTION()
+	virtual void Expand_Implementation() override;
+
+	void ExpandStock();
+
+	void init(APlantActor* actor, UMeshComponent* parentComponent, StockPlant const* stock);
 
 	void SetHover(bool hover = true);
 
 	void Hide();
   
-  void SetBorders(BorderStatus status);
-
+	void SetBorders(BorderStatus status);
 
 	UStaticMesh* mesh;
 	UMaterialInterface* material;
@@ -55,13 +65,15 @@ public:
 
 	UMeshComponent* parent;
 
-	StockPlant* stock;
+	const StockPlant* stock;
 
-	Assembly* assembly;
+	const Assembly* assembly;
   
-  APlantActor* actor;
+	APlantActor* actor;
 
 	TArray<UMeshComponent*> subStocks;
 
 	bool selected;
+
+	BorderStatus borderStatus;
 };

@@ -10,6 +10,7 @@ APlantActor::APlantActor()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	comodinUsed = false;
 }
 
 // Called when the game starts or when spawned
@@ -26,7 +27,7 @@ void APlantActor::Tick(float DeltaTime)
 
 }
 
-void APlantActor::init(StockPlant* stock)
+void APlantActor::init(const StockPlant* stock)
 {
   
   USceneComponent* root = NewObject<USceneComponent>(this, TEXT("RootComponent"));
@@ -36,8 +37,21 @@ void APlantActor::init(StockPlant* stock)
   
   rootStock = NewObject<UAssemblyComponent>(this, FName(*name));
     
-  rootStock->init(this, null, &stock);
+  rootStock->init(this, nullptr, stock);
   rootStock->RegisterComponent();
-  rootStock->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+  rootStock->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+  rootStock->ExpandStock();
+
+  for (UMeshComponent* child : rootStock->subStocks)
+  {
+	  UAssemblyComponent* childInterface = Cast<UAssemblyComponent>(child);
+
+	  if (childInterface->stock->getID() == 85)
+	  {
+		  childInterface->ExpandStock();
+	  }
+
+  }
 }
 

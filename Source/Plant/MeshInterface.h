@@ -21,9 +21,18 @@ class PLANT_API IMeshInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	
-  void Collapse();
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void Collapse();
 
-	virtual bool IsSelected() = 0;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	bool IsSelected();
 
-	virtual bool SetSelected(bool select) = 0;
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void SetSelected(bool select);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void UnregisterStock();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void Expand();
 };

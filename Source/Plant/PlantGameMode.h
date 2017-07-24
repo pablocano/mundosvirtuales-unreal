@@ -19,11 +19,9 @@ class PLANT_API APlantGameMode : public AGameMode
 
 	void initWorld();
 
-	Assemblies machines;
-
 	ClientPlant* clientPlant;
 
-	void asyncSpawnMachine(Assembly& machine);
+	void asyncSpawnMachine(const StockPlant& stock);
 
 public:
 
