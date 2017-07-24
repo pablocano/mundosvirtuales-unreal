@@ -7,7 +7,7 @@
 #include "plant/StockPlant.h"
 #include "AssemblyComponent.generated.h"
 
-class PlantActor;
+class APlantActor;
 /**
  * 
  */
@@ -15,6 +15,13 @@ UCLASS()
 class PLANT_API UAssemblyComponent : public UStaticMeshComponent, public IMeshInterface
 {
 public:
+  
+  enum(BorderStatus)
+  {
+    NOTHING,
+    HOVER,
+    FOCUS
+  }
 
 	GENERATED_UCLASS_BODY()
 
@@ -23,22 +30,24 @@ public:
 
 	UFUNCTION()
 		void CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent);
+  
+  UFUNCTION()
+		void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
+  
+  virtual bool IsSelected_Implementation(bool focus) override { return selected; }
+  
+  virtual void SetSelected_Implementation(bool select) override { selected = select; }
+  
+  virtual void Collapse_Implementation() override;
 
-	UFUNCTION()
-		virtual bool setFocus_Implementation(bool focus) override;
-
-	UFUNCTION()
-		virtual bool setEmissive_Implementation(float emissive) override;
-
-	void init(UMeshComponent* parentComponent, StockPlant* stock);
+  void init(APlantActor* actor, UMeshComponent* parentComponent, StockPlant* stock);
 
 	void SetHover(bool hover = true);
 
 	void Hide();
+  
+  void SetBorders(BorderStatus status);
 
-	bool IsSelected() { return selected; }
-
-	bool SetSelected(bool select) { selected = select; }
 
 	UStaticMesh* mesh;
 	UMaterialInterface* material;
@@ -49,15 +58,10 @@ public:
 	StockPlant* stock;
 
 	Assembly* assembly;
+  
+  APlantActor* actor;
 
 	TArray<UMeshComponent*> subStocks;
 
 	bool selected;
-
-protected:
-	UFUNCTION(Category = Default)
-		void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
-	
-	
-	
 };

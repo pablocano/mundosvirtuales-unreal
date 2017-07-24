@@ -13,11 +13,14 @@ void UAssemblyComponent::CustomOnBeginMouseOver(UPrimitiveComponent * TouchedCom
 {
 	if (parent)
 	{
-		if (parent->IsSelected())
+    
+    IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+    
+		if (parentInterface->IsSelected_Implementation())
 		{
 			if (!selected && stock->getCanBeSelected())
 			{
-				//SetBorders(almostselected);
+				SetBorders(HOVER);
 				return;
 			}
 		}
@@ -31,11 +34,13 @@ void UAssemblyComponent::CustomOnEndMouseOver(UPrimitiveComponent * TouchedCompo
 {
 	if (parent)
 	{
-		if (parent->IsSelected())
+    IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+    
+    if (parentInterface->IsSelected_Implementation())
 		{
 			if (!selected && stock->getCanBeSelected())
 			{
-				//SetBorders(nothing);
+				SetBorders(NOTHING);
 				return;
 			}
 		}
@@ -56,14 +61,30 @@ void UAssemblyComponent::SetHover(bool hover)
 
 void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * TouchedComponent, FKey key)
 {
-	if (selected)
+	if (selected || !stock->getCanBeSelected())
 		return;
-
-	selected = true;
 
 	if (!stock->getSubStock().empty())
 	{
-		parent->SetSelected(false);
+    selected = true;
+    
+    if(parent)
+    {
+      IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+
+      parentInterface->SetSelected_Implementation(false);
+    }
+    
+    if(actor->selectedStock)
+    {
+      
+      IMeshInterface* selectedStockInterface = Cast<IMeshInterface>(actor->selectedStock);
+    
+      selectedStockInterface->Collapse_Implementation();
+      
+    }
+    
+    actor->selectedStock = this;
 
 		Hide();
 
@@ -73,7 +94,7 @@ void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * Touched
 			{
 				FString name(stock->getSN().c_str());
 				UAssemblyComponent* subAssembly = NewObject<UAssemblyComponent>(this, FName(*name)); // text("") can be just about anything.
-				subAssembly->init(this, &substock);
+				subAssembly->init(actor, this, &substock);
 				subAssembly->RegisterComponent();
 				subAssembly->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 				subStocks.Add(subAssembly);
@@ -82,7 +103,7 @@ void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * Touched
 	}
 	else
 	{
-		//SetBorders(selected);
+		SetBorders(FOCUS);
 	}
 }
 
@@ -92,27 +113,51 @@ void UAssemblyComponent::Hide()
 	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 }
 
-bool UAssemblyComponent::setFocus_Implementation(bool focus)
+void UAssemblyComponent::Collapse_Implementation()
 {
-	selected = focus;
-	int stencilValue = focus ? 252 : 254;
-	this->SetCustomDepthStencilValue(stencilValue);
-	this->SetRenderCustomDepth(focus);
-	return true;
+  for(UMeshComponent& substock : this->subStocks)
+  {
+    IMeshInterface* subStockInterface = Cast<IMeshInterface>(substock);
+    
+    if(subStockInterface->IsSelected_Implementation())
+      return;
+  }
+  
+  this->UnregisterAllComponents();
+  
+  this->subStocks.Empty();
+  
+  IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+  
+  parentInterface->Collapse_Implementation();
 }
 
-bool UAssemblyComponent::setEmissive_Implementation(float emissive)
+void UAssemblyComponent::SetBorders(BorderStatus status)
 {
-	FLinearColor color;
-	DynMaterial->GetVectorParameterValue("BaseColor", color);
-	color = color * emissive;
-	DynMaterial->SetVectorParameterValue("Emissive", color);
-	return true;
+  switch(status)
+  {
+    case NOTHING:
+      this->SetRenderCustomDepth(false);
+      break;
+      
+    case HOVER:
+      this->SetCustomDepthStencilValue(252);
+      this->SetRenderCustomDepth(true)
+      break;
+      
+    case FOCUS:
+      this->SetCustomDepthStencilValue(254);
+      this->SetRenderCustomDepth(true)
+      break;
+      
+    default:
+      break;
+  }
 }
 
-
-void UAssemblyComponent::init(UMeshComponent* parentComponent, StockPlant* stockEntry)
+void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentComponent, StockPlant* stockEntry)
 {
+  this->actor = actorPointer;
 	this->parent = parentComponent;
 	this->stock = stockEntry;
 	this->assembly = stock->getAssembly();

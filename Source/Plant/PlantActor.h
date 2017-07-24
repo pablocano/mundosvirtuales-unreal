@@ -22,6 +22,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	
+  void init(StockPlant* stock);
+  
+  UMeshComponent* selectedStock;
+  
+  UAssemblyComponent* rootStock;
 	
 };
