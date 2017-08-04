@@ -39,20 +39,10 @@ void APlantGameMode::StartPlay()
 		MyController->bEnableClickEvents = true;
 		MyController->bEnableMouseOverEvents = true;
 	}
-	
-	static Assemblies &assemblies = Assemblies::getInstance();
-	static Plant &plant = Plant::getInstance();
 
 	APlantGameMode* hInstance = this;
-	static Concurrency con([hInstance]() -> bool {
-		if (hInstance->clientPlant->requestAssemblies(assemblies))
-		{
-			return hInstance->clientPlant->requestPlant(plant);
-		}
-		else
-			return false;
-	}, std::bind(&APlantGameMode::initWorld,this) , 100);
-
+	static Concurrency con([hInstance]() -> bool { return hInstance->clientPlant->requestPlant(); },
+		std::bind(&APlantGameMode::initWorld,this) , 500);
 }
 
 void APlantGameMode::initWorld()
