@@ -51,7 +51,7 @@ void APlantGameMode::StartPlay()
 		}
 		else
 			return false;
-	}, std::bind(&APlantGameMode::initWorld,this) , 100);
+	}, std::bind(&APlantGameMode::initWorld,this) , 10000);
 
 }
 
@@ -75,6 +75,6 @@ void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 		APlantActor* plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
 		plantActor->init(&stock);
 		plantActor->FinishSpawning(SpawnLocAndRotation);
-		plantActor->SetActorLocationAndRotation(FVector(0, 0, 0), FRotator(0, 0, 0));
+		plantActor->SetActorLocationAndRotation(FVector(0, 0, 65), FRotator(0, 0, 0));
 	});
 }

@@ -4,6 +4,8 @@
 #include "PlantActor.h"
 #include "AssemblyComponent.h"
 
+#define M_PI           3.14159265358979323846  /* pi */
+
 UAssemblyComponent::UAssemblyComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer), selected(false)
 {
@@ -211,16 +213,17 @@ void UAssemblyComponent::ExpandStock()
 
 	for (StockPlant const& substock : stock->getSubStock())
 	{
-		if (substock.isEnable())
+		//if (substock.isEnable())
 		{
-			FString name(substock.getSN().c_str());
+			FString name(substock.getstrHash().c_str());
 			UAssemblyComponent* subAssembly = NewObject<UAssemblyComponent>(this, FName(*name)); // text("") can be just about anything.
 			subAssembly->init(actor, this, &substock);
 			subAssembly->RegisterComponent();
 			subAssembly->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-			Vectorf3D pose = substock->getPosition().m_pos;
-			Vectorf3D rotation = substock->getPosition().m_rot;
-			subAssembly->SetRelativeLocationAndRotation(FVector(pose.x, pose.y, pose.z), FRotator(rotation.x, rotation.y, rotation.z), false, nullptr, ETeleportType::None);
+			Vectorf3D pose = substock.getPosition().m_pos * 100;
+			Vectorf3D rotation = substock.getPosition().m_rot;
+			rotation = rotation * (180.f / M_PI);
+			subAssembly->SetRelativeLocationAndRotation(FVector(pose.x, pose.y, pose.z), FRotator(rotation.y, rotation.z, rotation.x), false, nullptr, ETeleportType::None);
 			subStocks.Add(subAssembly);
 		}
 	}
@@ -232,7 +235,14 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->parent = parentComponent;
 	this->stock = stockEntry;
 	this->assembly = &this->stock->getAssembly();
-	FString meshName = FString(assembly->getModel().getPathModel().c_str());
+
+	std::string modelname = assembly->getModel().getPathModel();
+
+	modelname.erase(modelname.end() - 4, modelname.end());
+
+	modelname = "/Game/CashSorter/" + modelname + "." + modelname;
+
+	FString meshName = FString(modelname.c_str());
 
 	std::string materialStd = assembly->getModel().getColor() + assembly->getModel().getMaterial();
 	materialStd = "/Game/Materials/ProterMaterials/" + materialStd + "." + materialStd;

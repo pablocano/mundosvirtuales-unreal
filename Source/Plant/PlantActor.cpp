@@ -9,8 +9,6 @@ APlantActor::APlantActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	comodinUsed = false;
 }
 
 // Called when the game starts or when spawned
@@ -42,16 +40,5 @@ void APlantActor::init(const StockPlant* stock)
   rootStock->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
   rootStock->ExpandStock();
-
-  for (UMeshComponent* child : rootStock->subStocks)
-  {
-	  UAssemblyComponent* childInterface = Cast<UAssemblyComponent>(child);
-
-	  if (childInterface->stock->getID() == 85)
-	  {
-		  childInterface->ExpandStock();
-	  }
-
-  }
 }
 
