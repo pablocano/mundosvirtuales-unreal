@@ -38,35 +38,71 @@ public:
 	UFUNCTION()
 	void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
 
+	/// <summary>
+	/// The callback function used when the mouse is over this component
+	/// </summary>
 	UFUNCTION()
 	void CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent);
   
+	/// <summary>
+	/// The callback function used when a click is made over this component
+	/// </summary>
 	UFUNCTION()
 	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
   
+	/// <summary>
+	/// Ask if this component is selected
+	/// </summary>
 	UFUNCTION()
 	virtual bool IsSelected_Implementation() override;
   
+	/// <summary>
+	/// Set the selection state of this component
+	/// </summary>
 	UFUNCTION()
 	virtual void SetSelected_Implementation(bool select) override;
   
+	/// <summary>
+	/// Close all the childs of this component
+	/// </summary>
 	UFUNCTION()
 	virtual void Collapse_Implementation() override;
 
+	/// <summary>
+	/// Unregister this stock from the components tree
+	/// </summary>
 	UFUNCTION()
 	virtual void UnregisterStock_Implementation() override;
 
+	/// <summary>
+	/// Expand this component into its childs, and hides its own mesh
+	/// </summary>
 	UFUNCTION()
 	virtual void Expand_Implementation() override;
 
+	/// <summary>
+	/// Remove the focus from this component
+	/// </summary>
 	UFUNCTION()
 	virtual void RemoveFocus_Implementation() override;
 
+	/// <summary>
+	/// Remove the focus from the child of this component
+	/// </summary>
 	UFUNCTION()
 	virtual void RemoveFocusChild_Implementation() override;
 
+	/// <summary>
+	/// Set a child of this component as focused
+	/// </summary>
 	UFUNCTION()
 	virtual void SetFocusChild_Implementation(UMeshComponent* child) override;
+
+	/// <summary>
+	/// Show the mesh of this component
+	/// </summary>
+	UFUNCTION()
+	virtual void ShowComponent_Implementation() override;
 
 	/// <summary>
 	/// Expand the current stock to expose the next layer

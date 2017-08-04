@@ -13,58 +13,80 @@ UAssemblyComponent::UAssemblyComponent(const FObjectInitializer& ObjectInitializ
 
 void UAssemblyComponent::CustomOnBeginMouseOver(UPrimitiveComponent * TouchedComponent)
 {
+	//If this component is focused, do nothing
 	if (borderStatus == FOCUS)
 		return;
 
+	// If this component has a parent
 	if (parent)
 	{
+		// Access to the parent
 		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
-    
+		
+		// And if its parent is selected
 		if (parentInterface->Execute_IsSelected(parent))
 		{
+			// If this componet is not already selected
 			if (!selected /*&& stock->getCanBeSelected()*/)
 			{
+				// Set borders as hover
 				SetBorders(HOVER);
 				return;
 			}
 		}
 	}
 
+	// If this component is not selected, set hover
 	if (!selected /*&& stock->getCanBeSelected()*/)
 		SetHover();
 }
 
 void UAssemblyComponent::CustomOnEndMouseOver(UPrimitiveComponent * TouchedComponent)
 {
+	// If this component is focused, do nothing
 	if (borderStatus == FOCUS)
 		return;
 
+	// If this component has a parent
 	if (parent)
 	{
-    IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+		// Access to the parent
+		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
     
-    if (parentInterface->Execute_IsSelected(parent))
+		//If the parent is selected
+		if (parentInterface->Execute_IsSelected(parent))
 		{
+			// If this component is not already selected
 			if (!selected /*&& stock->getCanBeSelected()*/)
 			{
+				// Set borders to nothing
 				SetBorders(NOTHING);
 				return;
 			}
 		}
 	}
 
+	// If this component is not selected, remove hover
 	if (!selected /*&& stock->getCanBeSelected()*/)
 		SetHover(false);
 }
 
 void UAssemblyComponent::SetHover(bool hover)
 {
+	// If the material can be accessed
 	if (DynMaterial)
 	{
+		// Get the color from the material
 		FLinearColor color;
 		DynMaterial->GetVectorParameterValue("BaseColor", color);
+
+		// Toogle the emissivity accoding to the hover state
 		float emissive = hover ? 0.3f : 0.f;
+
+		// Set the emissive color
 		color = color * emissive;
+
+		// Set the emissivity of the material
 		DynMaterial->SetVectorParameterValue("Emissive", color);
 	}
 	
@@ -72,23 +94,33 @@ void UAssemblyComponent::SetHover(bool hover)
 
 void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * TouchedComponent, FKey key)
 {
+	// If this component is already selected or if cannot be selected, do nothing
 	if (selected /*|| !stock->getCanBeSelected()*/)
 		return;
 
+	// If this stock has substocks, expand this component
 	if (!stock->getSubStock().empty())
 	{
+		// Expand this component
 		ExpandStock();
 	}
-	else
+	// Or, if this component is not focused
+	else if(borderStatus != FOCUS)
 	{
+		// If this component has a parent
 		if (parent)
 		{
+			// Access to the parent
 			IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
 
+			// Remove the focused child of the parent of this component
 			parentInterface->Execute_RemoveFocusChild(parent);
 
+			// Set this component as focused
 			parentInterface->Execute_SetFocusChild(parent, this);
 		}
+
+		// Set the borders as focused
 		SetBorders(FOCUS);
 	}
 }
@@ -111,26 +143,53 @@ void UAssemblyComponent::Hide()
 
 void UAssemblyComponent::Collapse_Implementation()
 {
-  for(UMeshComponent* substock : this->subStocks)
-  {
-    IMeshInterface* subStockInterface = Cast<IMeshInterface>(substock);
-    
-    if(subStockInterface->Execute_IsSelected(substock))
-      return;
-  }
-  
-  for (UMeshComponent* substock : this->subStocks)
-  {
-	  IMeshInterface* subStockInterface = Cast<IMeshInterface>(substock);
+	// If one of the subcomponent of this component is selected, stop the collapse
+	for (UMeshComponent* substock : this->subStocks)
+	{
+		// Access to the subcomponent
+		IMeshInterface* subStockInterface = Cast<IMeshInterface>(substock);
 
-	  subStockInterface->Execute_UnregisterStock(substock);
-  }
+		//If the subcomponent is selected, stop
+		if (subStockInterface->Execute_IsSelected(substock))
+		{
+			for (UMeshComponent* substock2 : this->subStocks)
+			{
+				// Access to the subcomponent
+				IMeshInterface* subStockInterface2 = Cast<IMeshInterface>(substock2);
+
+				if (!subStockInterface2->Execute_IsSelected(substock2))
+				{
+					subStockInterface2->Execute_ShowComponent(substock2);
+				}
+			}
+			return;
+		}
+	}
   
-  this->subStocks.Empty();
+	//If this is not the layer where the selected component is, remove all childs
+	for (UMeshComponent* substock : this->subStocks)
+	{
+		// Access to the subcomponent
+		IMeshInterface* subStockInterface = Cast<IMeshInterface>(substock);
+
+		// Remove it from the tree
+		subStockInterface->Execute_UnregisterStock(substock);
+	}
   
-  IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+	// Delete all the substocks from the list
+	this->subStocks.Empty();
   
-  parentInterface->Execute_Collapse(parent);
+	// Access to the parent
+	IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+  
+	// Collapse the parent
+	parentInterface->Execute_Collapse(parent);
+}
+
+void UAssemblyComponent::ShowComponent_Implementation()
+{
+	SetVisibility(true);
+	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 }
 
 void UAssemblyComponent::UnregisterStock_Implementation()
@@ -140,7 +199,10 @@ void UAssemblyComponent::UnregisterStock_Implementation()
 
 void UAssemblyComponent::SetBorders(FocusStatus status)
 {
+	// Set the border status
 	borderStatus = status;
+
+	//According to the status, set the borders
 	switch (status)
 	{
 	case NOTHING:
@@ -189,8 +251,10 @@ void UAssemblyComponent::SetFocusChild_Implementation(UMeshComponent * child)
 
 void UAssemblyComponent::ExpandStock()
 {
+	// Set this component as selected
 	selected = true;
 
+	// If 
 	if (parent)
 	{
 		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
@@ -203,7 +267,7 @@ void UAssemblyComponent::ExpandStock()
 
 		IMeshInterface* selectedStockInterface = Cast<IMeshInterface>(actor->selectedStock);
 		
-		selectedStockInterface->Collapse_Implementation();
+		selectedStockInterface->Execute_Collapse(actor->selectedStock);
 
 	}
 
@@ -223,7 +287,7 @@ void UAssemblyComponent::ExpandStock()
 			Vectorf3D pose = substock.getPosition().m_pos * 100;
 			Vectorf3D rotation = substock.getPosition().m_rot;
 			rotation = rotation * (180.f / M_PI);
-			subAssembly->SetRelativeLocationAndRotation(FVector(pose.x, pose.y, pose.z), FRotator(rotation.y, rotation.z, rotation.x), false, nullptr, ETeleportType::None);
+			subAssembly->SetRelativeLocationAndRotation(FVector(pose.x, -pose.y, pose.z), FRotator(rotation.y, -rotation.z, rotation.x), false, nullptr, ETeleportType::None);
 			subStocks.Add(subAssembly);
 		}
 	}
