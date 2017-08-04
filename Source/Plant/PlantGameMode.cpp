@@ -39,20 +39,10 @@ void APlantGameMode::StartPlay()
 		MyController->bEnableClickEvents = true;
 		MyController->bEnableMouseOverEvents = true;
 	}
-	
-	static Assemblies &assemblies = Assemblies::getInstance();
-	static Plant &plant = Plant::getInstance();
 
 	APlantGameMode* hInstance = this;
-	static Concurrency con([hInstance]() -> bool {
-		if (hInstance->clientPlant->requestAssemblies(assemblies))
-		{
-			return hInstance->clientPlant->requestPlant(plant);
-		}
-		else
-			return false;
-	}, std::bind(&APlantGameMode::initWorld,this) , 10000);
-
+	static Concurrency con([hInstance]() -> bool { return hInstance->clientPlant->requestPlant(); },
+		std::bind(&APlantGameMode::initWorld,this) , 500);
 }
 
 void APlantGameMode::initWorld()
@@ -75,6 +65,6 @@ void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 		APlantActor* plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
 		plantActor->init(&stock);
 		plantActor->FinishSpawning(SpawnLocAndRotation);
-		plantActor->SetActorLocationAndRotation(FVector(0, 0, 65), FRotator(0, 0, 0));
+		plantActor->SetActorLocationAndRotation(FVector(50, 50, 2), FRotator(0, 0, 90));
 	});
 }
