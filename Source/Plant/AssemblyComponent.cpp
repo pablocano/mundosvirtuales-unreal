@@ -79,6 +79,14 @@ void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * Touched
 	}
 	else
 	{
+		if (parent)
+		{
+			IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+
+			parentInterface->Execute_RemoveFocusChild(parent);
+
+			parentInterface->Execute_SetFocusChild(parent, this);
+		}
 		SetBorders(FOCUS);
 	}
 }
@@ -128,7 +136,7 @@ void UAssemblyComponent::UnregisterStock_Implementation()
 	this->UnregisterComponent();
 }
 
-void UAssemblyComponent::SetBorders(BorderStatus status)
+void UAssemblyComponent::SetBorders(FocusStatus status)
 {
 	borderStatus = status;
 	switch (status)
@@ -157,6 +165,26 @@ void UAssemblyComponent::Expand_Implementation()
 	ExpandStock();
 }
 
+void UAssemblyComponent::RemoveFocus_Implementation()
+{
+	SetBorders(NOTHING);
+}
+
+void UAssemblyComponent::RemoveFocusChild_Implementation()
+{
+	if (focusedChild)
+	{
+		IMeshInterface* focusedChildInterface = Cast<IMeshInterface>(focusedChild);
+
+		focusedChildInterface->Execute_RemoveFocus(focusedChild);
+	}
+}
+
+void UAssemblyComponent::SetFocusChild_Implementation(UMeshComponent * child)
+{
+	this->focusedChild = child;
+}
+
 void UAssemblyComponent::ExpandStock()
 {
 	selected = true;
@@ -172,7 +200,7 @@ void UAssemblyComponent::ExpandStock()
 	{
 
 		IMeshInterface* selectedStockInterface = Cast<IMeshInterface>(actor->selectedStock);
-
+		
 		selectedStockInterface->Collapse_Implementation();
 
 	}
@@ -190,6 +218,9 @@ void UAssemblyComponent::ExpandStock()
 			subAssembly->init(actor, this, &substock);
 			subAssembly->RegisterComponent();
 			subAssembly->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+			Vectorf3D pose = substock->getPosition().m_pos;
+			Vectorf3D rotation = substock->getPosition().m_rot;
+			subAssembly->SetRelativeLocationAndRotation(FVector(pose.x, pose.y, pose.z), FRotator(rotation.x, rotation.y, rotation.z), false, nullptr, ETeleportType::None);
 			subStocks.Add(subAssembly);
 		}
 	}
@@ -216,18 +247,6 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 		this->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
 		this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		this->SetStaticMesh(mesh);
-	}
-	else
-	{
-		if (!actor->comodinUsed && parent)
-		{
-			actor->comodinUsed = true;
-			FString defaultName = FString(TEXT("/Game/Proter/Planta-05102017_Bombas_y_tuberias__Estanque_600_CR_002.Planta-05102017_Bombas_y_tuberias__Estanque_600_CR_002"));
-			mesh = LoadObject<UStaticMesh>(NULL, *defaultName, NULL, LOAD_None, NULL);
-			this->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
-			this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-			this->SetStaticMesh(mesh);
-		}
 	}
 
 	if (material)

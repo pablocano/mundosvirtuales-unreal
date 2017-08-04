@@ -28,7 +28,5 @@ public:
   UMeshComponent* selectedStock;
   
   UAssemblyComponent* rootStock;
-
-  bool comodinUsed;
 	
 };
