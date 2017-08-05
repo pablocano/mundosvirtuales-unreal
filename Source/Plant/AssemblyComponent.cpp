@@ -149,19 +149,24 @@ void UAssemblyComponent::Collapse_Implementation()
 		// Access to the subcomponent
 		IMeshInterface* subStockInterface = Cast<IMeshInterface>(substock);
 
-		//If the subcomponent is selected, stop
+		// If the subcomponent is selected, it means that this layer must be shown
 		if (subStockInterface->Execute_IsSelected(substock))
 		{
+			// Iterate over all the substocks again
 			for (UMeshComponent* substock2 : this->subStocks)
 			{
 				// Access to the subcomponent
 				IMeshInterface* subStockInterface2 = Cast<IMeshInterface>(substock2);
 
+				// If the subcomponent is not selected
 				if (!subStockInterface2->Execute_IsSelected(substock2))
 				{
+					// Show the mesh of the subcomponent
 					subStockInterface2->Execute_ShowComponent(substock2);
 				}
 			}
+
+			// End the collapse call
 			return;
 		}
 	}
@@ -254,40 +259,70 @@ void UAssemblyComponent::ExpandStock()
 	// Set this component as selected
 	selected = true;
 
-	// If 
+	// If this component has a parent, remove the selection state of the parent
 	if (parent)
 	{
+		// Access to the parent
 		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
 
+		// Remove the selection status
 		parentInterface->Execute_SetSelected(parent, false);
 	}
 
+	// If there was a previous selected component, collapse the tree
 	if (actor->selectedStock)
 	{
+		// Access to the previous selected component
+		IMeshInterface* previousSelectedStockInterface = Cast<IMeshInterface>(actor->selectedStock);
 
-		IMeshInterface* selectedStockInterface = Cast<IMeshInterface>(actor->selectedStock);
+		// Remove the selection status of the component
+		previousSelectedStockInterface->Execute_SetSelected(actor->selectedStock, false);
 		
-		selectedStockInterface->Execute_Collapse(actor->selectedStock);
+		// Collapse the component
+		previousSelectedStockInterface->Execute_Collapse(actor->selectedStock);
 
 	}
 
+	// Set the selected component as this
 	actor->selectedStock = this;
 
+	// Hide the mesh of this componet
 	Hide();
 
+	// Expand this component in all its childs
 	for (StockPlant const& substock : stock->getSubStock())
 	{
+		// Expand the substock only if is enable
 		//if (substock.isEnable())
 		{
+			// Unique name for this component
 			FString name(substock.getstrHash().c_str());
+
+			// Create the subcomponent
 			UAssemblyComponent* subAssembly = NewObject<UAssemblyComponent>(this, FName(*name)); // text("") can be just about anything.
+			
+			// Init the subcomponent
 			subAssembly->init(actor, this, &substock);
+
+			// Register the subcomponent into the tree
 			subAssembly->RegisterComponent();
+
+			// Attach the subcomponent to the this component
 			subAssembly->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+
+			// Get the pose of the substock, and transform its measures to centimeter
 			Vectorf3D pose = substock.getPosition().m_pos * 100;
+
+			// Get the rotation of the substokc
 			Vectorf3D rotation = substock.getPosition().m_rot;
+
+			// Transform it to degrees
 			rotation = rotation * (180.f / M_PI);
+
+			// Set the relative position of the component
 			subAssembly->SetRelativeLocationAndRotation(FVector(pose.x, -pose.y, pose.z), FRotator(rotation.y, -rotation.z, rotation.x), false, nullptr, ETeleportType::None);
+			
+			// Add the substock into the substocks list
 			subStocks.Add(subAssembly);
 		}
 	}
