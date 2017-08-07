@@ -16,7 +16,7 @@ APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Su
 
 	GameStateClass = AMyGameState::StaticClass();
 
-	clientPlant = new ClientPlant("10.0.42.8");
+	clientPlant = new ClientPlant("10.31.13.100");
 	
 	clientPlant->start();
 }
