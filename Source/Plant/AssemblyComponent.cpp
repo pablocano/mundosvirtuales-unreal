@@ -195,6 +195,7 @@ void UAssemblyComponent::ShowComponent_Implementation()
 {
 	SetVisibility(true);
 	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	SetBorders(NOTHING);
 }
 
 void UAssemblyComponent::UnregisterStock_Implementation()
@@ -330,25 +331,35 @@ void UAssemblyComponent::ExpandStock()
 
 void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentComponent, StockPlant const *stockEntry)
 {
+	// Initialization of the pointers
 	this->actor = actorPointer;
 	this->parent = parentComponent;
 	this->stock = stockEntry;
 	this->assembly = &this->stock->getAssembly();
 
+	// Get the model name of the stock
 	std::string modelname = assembly->getModel().getPathModel();
 
+	// Erase the file type
 	modelname.erase(modelname.end() - 4, modelname.end());
 
+	// Create the model name for unreal
 	modelname = "/Game/CashSorter/" + modelname + "." + modelname;
 
+	// Transform the name into a FString
 	FString meshName = FString(modelname.c_str());
 
+	// Create the name of the material
 	std::string materialStd = assembly->getModel().getColor() + assembly->getModel().getMaterial();
 	materialStd = "/Game/Materials/ProterMaterials/" + materialStd + "." + materialStd;
 
+	// Transform the name into a Fstring
 	FString materialName = FString(materialStd.c_str());
 
+	// Load the mesh from the library
 	mesh = LoadObject<UStaticMesh>(NULL, *meshName, NULL, LOAD_None, NULL);
+
+	// Load the material from the library
 	material = LoadObject<UMaterialInterface>(NULL, *materialName, NULL, LOAD_None, NULL);
 
 	if (mesh)
