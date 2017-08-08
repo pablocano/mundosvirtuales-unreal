@@ -147,7 +147,7 @@ public:
 	/// <summary>
 	/// A dynamic version of the material, that can be changed on runtime
 	/// </summary>
-	UMaterialInstanceDynamic* DynMaterial;
+	TArray<UMaterialInstanceDynamic*> DynMaterials;
 
 	/// <summary>
 	/// A pointer to the focused child of this componet, if it has one. Null otherwise

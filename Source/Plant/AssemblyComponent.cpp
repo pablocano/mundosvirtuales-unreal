@@ -74,20 +74,20 @@ void UAssemblyComponent::CustomOnEndMouseOver(UPrimitiveComponent * TouchedCompo
 void UAssemblyComponent::SetHover(bool hover)
 {
 	// If the material can be accessed
-	if (DynMaterial)
+	for(int i = 0; i < DynMaterials.Num(); i++)
 	{
 		// Get the color from the material
 		FLinearColor color;
-		DynMaterial->GetVectorParameterValue("BaseColor", color);
+		DynMaterials[i]->GetVectorParameterValue("BaseColor", color);
 
 		// Toogle the emissivity accoding to the hover state
-		float emissive = hover ? 0.3f : 0.f;
+		float emissive = hover ? 0.5f : 0.f;
 
 		// Set the emissive color
 		color = color * emissive;
 
 		// Set the emissivity of the material
-		DynMaterial->SetVectorParameterValue("Emissive", color);
+		DynMaterials[i]->SetVectorParameterValue("Emissive", color);
 	}
 	
 }
@@ -196,6 +196,23 @@ void UAssemblyComponent::ShowComponent_Implementation()
 	SetVisibility(true);
 	SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	SetBorders(NOTHING);
+
+	// If the material can be accessed
+	for (int i = 0; i < DynMaterials.Num(); i++)
+	{
+		// Get the color from the material
+		FLinearColor color;
+		DynMaterials[i]->GetVectorParameterValue("BaseColor", color);
+
+		// Toogle the emissivity accoding to the hover state
+		float emissive = 0.f;
+
+		// Set the emissive color
+		color = color * emissive;
+
+		// Set the emissivity of the material
+		DynMaterials[i]->SetVectorParameterValue("Emissive", color);
+	}
 }
 
 void UAssemblyComponent::UnregisterStock_Implementation()
@@ -350,8 +367,7 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 	FString meshName = FString(modelname.c_str());
 
 	// Create the name of the material
-	std::string materialStd = assembly->getModel().getColor() + assembly->getModel().getMaterial();
-	materialStd = "/Game/Materials/ProterMaterials/" + materialStd + "." + materialStd;
+	std::string materialStd = "/Game/Materials/ProterMaterials/BlueMetal.BlueMetal";
 
 	// Transform the name into a Fstring
 	FString materialName = FString(materialStd.c_str());
@@ -362,18 +378,25 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 	// Load the material from the library
 	material = LoadObject<UMaterialInterface>(NULL, *materialName, NULL, LOAD_None, NULL);
 
+	FString asdfName(std::string("/Game/Materials/ProterMaterials/Metal.Metal").c_str());
+	UMaterial *asdf = LoadObject<UMaterial>(NULL, *asdfName, NULL, LOAD_None, NULL);
+
 	if (mesh)
 	{
 		this->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
 		this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 		this->SetStaticMesh(mesh);
-	}
 
-	if (material)
-	{
-		DynMaterial = UMaterialInstanceDynamic::Create(material, this);
-		DynMaterial->SetScalarParameterValue("Emissive", 0.f);
-		this->SetMaterial(0, DynMaterial);
+		for (int i = 0; i < this->GetNumMaterials(); i++)
+		{
+			UMaterialInterface *baseMaterial = this->GetMaterial(i);
+
+			UMaterialInstanceDynamic *dynMaterial = CreateAndSetMaterialInstanceDynamic(i);
+
+			this->SetMaterial(i, dynMaterial);
+
+			DynMaterials.Add(dynMaterial);
+		}
 	}
 
 	this->OnBeginCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseOver);

@@ -42,7 +42,7 @@ void APlantGameMode::StartPlay()
 
 	APlantGameMode* hInstance = this;
 	static Concurrency con([hInstance]() -> bool { return hInstance->clientPlant->requestPlant(); },
-		std::bind(&APlantGameMode::initWorld,this) , 500);
+		std::bind(&APlantGameMode::initWorld,this) , 5000);
 }
 
 void APlantGameMode::initWorld()
