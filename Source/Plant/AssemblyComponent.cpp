@@ -3,12 +3,14 @@
 #include "Plant.h"
 #include "PlantActor.h"
 #include "AssemblyComponent.h"
+#include "WidgetInfoComponent.h"
 
 #define M_PI           3.14159265358979323846  /* pi */
 
 UAssemblyComponent::UAssemblyComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), selected(false)
+	: Super(ObjectInitializer), selected(false), Space(EWidgetSpace::World), sizeWidget(1920, 1080), widgetInfoComponent(nullptr)
 {
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UAssemblyComponent::CustomOnBeginMouseOver(UPrimitiveComponent * TouchedComponent)
@@ -378,23 +380,28 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 	// Load the material from the library
 	material = LoadObject<UMaterialInterface>(NULL, *materialName, NULL, LOAD_None, NULL);
 
-	FString asdfName(std::string("/Game/Materials/ProterMaterials/Metal.Metal").c_str());
-	UMaterial *asdf = LoadObject<UMaterial>(NULL, *asdfName, NULL, LOAD_None, NULL);
-
+	// If the mesh was loaded
 	if (mesh)
 	{
+		// Set the collitions as query only
 		this->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
+
+		// Block all chanenels
 		this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+		// Set the mesh of this component
 		this->SetStaticMesh(mesh);
 
+		// Set all the materials of this component as a dynamic material
 		for (int i = 0; i < this->GetNumMaterials(); i++)
 		{
-			UMaterialInterface *baseMaterial = this->GetMaterial(i);
-
+			// Create a dynamic material using the base material of this slpt
 			UMaterialInstanceDynamic *dynMaterial = CreateAndSetMaterialInstanceDynamic(i);
 
+			// Set the material of this slot with the dynamic material
 			this->SetMaterial(i, dynMaterial);
 
+			// Add a pointer of this material in a list
 			DynMaterials.Add(dynMaterial);
 		}
 	}
@@ -404,6 +411,97 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->OnClicked.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseClicked);
 
 	this->SetCustomDepthStencilValue(254);
+
+	if (!this->stock->getCanShowInfo())
+	{
+		// Generate Widget Info
+		std::string widgetHashName = this->stock->getstrHash() + "widget";
+
+		FString widgetName = widgetHashName.c_str();
+
+		widgetInfoComponent = NewObject<UWidgetInfoComponent>(this, FName(*widgetName));
+		widgetInfoComponent->SetVisibility(true);
+		widgetInfoComponent->SetOnlyOwnerSee(false);
+		widgetInfoComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+		widgetInfoComponent->SetDrawSize(sizeWidget);
+		widgetInfoComponent->SetWorldLocation(FVector(0.f, 0.f, 0.f));
+		widgetInfoComponent->SetWorldRotation(FRotator(90.f, 90.f, 0.f));
+		widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+		widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
+		widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+		widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .95f));
+		widgetInfoComponent->SetBlendMode(EWidgetBlendMode::Transparent);
+		widgetInfoComponent->SetWidgetSpace(Space);
+		widgetInfoComponent->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+
+		if (Space == EWidgetSpace::World)
+		{
+			widgetInfoComponent->SetTwoSided(true);
+			SetBoolUProperty(widgetInfoComponent, TEXT("bReceiveHardwareInput"), true);  // Enable click
+		}
+
+		widgetInfoComponent->RegisterComponent();
+	}
+	else
+		widgetInfoComponent = nullptr;
+}
+
+// Called when the game starts or when spawned
+void UAssemblyComponent::BeginPlay()
+{
+
+	if (widgetInfoComponent)
+	{
+		widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
+
+		widgetInfo->SetStock(this->stock);
+
+		USensor* sensor1 = NewObject<USensor>();
+		sensor1->SetNameSensor("Temperatura");
+		sensor1->SetTypeSensor(ETypeSensor::Temperature);
+		Sensors.Add(sensor1);
+
+		USensor* sensor2 = NewObject<USensor>();
+		sensor2->SetNameSensor("Presion");
+		sensor2->SetTypeSensor(ETypeSensor::Pressure);
+		Sensors.Add(sensor2);
+
+		USensor* sensor3 = NewObject<USensor>();
+		sensor3->SetNameSensor("Flujo");
+		sensor3->SetTypeSensor(ETypeSensor::Flow);
+		Sensors.Add(sensor3);
+
+		widgetInfo->SetSensors(Sensors);
+		widgetInfoComponent->SetWidget(widgetInfo);
+		widgetInfo->buttonOk->OnClicked.AddDynamic(this, &UAssemblyComponent::OnClickButtonOk);
+		widgetInfoComponent->OnClicked.AddDynamic(this, &UAssemblyComponent::OnClickWidgetComponent);
+		widgetInfoComponent->DisableWidget();
+	}
+}
+
+// Called every frame
+void UAssemblyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)
+{
+
+	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
+	{
+		widgetInfo->UpdateWidgetSensors(DeltaTime);
+	}
+}
+
+void UAssemblyComponent::OnClickButtonOk()
+{
+	//setSelect(false);
+}
+
+void UAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click on WidgetComponent"));
+	}
 }
 
 

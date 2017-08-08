@@ -31,13 +31,15 @@ void APlantActor::init(const StockPlant* stock)
   USceneComponent* root = NewObject<USceneComponent>(this, TEXT("RootComponent"));
   this->SetRootComponent(root);
   
-  FString name(stock->getSN().c_str());
+  FString name(stock->getstrHash().c_str());
   
   rootStock = NewObject<UAssemblyComponent>(this, FName(*name));
     
   rootStock->init(this, nullptr, stock);
   rootStock->RegisterComponent();
   rootStock->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+  //rootStock->BeginPlay();
 
   rootStock->ExpandStock();
 }

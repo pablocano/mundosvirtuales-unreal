@@ -3,11 +3,15 @@
 #pragma once
 
 #include "Components/StaticMeshComponent.h"
+#include "Components/WidgetComponent.h"
+#include "MyUserWidgetInfo.h"
 #include "MeshInterface.h"
 #include "plant/StockPlant.h"
 #include "AssemblyComponent.generated.h"
 
 class APlantActor;
+class UWidgetInfoComponent;
+class UMyUserWidgetInfo;
 /**
  * 
  */
@@ -15,6 +19,15 @@ UCLASS()
 class PLANT_API UAssemblyComponent : public UStaticMeshComponent, public IMeshInterface
 {
 public:
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
+	UWidgetInfoComponent* widgetInfoComponent;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
+	UMyUserWidgetInfo* widgetInfo;
+
+	UPROPERTY()
+	TArray<USensor*> Sensors;
   
 	/// <summary>
 	/// The posibles focus status
@@ -117,6 +130,10 @@ public:
 	/// <param name="stock">The stock of which this component is made</param>
 	void init(APlantActor* actor, UMeshComponent* parentComponent, StockPlant const* stock);
 
+	void BeginPlay();
+
+	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
+
 	/// <summary>
 	/// Set this component as hover, by making it glow
 	/// </summary>
@@ -188,4 +205,19 @@ public:
 	/// The focus status of this component
 	/// </summary>
 	FocusStatus borderStatus;
+
+protected:
+
+	UFUNCTION()
+	void OnClickButtonOk();
+
+	UFUNCTION()
+	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
+
+private:
+
+	UPROPERTY(EditAnywhere, Category = UserInterface)
+	EWidgetSpace Space;
+
+	FVector2D sizeWidget;
 };
