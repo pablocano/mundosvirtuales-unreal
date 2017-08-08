@@ -8,7 +8,7 @@
 #define M_PI           3.14159265358979323846  /* pi */
 
 UAssemblyComponent::UAssemblyComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), selected(false), Space(EWidgetSpace::World), sizeWidget(1920, 1080), widgetInfoComponent(nullptr)
+	: Super(ObjectInitializer), selected(false), Space(EWidgetSpace::World), sizeWidget(1920, 1080), widgetInfoComponent(nullptr), pose()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -135,6 +135,14 @@ bool UAssemblyComponent::IsSelected_Implementation()
 void UAssemblyComponent::SetSelected_Implementation(bool select)
 {
 	selected = select;
+
+	if(widgetInfoComponent)
+	{
+		if (selected)
+			widgetInfoComponent->EnableWidget();
+		else
+			widgetInfoComponent->DisableWidget();
+	}
 }
 
 void UAssemblyComponent::Hide()
@@ -182,6 +190,10 @@ void UAssemblyComponent::Collapse_Implementation()
 		// Remove it from the tree
 		subStockInterface->Execute_UnregisterStock(substock);
 	}
+
+	// Disable the widget of this component
+	if (widgetInfoComponent)
+		widgetInfoComponent->DisableWidget();
   
 	// Delete all the substocks from the list
 	this->subStocks.Empty();
@@ -219,6 +231,12 @@ void UAssemblyComponent::ShowComponent_Implementation()
 
 void UAssemblyComponent::UnregisterStock_Implementation()
 {
+	if (widgetInfoComponent)
+	{
+		widgetInfoComponent->DisableWidget();
+		widgetInfoComponent->UnregisterComponent();
+	}
+
 	this->UnregisterComponent();
 }
 
@@ -240,6 +258,8 @@ void UAssemblyComponent::SetBorders(FocusStatus status)
 		break;
 
 	case FOCUS:
+		if (widgetInfoComponent)
+			widgetInfoComponent->EnableWidget();
 		this->SetCustomDepthStencilValue(254);
 		this->SetRenderCustomDepth(true);
 		break;
@@ -257,6 +277,9 @@ void UAssemblyComponent::Expand_Implementation()
 void UAssemblyComponent::RemoveFocus_Implementation()
 {
 	SetBorders(NOTHING);
+
+	if (widgetInfoComponent)
+		widgetInfoComponent->DisableWidget();
 }
 
 void UAssemblyComponent::RemoveFocusChild_Implementation()
@@ -267,6 +290,8 @@ void UAssemblyComponent::RemoveFocusChild_Implementation()
 
 		focusedChildInterface->Execute_RemoveFocus(focusedChild);
 	}
+
+	widgetInfoComponent->DisableWidget();
 }
 
 void UAssemblyComponent::SetFocusChild_Implementation(UMeshComponent * child)
@@ -274,10 +299,29 @@ void UAssemblyComponent::SetFocusChild_Implementation(UMeshComponent * child)
 	this->focusedChild = child;
 }
 
+FTransform UAssemblyComponent::GetGlobalPosition_Implementation()
+{
+	if (parent)
+	{
+		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+
+		return pose * parentInterface->Execute_GetGlobalPosition(parent);
+	}
+	else 
+	{
+		FTransform actorTransform = actor->GetActorTransform();
+		return pose* actorTransform;
+	}
+		
+}
+
 void UAssemblyComponent::ExpandStock()
 {
 	// Set this component as selected
 	selected = true;
+
+	if (widgetInfoComponent)
+		widgetInfoComponent->EnableWidget();
 
 	// If this component has a parent, remove the selection state of the parent
 	if (parent)
@@ -330,17 +374,8 @@ void UAssemblyComponent::ExpandStock()
 			// Attach the subcomponent to the this component
 			subAssembly->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
-			// Get the pose of the substock, and transform its measures to centimeter
-			Vectorf3D pose = substock.getPosition().m_pos * 100;
-
-			// Get the rotation of the substokc
-			Vectorf3D rotation = substock.getPosition().m_rot;
-
-			// Transform it to degrees
-			rotation = rotation * (180.f / M_PI);
-
 			// Set the relative position of the component
-			subAssembly->SetRelativeLocationAndRotation(FVector(pose.x, -pose.y, pose.z), FRotator(rotation.y, -rotation.z, rotation.x), false, nullptr, ETeleportType::None);
+			subAssembly->SetRelativeLocationAndRotation(subAssembly->pose.GetTranslationV(), subAssembly->pose.GetRotationV(), false, nullptr, ETeleportType::None);
 			
 			// Add the substock into the substocks list
 			subStocks.Add(subAssembly);
@@ -355,6 +390,18 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->parent = parentComponent;
 	this->stock = stockEntry;
 	this->assembly = &this->stock->getAssembly();
+
+	// Get the pose of the stock, and transform its measures to centimeter
+	Vectorf3D position = stock->getPosition().m_pos * 100;
+
+	// Get the rotation of the substokc
+	Vectorf3D rotation = stock->getPosition().m_rot;
+
+	// Transform it to degrees
+	rotation = rotation * (180.f / M_PI);
+
+	// Set the pose of this component
+	pose = FTransform(FRotator(rotation.y, -rotation.z, rotation.x), FVector(position.x, -position.y, position.z));
 
 	// Get the model name of the stock
 	std::string modelname = assembly->getModel().getPathModel();
@@ -412,7 +459,7 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 
 	this->SetCustomDepthStencilValue(254);
 
-	if (!this->stock->getCanShowInfo())
+	if (this->stock->getCanShowInfo())
 	{
 		// Generate Widget Info
 		std::string widgetHashName = this->stock->getstrHash() + "widget";
@@ -422,19 +469,16 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 		widgetInfoComponent = NewObject<UWidgetInfoComponent>(this, FName(*widgetName));
 		widgetInfoComponent->SetVisibility(true);
 		widgetInfoComponent->SetOnlyOwnerSee(false);
-		widgetInfoComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+		
+		widgetInfoComponent->AttachToComponent(this, FAttachmentTransformRules::KeepWorldTransform);
 		widgetInfoComponent->SetDrawSize(sizeWidget);
-		widgetInfoComponent->SetWorldLocation(FVector(0.f, 0.f, 0.f));
-		widgetInfoComponent->SetWorldRotation(FRotator(90.f, 90.f, 0.f));
 		widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 		widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-		widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Block);
-		widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 		widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .95f));
 		widgetInfoComponent->SetBlendMode(EWidgetBlendMode::Transparent);
 		widgetInfoComponent->SetWidgetSpace(Space);
-		widgetInfoComponent->SetRelativeScale3D(FVector(0.1f, 0.1f, 0.1f));
+		widgetInfoComponent->SetRelativeScale3D(FVector(0.03f, 0.03f, 0.03f));
 
 		if (Space == EWidgetSpace::World)
 		{
@@ -451,9 +495,21 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 // Called when the game starts or when spawned
 void UAssemblyComponent::BeginPlay()
 {
-
 	if (widgetInfoComponent)
 	{
+		widgetInfoComponent->bAbsoluteLocation = 1;
+		widgetInfoComponent->bAbsoluteRotation = 1;
+
+		FTransform componentTransform = GetGlobalPosition_Implementation();
+
+		FVector componentPosition = componentTransform.GetTranslationV();
+		componentPosition.Z = 150;
+
+		FRotator componentRotation(componentTransform.GetRotationV());
+
+		widgetInfoComponent->SetWorldLocation(componentPosition);
+		widgetInfoComponent->SetWorldRotation(FRotator(0.f, componentRotation.Yaw + 90.f, 0.f));
+
 		widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
 
 		widgetInfo->SetStock(this->stock);

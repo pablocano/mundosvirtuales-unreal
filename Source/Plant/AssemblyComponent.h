@@ -118,6 +118,12 @@ public:
 	virtual void ShowComponent_Implementation() override;
 
 	/// <summary>
+	/// Get the global position of this component, by concatenation of all its parents
+	/// </summary>
+	UFUNCTION()
+	virtual FTransform GetGlobalPosition_Implementation() override;
+
+	/// <summary>
 	/// Expand the current stock to expose the next layer
 	/// </summary>
 	void ExpandStock();
@@ -205,6 +211,11 @@ public:
 	/// The focus status of this component
 	/// </summary>
 	FocusStatus borderStatus;
+
+	/// <summary>
+	/// The pose of this component, relative to the parent component
+	/// </summary>
+	FTransform pose;
 
 protected:
 

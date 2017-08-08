@@ -47,4 +47,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	void ShowComponent();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	FTransform GetGlobalPosition();
 };
