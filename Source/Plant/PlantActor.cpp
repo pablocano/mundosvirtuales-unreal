@@ -39,8 +39,6 @@ void APlantActor::init(const StockPlant* stock)
   rootStock->RegisterComponent();
   rootStock->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
-  //rootStock->BeginPlay();
-
   rootStock->ExpandStock();
 }
 

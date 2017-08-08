@@ -29,7 +29,7 @@ void UAssemblyComponent::CustomOnBeginMouseOver(UPrimitiveComponent * TouchedCom
 		if (parentInterface->Execute_IsSelected(parent))
 		{
 			// If this componet is not already selected
-			if (!selected /*&& stock->getCanBeSelected()*/)
+			if (!selected && stock->getCanBeSelected())
 			{
 				// Set borders as hover
 				SetBorders(HOVER);
@@ -39,7 +39,7 @@ void UAssemblyComponent::CustomOnBeginMouseOver(UPrimitiveComponent * TouchedCom
 	}
 
 	// If this component is not selected, set hover
-	if (!selected /*&& stock->getCanBeSelected()*/)
+	if (!selected && stock->getCanBeSelected())
 		SetHover();
 }
 
@@ -59,7 +59,7 @@ void UAssemblyComponent::CustomOnEndMouseOver(UPrimitiveComponent * TouchedCompo
 		if (parentInterface->Execute_IsSelected(parent))
 		{
 			// If this component is not already selected
-			if (!selected /*&& stock->getCanBeSelected()*/)
+			if (!selected && stock->getCanBeSelected())
 			{
 				// Set borders to nothing
 				SetBorders(NOTHING);
@@ -69,7 +69,7 @@ void UAssemblyComponent::CustomOnEndMouseOver(UPrimitiveComponent * TouchedCompo
 	}
 
 	// If this component is not selected, remove hover
-	if (!selected /*&& stock->getCanBeSelected()*/)
+	if (!selected && stock->getCanBeSelected())
 		SetHover(false);
 }
 
@@ -97,7 +97,7 @@ void UAssemblyComponent::SetHover(bool hover)
 void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * TouchedComponent, FKey key)
 {
 	// If this component is already selected or if cannot be selected, do nothing
-	if (selected /*|| !stock->getCanBeSelected()*/)
+	if (selected || !stock->getCanBeSelected())
 		return;
 
 	// If this stock has substocks, expand this component
@@ -115,11 +115,38 @@ void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * Touched
 			// Access to the parent
 			IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
 
-			// Remove the focused child of the parent of this component
-			parentInterface->Execute_RemoveFocusChild(parent);
+			if (parentInterface->Execute_IsSelected(parent))
+			{
+				// Remove the focused child of the parent of this component
+				parentInterface->Execute_RemoveFocusChild(parent);
 
-			// Set this component as focused
-			parentInterface->Execute_SetFocusChild(parent, this);
+				// Set this component as focused
+				parentInterface->Execute_SetFocusChild(parent, this);
+			}
+			else
+			{
+				parentInterface->Execute_SetSelected(parent, true);
+
+				if (actor->selectedStock)
+				{
+					// Access to the previous selected component
+					IMeshInterface* previousSelectedStockInterface = Cast<IMeshInterface>(actor->selectedStock);
+
+					// Remove the selection status of the component
+					previousSelectedStockInterface->Execute_SetSelected(actor->selectedStock, false);
+
+					// Collapse the component
+					previousSelectedStockInterface->Execute_Collapse(actor->selectedStock);
+				}
+
+				actor->selectedStock = parent;
+
+				// Remove the focused child of the parent of this component
+				parentInterface->Execute_RemoveFocusChild(parent);
+
+				// Set this component as focused
+				parentInterface->Execute_SetFocusChild(parent, this);
+			}
 		}
 
 		// Set the borders as focused
@@ -139,7 +166,10 @@ void UAssemblyComponent::SetSelected_Implementation(bool select)
 	if(widgetInfoComponent)
 	{
 		if (selected)
+		{
 			widgetInfoComponent->EnableWidget();
+			UpdateWidgetPosition();
+		}
 		else
 			widgetInfoComponent->DisableWidget();
 	}
@@ -153,6 +183,21 @@ void UAssemblyComponent::Hide()
 
 void UAssemblyComponent::Collapse_Implementation()
 {
+	if (selected)
+	{
+		// Iterate over all the substocks again
+		for (UMeshComponent* substock : this->subStocks)
+		{
+			// Access to the subcomponent
+			IMeshInterface* subStockInterface = Cast<IMeshInterface>(substock);
+
+			// Show the mesh of the subcomponent
+			subStockInterface->Execute_ShowComponent(substock);
+		}
+
+		return;
+	}
+
 	// If one of the subcomponent of this component is selected, stop the collapse
 	for (UMeshComponent* substock : this->subStocks)
 	{
@@ -192,7 +237,7 @@ void UAssemblyComponent::Collapse_Implementation()
 	}
 
 	// Disable the widget of this component
-	if (widgetInfoComponent)
+	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
 		widgetInfoComponent->DisableWidget();
   
 	// Delete all the substocks from the list
@@ -259,7 +304,10 @@ void UAssemblyComponent::SetBorders(FocusStatus status)
 
 	case FOCUS:
 		if (widgetInfoComponent)
+		{
 			widgetInfoComponent->EnableWidget();
+			UpdateWidgetPosition();
+		}
 		this->SetCustomDepthStencilValue(254);
 		this->SetRenderCustomDepth(true);
 		break;
@@ -278,7 +326,7 @@ void UAssemblyComponent::RemoveFocus_Implementation()
 {
 	SetBorders(NOTHING);
 
-	if (widgetInfoComponent)
+	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
 		widgetInfoComponent->DisableWidget();
 }
 
@@ -291,7 +339,8 @@ void UAssemblyComponent::RemoveFocusChild_Implementation()
 		focusedChildInterface->Execute_RemoveFocus(focusedChild);
 	}
 
-	widgetInfoComponent->DisableWidget();
+	if(widgetInfoComponent && widgetInfoComponent->IsVisible())
+		widgetInfoComponent->DisableWidget();
 }
 
 void UAssemblyComponent::SetFocusChild_Implementation(UMeshComponent * child)
@@ -321,7 +370,10 @@ void UAssemblyComponent::ExpandStock()
 	selected = true;
 
 	if (widgetInfoComponent)
+	{
 		widgetInfoComponent->EnableWidget();
+		UpdateWidgetPosition();
+	}
 
 	// If this component has a parent, remove the selection state of the parent
 	if (parent)
@@ -341,6 +393,9 @@ void UAssemblyComponent::ExpandStock()
 
 		// Remove the selection status of the component
 		previousSelectedStockInterface->Execute_SetSelected(actor->selectedStock, false);
+
+		// Remove its focus child, if it has one
+		previousSelectedStockInterface->Execute_RemoveFocusChild(actor->selectedStock);
 		
 		// Collapse the component
 		previousSelectedStockInterface->Execute_Collapse(actor->selectedStock);
@@ -357,7 +412,7 @@ void UAssemblyComponent::ExpandStock()
 	for (StockPlant const& substock : stock->getSubStock())
 	{
 		// Expand the substock only if is enable
-		//if (substock.isEnable())
+		if (substock.isEnable())
 		{
 			// Unique name for this component
 			FString name(substock.getstrHash().c_str());
@@ -497,19 +552,6 @@ void UAssemblyComponent::BeginPlay()
 {
 	if (widgetInfoComponent)
 	{
-		widgetInfoComponent->bAbsoluteLocation = 1;
-		widgetInfoComponent->bAbsoluteRotation = 1;
-
-		FTransform componentTransform = GetGlobalPosition_Implementation();
-
-		FVector componentPosition = componentTransform.GetTranslationV();
-		componentPosition.Z = 150;
-
-		FRotator componentRotation(componentTransform.GetRotationV());
-
-		widgetInfoComponent->SetWorldLocation(componentPosition);
-		widgetInfoComponent->SetWorldRotation(FRotator(0.f, componentRotation.Yaw + 90.f, 0.f));
-
 		widgetInfo = NewObject<UMyUserWidgetInfo>(this, UMyUserWidgetInfo::StaticClass());
 
 		widgetInfo->SetStock(this->stock);
@@ -543,13 +585,65 @@ void UAssemblyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
 	{
+		FVector cameraLocation = GEngine->GetFirstLocalPlayerController(GetWorld())->PlayerCameraManager->GetCameraLocation();
+
+		FVector widgetLocation = GetGlobalPosition_Implementation().GetLocation();
+
+		float angle = (cameraLocation - widgetLocation).Rotation().Yaw;
+		
+		widgetInfoComponent->SetWorldRotation(FRotator(0.f, angle , 0.f));
 		widgetInfo->UpdateWidgetSensors(DeltaTime);
 	}
 }
 
+void UAssemblyComponent::UpdateWidgetPosition()
+{
+	widgetInfoComponent->bAbsoluteLocation = 1;
+	widgetInfoComponent->bAbsoluteRotation = 1;
+
+	FTransform componentTransform = GetGlobalPosition_Implementation();
+
+	FVector componentPosition = componentTransform.GetTranslationV();
+	componentPosition.Z = 160;
+
+	widgetInfoComponent->SetWorldLocation(componentPosition);
+	widgetInfoComponent->SetWorldRotation(FRotator(0.f, 0.f, 0.f));
+}
+
 void UAssemblyComponent::OnClickButtonOk()
 {
-	//setSelect(false);
+	if (selected && parent)
+	{
+		// Remove the selection
+		selected = false;
+
+		// Access to the parent
+		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+
+		// Select the parent
+		parentInterface->Execute_SetSelected(parent, true);
+
+		// Remove this component as selected, and set the parent
+		actor->selectedStock = parent;
+
+		// Disable the parent widget
+		parentInterface->Execute_RemoveFocusChild(parent);
+
+		// Collapse this component
+		this->Collapse_Implementation();
+
+		return;
+	}
+	else if(parent)
+	{
+		// Access to the parent
+		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
+
+		// Disable the parent widget
+		parentInterface->Execute_RemoveFocusChild(parent);
+	}
+	
+
 }
 
 void UAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey)

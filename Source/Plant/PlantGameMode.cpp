@@ -65,6 +65,6 @@ void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 		APlantActor* plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
 		plantActor->init(&stock);
 		plantActor->FinishSpawning(SpawnLocAndRotation);
-		plantActor->SetActorLocationAndRotation(FVector(0, 0, 72.5), FRotator(0, 0, 0));
+		plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
 	});
 }

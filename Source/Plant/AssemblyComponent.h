@@ -140,6 +140,8 @@ public:
 
 	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
 
+	void UpdateWidgetPosition();
+
 	/// <summary>
 	/// Set this component as hover, by making it glow
 	/// </summary>
