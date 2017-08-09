@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GameFramework/GameState.h"
-#include "MyActor.h"
+#include "MeshInterface.h"
 #include "MyGameState.generated.h"
 
 
@@ -12,11 +12,11 @@ class PLANT_API AMyGameState : public AGameState
 {
 	GENERATED_UCLASS_BODY()
 	
-	AMyActor* selectedMyActor;
+	UMeshInterface* selectedComponent;
 
 public:
-	bool isSeletedMyActor(AMyActor* actor = nullptr);
+	bool isSeletedMyActor(UMeshInterface* actor = nullptr);
 
-	bool setSelectedMyActor(AMyActor* actor);
+	bool setSelectedMyActor(UMeshInterface* actor);
 	
 };

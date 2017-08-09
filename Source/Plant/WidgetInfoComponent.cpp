@@ -8,7 +8,12 @@ void UWidgetInfoComponent::SetWidget(UUserWidget* InWidget)
 {
 	Super::SetWidget(InWidget);
 
-	((UMyUserWidgetInfo*) InWidget)->SetParentComponent(this);
+	UMyUserWidgetInfo* widget = Cast<UMyUserWidgetInfo>(InWidget);
+
+	if (widget)
+	{
+		widget->SetParentComponent(this);
+	}
 }
 
 void UWidgetInfoComponent::EnableWidget()

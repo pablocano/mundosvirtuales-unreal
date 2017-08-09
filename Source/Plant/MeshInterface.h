@@ -22,8 +22,35 @@ class PLANT_API IMeshInterface
 public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
-	bool setFocus(bool focus);
+	void Collapse();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
-	bool setEmissive(float emissive);
+	bool IsSelected();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void SetSelected(bool select);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void UnregisterStock();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void Expand();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void RemoveFocus();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void RemoveFocusChild();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void SetFocusChild(UMeshComponent* child);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void ShowComponent();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	FTransform GetGlobalPosition();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void ToggleConstructionMode();
 };

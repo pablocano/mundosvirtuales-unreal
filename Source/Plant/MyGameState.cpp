@@ -3,24 +3,28 @@
 #include "Plant.h"
 #include "MyGameState.h"
 
-AMyGameState::AMyGameState(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), selectedMyActor(nullptr)
+AMyGameState::AMyGameState(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), selectedComponent(nullptr)
 {
 }
 
-bool AMyGameState::isSeletedMyActor(AMyActor* actor)
+bool AMyGameState::isSeletedMyActor(UMeshInterface* actor)
 {
 	if (actor == nullptr)
-		return selectedMyActor != nullptr;
+		return selectedComponent != nullptr;
 	else
-		return selectedMyActor == actor;
+		return selectedComponent == actor;
 }
 
-bool AMyGameState::setSelectedMyActor(AMyActor* actor)
+bool AMyGameState::setSelectedMyActor(UMeshInterface* actor)
 {
-	if (selectedMyActor != nullptr)
-		selectedMyActor->setSelect(false);
+	if (selectedComponent != nullptr)
+	{
+		IMeshInterface* componentInterface = Cast<IMeshInterface>(selectedComponent);
 
-	selectedMyActor = actor;
+		componentInterface->Execute_SetSelected(selectedComponent, false);
+	}
+
+	selectedComponent = actor;
 	
 	return true;
 }

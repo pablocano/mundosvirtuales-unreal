@@ -2,11 +2,13 @@
 
 #include "Plant.h"
 #include "PlantGameMode.h"
-#include "MyActor.h"
+#include "PlantActor.h"
 #include "MyPawn.h"
 #include "MyGameState.h"
 #include "Async.h"
+#include "ClientPlant.h"
 #include "utils/Concurrency/Concurrency.h" 
+#include <functional>
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -14,14 +16,13 @@ APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Su
 
 	GameStateClass = AMyGameState::StaticClass();
 
-	clientPlant = new ClientPlant("10.0.42.8");
+	clientPlant = new ClientPlant("10.31.13.100");
 	
-	clientPlant->start(); // Starting response packet.
+	clientPlant->start();
 }
 
 APlantGameMode::~APlantGameMode()
 {
-	delete clientPlant; // Stop thread.
 }
 
 void APlantGameMode::StartPlay()
@@ -40,7 +41,8 @@ void APlantGameMode::StartPlay()
 	}
 
 	APlantGameMode* hInstance = this;
-	static Concurrency con([hInstance]() -> bool { hInstance->machines = hInstance->clientPlant->requestMachines(); return hInstance->machines.size() > 0; }, std::bind(&APlantGameMode::initWorld, this), 100);
+	static Concurrency con([hInstance]() -> bool { return hInstance->clientPlant->requestPlant(); },
+		std::bind(&APlantGameMode::initWorld,this) , 5000);
 }
 
 void APlantGameMode::initWorld()
@@ -50,22 +52,26 @@ void APlantGameMode::initWorld()
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	if (GetWorld())
 	{
-		for(Assembly& machine : machines)
-		{
-			asyncSpawnMachine(machine);
-		}
+		asyncSpawnMachine(Plant::getInstance().getPlant());
 	}	
 }
 
-void APlantGameMode::asyncSpawnMachine(Assembly &machine)
+void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 {
 	UWorld* const World = GetWorld();
-	AsyncTask(ENamedThreads::GameThread, [&machine, World]()
+	APlantGameMode* hInstance = this;
+	AsyncTask(ENamedThreads::GameThread, [&stock, World, hInstance]()
 	{
 		FTransform SpawnLocAndRotation;
-		AMyActor* MyActor = World->SpawnActorDeferred<AMyActor>(AMyActor::StaticClass(), SpawnLocAndRotation);
-		MyActor->init(machine);
-		MyActor->FinishSpawning(SpawnLocAndRotation);
-		MyActor->SetActorLocationAndRotation(FVector(50, 50, 2), FRotator(0, 0, 90));
+		hInstance->plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
+		hInstance->plantActor->init(&stock);
+		hInstance->plantActor->FinishSpawning(SpawnLocAndRotation);
+		hInstance->plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
+
+		hInstance->statusWidget = NewObject<UStatusWidget>(hInstance, FName(TEXT("Status Wiget")));
+
+		hInstance->statusWidget->SetActor(hInstance->plantActor);
+
+		hInstance->statusWidget->AddToViewport();
 	});
 }

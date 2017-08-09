@@ -2,11 +2,10 @@
 
 #include "Plant.h"
 #include "MyUserWidgetInfo.h"
-#include "plant/Assembly.h"
 
 
 UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f), fPadding(5), machine(nullptr), machinePart(nullptr)
+	: Super(ObjectInitializer), DeltaTime(1.f), accTime(1.f), fPadding(5), stock(nullptr)
 {
 	SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
 
@@ -104,26 +103,14 @@ void UMyUserWidgetInfo::SetTitleWindow(FText title)
 	textTitle->SetText(title);
 }
 
-void UMyUserWidgetInfo::SetMachine(Assembly* _machine)
+void UMyUserWidgetInfo::SetStock(const StockPlant* _stock)
 {
-	if (_machine)
+	if (_stock)
 	{
-		this->machine = _machine;
-		std::string title = std::string("PN: ") + this->machine->pn;
+		this->stock = _stock;
+		std::string title = this->stock->getAssembly().getInfo().getName() + "(" + this->stock->getSN() + ")";
 		SetTitleWindow(FText::FromString(title.c_str()));
-		textInfo->SetText(FText::FromString(this->machine->info.c_str()));
-	}
-}
-
-void UMyUserWidgetInfo::SetMachinePart(Part* _machinePart)
-{
-	if (_machinePart)
-	{
-		this->machinePart = _machinePart;
-		std::string title = std::string("PN: ") + this->machinePart->pn;
-		SetTitleWindow(FText::FromString(title.c_str()));
-		textInfo->SetText(FText::FromString(this->machinePart->info.c_str()));
-		SetVisibleSensors(false);
+		textInfo->SetText(FText::FromString(this->stock->getAssembly().getInfo().getInfo().c_str()));
 	}
 }
 
