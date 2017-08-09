@@ -66,5 +66,7 @@ void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 		plantActor->init(&stock);
 		plantActor->FinishSpawning(SpawnLocAndRotation);
 		plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
+
+		plantActor->ToogleConstructionMode();
 	});
 }

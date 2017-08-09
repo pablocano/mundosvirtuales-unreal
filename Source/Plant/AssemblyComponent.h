@@ -123,6 +123,9 @@ public:
 	UFUNCTION()
 	virtual FTransform GetGlobalPosition_Implementation() override;
 
+	UFUNCTION()
+	virtual void ToogleConstructionMode_Implementation() override;
+
 	/// <summary>
 	/// Expand the current stock to expose the next layer
 	/// </summary>
@@ -218,6 +221,8 @@ public:
 	/// The pose of this component, relative to the parent component
 	/// </summary>
 	FTransform pose;
+
+	TArray<FLinearColor> originalColors;
 
 protected:
 

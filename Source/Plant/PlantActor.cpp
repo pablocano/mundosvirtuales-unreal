@@ -5,7 +5,7 @@
 
 
 // Sets default values
-APlantActor::APlantActor()
+APlantActor::APlantActor() : constructionMode(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -40,5 +40,12 @@ void APlantActor::init(const StockPlant* stock)
   rootStock->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
   rootStock->ExpandStock();
+}
+
+void APlantActor::ToogleConstructionMode()
+{
+	constructionMode = !constructionMode;
+
+	rootStock->ToogleConstructionMode_Implementation();
 }
 

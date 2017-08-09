@@ -91,7 +91,6 @@ void UAssemblyComponent::SetHover(bool hover)
 		// Set the emissivity of the material
 		DynMaterials[i]->SetVectorParameterValue("Emissive", color);
 	}
-	
 }
 
 void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * TouchedComponent, FKey key)
@@ -500,12 +499,19 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 			// Create a dynamic material using the base material of this slpt
 			UMaterialInstanceDynamic *dynMaterial = CreateAndSetMaterialInstanceDynamic(i);
 
-			// Set the material of this slot with the dynamic material
-			this->SetMaterial(i, dynMaterial);
-
 			// Add a pointer of this material in a list
 			DynMaterials.Add(dynMaterial);
+
+			// Save the original color
+			FLinearColor color;
+			dynMaterial->GetVectorParameterValue("BaseColor", color);
+			originalColors.Add(color);
+
+			// Set the material of this slot with the dynamic material
+			this->SetMaterial(i, dynMaterial);
 		}
+
+		ToogleConstructionMode_Implementation();
 	}
 
 	this->OnBeginCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseOver);
@@ -642,8 +648,6 @@ void UAssemblyComponent::OnClickButtonOk()
 		// Disable the parent widget
 		parentInterface->Execute_RemoveFocusChild(parent);
 	}
-	
-
 }
 
 void UAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey)
@@ -651,6 +655,59 @@ void UAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pComponent,
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click on WidgetComponent"));
+	}
+}
+
+void UAssemblyComponent::ToogleConstructionMode_Implementation()
+{
+	if (actor->constructionMode)
+	{
+		for (int i = 0; i < DynMaterials.Num(); i++)
+		{
+			switch (stock->getState())
+			{
+			case StateStock::INSTALLED:
+				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Green);
+				break;
+
+			case StateStock::CONSTRUCTION:
+				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor(0.f,1.f,1.f));
+				break;
+
+			case StateStock::WAREHOUSE:
+				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Blue);
+				break;
+
+			case StateStock::PROCESS_OF_PURCHASE:
+				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Yellow);
+				break;
+
+			case StateStock::NEED_BUY:
+				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Red);
+				break;
+
+			default:
+				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Black);
+				break;
+			}
+			
+		}
+	}
+	else
+	{
+		for (int i = 0; i < DynMaterials.Num(); i++)
+		{
+			// Set the color of the material with its original color
+			DynMaterials[i]->SetVectorParameterValue("BaseColor", originalColors[i]);
+		}
+	}
+
+	for (const auto& subComponent : subStocks)
+	{
+		// Access to the subcomponent
+		IMeshInterface* subStockInterface = Cast<IMeshInterface>(subComponent);
+
+		subStockInterface->Execute_ToogleConstructionMode(subComponent);
 	}
 }
 

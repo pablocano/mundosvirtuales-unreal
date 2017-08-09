@@ -23,10 +23,14 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-  void init(const StockPlant* stock);
+	void ToogleConstructionMode();
+
+	void init(const StockPlant* stock);
   
-  UMeshComponent* selectedStock;
+	UMeshComponent* selectedStock;
   
-  UAssemblyComponent* rootStock;
+	UAssemblyComponent* rootStock;
+
+	bool constructionMode;
 	
 };
