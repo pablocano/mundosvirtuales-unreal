@@ -3,9 +3,10 @@
 #include "Plant.h"
 #include "PlantActor.h"
 
+FLinearColor APlantActor::StateColorArray[6] = { FLinearColor::Green, FLinearColor(0.f,1.f,1.f), FLinearColor::Blue, FLinearColor::Yellow, FLinearColor::Red, FLinearColor::Black };
 
 // Sets default values
-APlantActor::APlantActor() : constructionMode(false)
+APlantActor::APlantActor() : constructionMode(false), highlightState(StateStock::NONE_STATE)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -45,6 +46,13 @@ void APlantActor::init(const StockPlant* stock)
 void APlantActor::ToggleConstructionMode()
 {
 	constructionMode = !constructionMode;
+
+	rootStock->ToggleConstructionMode_Implementation();
+}
+
+void APlantActor::SetHighlightState(StateStock state)
+{
+	highlightState = state;
 
 	rootStock->ToggleConstructionMode_Implementation();
 }

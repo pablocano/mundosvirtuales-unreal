@@ -4,6 +4,7 @@
 
 #include "AssemblyComponent.h" 
 #include "GameFramework/Actor.h"
+#include "plant/StockPlant.h"
 #include "PlantActor.generated.h"
 
 UCLASS()
@@ -15,6 +16,8 @@ public:
 	// Sets default values for this actor's properties
 	APlantActor();
 
+	static FLinearColor StateColorArray[];
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -25,6 +28,8 @@ public:
 
 	void ToggleConstructionMode();
 
+	void SetHighlightState(StateStock state);
+
 	void init(const StockPlant* stock);
   
 	UMeshComponent* selectedStock;
@@ -32,5 +37,7 @@ public:
 	UAssemblyComponent* rootStock;
 
 	bool constructionMode;
+
+	StateStock highlightState;
 	
 };

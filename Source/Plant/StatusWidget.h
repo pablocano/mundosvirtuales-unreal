@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Blueprint/UserWidget.h"
+#include "plant/StockPlant.h" 
 #include "StatusWidget.generated.h"
 
 class APlantActor;
@@ -14,8 +15,25 @@ class PLANT_API UStatusWidget : public UUserWidget
 {
 	GENERATED_UCLASS_BODY()
 
+	TSharedRef<SWidget>	RebuildWidget();
+
 	UFUNCTION()
 	void OnClickToggleButton();
+
+	UFUNCTION()
+	void OnClickInstalledButton();
+
+	UFUNCTION()
+	void OnClickConstructionButton();
+
+	UFUNCTION()
+	void OnClickWarehouseButton();
+
+	UFUNCTION()
+	void OnClickPoPButton();
+
+	UFUNCTION()
+	void OnClickNeedToBuyButton();
 
 	UFUNCTION()
 	void SetActor(APlantActor* _actor);
@@ -54,5 +72,13 @@ class PLANT_API UStatusWidget : public UUserWidget
 	/// The text of the toggle button
 	/// </summary>
 	UTextBlock* TextButton;
+
+	TArray<UHorizontalBox*> Legend;
+
+	TArray<UButton*> LegendColor;
+
+	TArray<UTextBlock*> LegendText;
+
+	StateStock highlightState;
 	
 };

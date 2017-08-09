@@ -662,35 +662,26 @@ void UAssemblyComponent::ToggleConstructionMode_Implementation()
 {
 	if (actor->constructionMode)
 	{
-		for (int i = 0; i < DynMaterials.Num(); i++)
+		if (actor->highlightState != StateStock::NONE_STATE)
 		{
-			switch (stock->getState())
+			for (int i = 0; i < DynMaterials.Num(); i++)
 			{
-			case StateStock::INSTALLED:
-				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Green);
-				break;
-
-			case StateStock::CONSTRUCTION:
-				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor(0.f,1.f,1.f));
-				break;
-
-			case StateStock::WAREHOUSE:
-				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Blue);
-				break;
-
-			case StateStock::PROCESS_OF_PURCHASE:
-				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Yellow);
-				break;
-
-			case StateStock::NEED_BUY:
-				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Red);
-				break;
-
-			default:
-				DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Black);
-				break;
+				if (stock->getState() == actor->highlightState)
+				{
+					DynMaterials[i]->SetVectorParameterValue("BaseColor", APlantActor::StateColorArray[actor->highlightState]);
+				}
+				else
+				{
+					DynMaterials[i]->SetVectorParameterValue("BaseColor", FLinearColor::Gray);
+				}
 			}
-			
+		}
+		else
+		{
+			for (int i = 0; i < DynMaterials.Num(); i++)
+			{
+				DynMaterials[i]->SetVectorParameterValue("BaseColor", APlantActor::StateColorArray[stock->getState()]);
+			}
 		}
 	}
 	else

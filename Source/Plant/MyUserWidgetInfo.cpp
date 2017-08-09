@@ -108,7 +108,7 @@ void UMyUserWidgetInfo::SetStock(const StockPlant* _stock)
 	if (_stock)
 	{
 		this->stock = _stock;
-		std::string title = std::string("PN: ") + this->stock->getSN();
+		std::string title = this->stock->getAssembly().getInfo().getName() + "(" + this->stock->getSN() + ")";
 		SetTitleWindow(FText::FromString(title.c_str()));
 		textInfo->SetText(FText::FromString(this->stock->getAssembly().getInfo().getInfo().c_str()));
 	}
