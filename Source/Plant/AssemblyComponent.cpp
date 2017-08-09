@@ -511,7 +511,7 @@ void UAssemblyComponent::init(APlantActor* actorPointer, UMeshComponent* parentC
 			this->SetMaterial(i, dynMaterial);
 		}
 
-		ToogleConstructionMode_Implementation();
+		ToggleConstructionMode_Implementation();
 	}
 
 	this->OnBeginCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseOver);
@@ -658,7 +658,7 @@ void UAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pComponent,
 	}
 }
 
-void UAssemblyComponent::ToogleConstructionMode_Implementation()
+void UAssemblyComponent::ToggleConstructionMode_Implementation()
 {
 	if (actor->constructionMode)
 	{
@@ -707,7 +707,7 @@ void UAssemblyComponent::ToogleConstructionMode_Implementation()
 		// Access to the subcomponent
 		IMeshInterface* subStockInterface = Cast<IMeshInterface>(subComponent);
 
-		subStockInterface->Execute_ToogleConstructionMode(subComponent);
+		subStockInterface->Execute_ToggleConstructionMode(subComponent);
 	}
 }
 

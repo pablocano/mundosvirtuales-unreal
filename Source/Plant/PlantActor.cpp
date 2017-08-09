@@ -42,10 +42,10 @@ void APlantActor::init(const StockPlant* stock)
   rootStock->ExpandStock();
 }
 
-void APlantActor::ToogleConstructionMode()
+void APlantActor::ToggleConstructionMode()
 {
 	constructionMode = !constructionMode;
 
-	rootStock->ToogleConstructionMode_Implementation();
+	rootStock->ToggleConstructionMode_Implementation();
 }
 

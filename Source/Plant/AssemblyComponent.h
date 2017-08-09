@@ -124,7 +124,7 @@ public:
 	virtual FTransform GetGlobalPosition_Implementation() override;
 
 	UFUNCTION()
-	virtual void ToogleConstructionMode_Implementation() override;
+	virtual void ToggleConstructionMode_Implementation() override;
 
 	/// <summary>
 	/// Expand the current stock to expose the next layer

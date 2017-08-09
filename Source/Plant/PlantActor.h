@@ -23,7 +23,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void ToogleConstructionMode();
+	void ToggleConstructionMode();
 
 	void init(const StockPlant* stock);
   

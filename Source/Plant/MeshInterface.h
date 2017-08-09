@@ -52,5 +52,5 @@ public:
 	FTransform GetGlobalPosition();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
-	void ToogleConstructionMode();
+	void ToggleConstructionMode();
 };
