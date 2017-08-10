@@ -26,18 +26,41 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	/// <summary>
+	/// Toggle between visualization modes
+	/// </summary>
 	void ToggleConstructionMode();
 
+	/// <summary>
+	/// Set the highlight state of the actor and process the mode
+	/// </summary>
+	/// <param name="state"></param>
 	void SetHighlightState(StateStock state);
 
-	void init(const StockPlant* stock);
+	/// <summary>
+	/// Initialize the actor
+	/// </summary>
+	/// <param name="stock"></param>
+	void Init(const StockPlant* stock);
   
-	UMeshComponent* selectedStock;
+	/// <summary>
+	/// The selected component
+	/// </summary>
+	UMeshComponent* SelectedComponent;
   
-	UAssemblyComponent* rootStock;
+	/// <summary>
+	/// The root component
+	/// </summary>
+	UMeshComponent* AssemblyRootComponent;
 
+	/// <summary>
+	/// If the construction mode is ON
+	/// </summary>
 	bool constructionMode;
 
+	/// <summary>
+	/// The highlight state in the construction mode
+	/// </summary>
 	StateStock highlightState;
 	
 };

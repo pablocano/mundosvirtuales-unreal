@@ -19,25 +19,7 @@ UCLASS()
 class PLANT_API UAssemblyComponent : public UStaticMeshComponent, public IMeshInterface
 {
 public:
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
-	UWidgetInfoComponent* widgetInfoComponent;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = HUD)
-	UMyUserWidgetInfo* widgetInfo;
-
-	UPROPERTY()
-	TArray<USensor*> Sensors;
-  
-	/// <summary>
-	/// The posibles focus status
-	/// </summary>
-	static enum FocusStatus
-	{
-		NOTHING,
-		HOVER,
-		FOCUS
-	};
+	/* ----- Construction section ----- */
 
 	/// <summary>
 	/// The constructor of this class
@@ -45,24 +27,28 @@ public:
 	GENERATED_UCLASS_BODY()
 
 	/// <summary>
-	/// The callback function used when this component is hovered
+	/// Initialice the stock component, load the correnponding mesh and its material
 	/// </summary>
-	/// <param name="TouchedComponent">The caller of this callback</param>
-	UFUNCTION()
-	void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
+	/// <param name="actor">The actor that owns all the stock components</param>
+	/// <param name="parentComponent">The parent component of this stock component</param>
+	/// <param name="stock">The stock of which this component is made</param>
+	void Init(APlantActor* actor, UMeshComponent* parentComponent, StockPlant const* stock);
 
 	/// <summary>
-	/// The callback function used when the mouse is over this component
+	/// Function called after the creation of this object
 	/// </summary>
-	UFUNCTION()
-	void CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent);
-  
+	void BeginPlay();
+
 	/// <summary>
-	/// The callback function used when a click is made over this component
+	/// Function called in every frame of the 
 	/// </summary>
-	UFUNCTION()
-	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
-  
+	/// <param name="DeltaTime">The time between this and the last frame</param>
+	/// <param name="TickType">The type of tick received</param>
+	/// <param name="ThisTickFunction">Pointer to the tick function</param>
+	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
+
+	/* ----- Interface override section ----- */
+
 	/// <summary>
 	/// Ask if this component is selected
 	/// </summary>
@@ -71,6 +57,7 @@ public:
   
 	/// <summary>
 	/// Set the selection state of this component
+	/// <param name="select">The state to set into the selection state</param>
 	/// </summary>
 	UFUNCTION()
 	virtual void SetSelected_Implementation(bool select) override;
@@ -123,38 +110,101 @@ public:
 	UFUNCTION()
 	virtual FTransform GetGlobalPosition_Implementation() override;
 
+	/// <summary>
+	/// Process the change between the construction or the standar mode of the view
+	/// </summary>
 	UFUNCTION()
-	virtual void ToggleConstructionMode_Implementation() override;
+	virtual void ProcessVisualizationMode_Implementation() override;
+
+private:
+	/* ----- Events section ----- */
 
 	/// <summary>
-	/// Expand the current stock to expose the next layer
+	/// The callback function used when this component is hovered
 	/// </summary>
-	void ExpandStock();
+	/// <param name="TouchedComponent">The caller of this callback</param>
+	UFUNCTION()
+	void CustomOnBeginMouseOver(UPrimitiveComponent* TouchedComponent);
 
 	/// <summary>
-	/// Initialice the stock component, load the correnponding mesh and its material
+	/// The callback function used when the mouse is over this component
 	/// </summary>
-	/// <param name="actor">The actor that owns all the stock components</param>
-	/// <param name="parentComponent">The parent component of this stock component</param>
-	/// <param name="stock">The stock of which this component is made</param>
-	void init(APlantActor* actor, UMeshComponent* parentComponent, StockPlant const* stock);
+	UFUNCTION()
+	void CustomOnEndMouseOver(UPrimitiveComponent* TouchedComponent);
 
-	void BeginPlay();
+	/// <summary>
+	/// The callback function used when a click is made over this component
+	/// </summary>
+	UFUNCTION()
+	void CustomOnBeginMouseClicked(UPrimitiveComponent* TouchedComponent, FKey key);
 
-	void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction) override;
+	/* ----- Widget section ----- */
 
+	/// <summary>
+	/// The function called when clicked into the OK button of the widget
+	/// </summary>
+	UFUNCTION()
+	void OnClickButtonOk();
+
+	/// <summary>
+	/// The event function called when the widget is clicked
+	/// </summary>
+	UFUNCTION()
+	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
+
+	/// <summary>
+	/// Update the position of the widget of this component
+	/// </summary>
 	void UpdateWidgetPosition();
+
+	/// <summary>
+	/// The space where the widget of this component is going to be
+	/// </summary>
+	UPROPERTY(EditAnywhere, Category = UserInterface)
+	EWidgetSpace Space;
+
+	/// <summary>
+	/// The size of the widget of this component
+	/// </summary>
+	FVector2D sizeWidget;
+
+	/// <summary>
+	/// The widget component of this component
+	/// </summary>
+	UWidgetInfoComponent* widgetInfoComponent;
+
+	/// <summary>
+	/// The real widget present in the widget component
+	/// </summary>
+	UMyUserWidgetInfo* widgetInfo;
+
+	/// <summary>
+	/// The sensors asociated to the widget
+	/// </summary>
+	TArray<USensor*> Sensors;
+
+	/* ----- Selection and highlight section ----- */
+  
+	/// <summary>
+	/// The posibles focus status
+	/// </summary>
+	static enum FocusStatus
+	{
+		NOTHING,
+		HOVER,
+		FOCUS
+	};
+
+	/// <summary>
+	/// The focus status of this component
+	/// </summary>
+	FocusStatus borderStatus;
 
 	/// <summary>
 	/// Set this component as hover, by making it glow
 	/// </summary>
 	/// <param name="hover">If this component is hovered or not</param>
 	void SetHover(bool hover = true);
-
-	/// <summary>
-	/// Hide this component mesh to the user
-	/// </summary>
-	void Hide();
   
 	/// <summary>
 	/// Highlight the borders of this component mesh
@@ -162,10 +212,7 @@ public:
 	/// <param name="status">The focus status of this component</param>
 	void SetBorders(FocusStatus status);
 
-	/// <summary>
-	/// The mesh of this component
-	/// </summary>
-	UStaticMesh* mesh;
+	/* ----- Material handling section ----- */
 
 	/// <summary>
 	/// The material of which this component is made
@@ -176,6 +223,35 @@ public:
 	/// A dynamic version of the material, that can be changed on runtime
 	/// </summary>
 	TArray<UMaterialInstanceDynamic*> DynMaterials;
+
+	/// <summary>
+	/// The original colors of all the material of this component
+	/// </summary>
+	TArray<FLinearColor> originalColors;
+
+	/* ----- Private functions ----- */
+
+	/// <summary>
+	/// Expand the current stock to expose the next layer
+	/// </summary>
+	void ExpandComponent();
+
+	/// <summary>
+	/// Hide this component mesh to the user
+	/// </summary>
+	void Hide();
+  
+	/* ----- Private members ----- */
+
+	/// <summary>
+	/// The mesh of this component
+	/// </summary>
+	UStaticMesh* mesh;
+
+	/// <summary>
+	/// The pose of this component, relative to the parent component
+	/// </summary>
+	FTransform pose;
 
 	/// <summary>
 	/// A pointer to the focused child of this componet, if it has one. Null otherwise
@@ -205,37 +281,10 @@ public:
 	/// <summary>
 	/// All the subcomponent of this components
 	/// </summary>
-	TArray<UMeshComponent*> subStocks;
+	TArray<UMeshComponent*> subComponents;
 
 	/// <summary>
 	/// If this component is selected
 	/// </summary>
 	bool selected;
-
-	/// <summary>
-	/// The focus status of this component
-	/// </summary>
-	FocusStatus borderStatus;
-
-	/// <summary>
-	/// The pose of this component, relative to the parent component
-	/// </summary>
-	FTransform pose;
-
-	TArray<FLinearColor> originalColors;
-
-protected:
-
-	UFUNCTION()
-	void OnClickButtonOk();
-
-	UFUNCTION()
-	void OnClickWidgetComponent(UPrimitiveComponent* pComponent, FKey inKey);
-
-private:
-
-	UPROPERTY(EditAnywhere, Category = UserInterface)
-	EWidgetSpace Space;
-
-	FVector2D sizeWidget;
 };

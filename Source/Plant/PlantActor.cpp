@@ -26,34 +26,46 @@ void APlantActor::Tick(float DeltaTime)
 
 }
 
-void APlantActor::init(const StockPlant* stock)
+void APlantActor::Init(const StockPlant* stock)
 {
-  
-  USceneComponent* root = NewObject<USceneComponent>(this, TEXT("RootComponent"));
-  this->SetRootComponent(root);
-  
-  FString name(stock->getstrHash().c_str());
-  
-  rootStock = NewObject<UAssemblyComponent>(this, FName(*name));
-    
-  rootStock->init(this, nullptr, stock);
-  rootStock->RegisterComponent();
-  rootStock->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	// Set the root component of this actor
+	USceneComponent* root = NewObject<USceneComponent>(this, TEXT("RootComponent"));
+	this->SetRootComponent(root);
 
-  rootStock->ExpandStock();
+	// Create the root assembly component
+	FString name(stock->getstrHash().c_str());
+	UAssemblyComponent* InitRootComponent = NewObject<UAssemblyComponent>(this, FName(*name));
+
+	// Init the root assembly component
+	InitRootComponent->Init(this, nullptr, stock);
+	InitRootComponent->RegisterComponent();
+	InitRootComponent->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
+	// Set the Assembly root component
+	AssemblyRootComponent = InitRootComponent;
+
+	// Expand the firts layer of the tree
+	IMeshInterface* AssemblyRootComponentInterface = Cast<IMeshInterface>(AssemblyRootComponent);
+	AssemblyRootComponentInterface->Execute_Expand(AssemblyRootComponent);
 }
 
 void APlantActor::ToggleConstructionMode()
 {
+	// Toggle the construction mode
 	constructionMode = !constructionMode;
 
-	rootStock->ToggleConstructionMode_Implementation();
+	// Process the visualization mode in all the tree
+	IMeshInterface* AssemblyRootComponentInterface = Cast<IMeshInterface>(AssemblyRootComponent);
+	AssemblyRootComponentInterface->Execute_ProcessVisualizationMode(AssemblyRootComponent);
 }
 
 void APlantActor::SetHighlightState(StateStock state)
 {
+	// Set the highlight state
 	highlightState = state;
 
-	rootStock->ToggleConstructionMode_Implementation();
+	// Process the visualization mode in all the tree
+	IMeshInterface* AssemblyRootComponentInterface = Cast<IMeshInterface>(AssemblyRootComponent);
+	AssemblyRootComponentInterface->Execute_ProcessVisualizationMode(AssemblyRootComponent);
 }
 
