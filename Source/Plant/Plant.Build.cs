@@ -18,6 +18,8 @@ public class Plant : ModuleRules
 
     public Plant(TargetInfo ROTargetRules)// : base(ROTargetRules)
     {
+		Definitions.Add("DISABLE_LOGGER=1");
+		
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UMG" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
