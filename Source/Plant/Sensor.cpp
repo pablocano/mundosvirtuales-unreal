@@ -4,15 +4,15 @@
 #include "Sensor.h"
 #include "Components/TextBlock.h"
 
-USensor::USensor() : nameSensor(TEXT("Sensor")), TypeSensor(ETypeSensor::Default)
+USensor::USensor() : nameSensor(TEXT("Sensor")), TypeSensor(ETypeSensor::Default), data()
 {
 }
 
-USensor::USensor(const char* name) : nameSensor(name), TypeSensor(ETypeSensor::Default)
+USensor::USensor(const char* name) : nameSensor(name), TypeSensor(ETypeSensor::Default), data()
 {
 }
 
-USensor::USensor(FString name) : nameSensor(name), TypeSensor(ETypeSensor::Default)
+USensor::USensor(FString name) : nameSensor(name), TypeSensor(ETypeSensor::Default), data()
 {
 }
 
@@ -53,11 +53,12 @@ void USensor::SetNameSensor(FString name)
 
 void USensor::UpdateData(float InDeltaTime)
 {
+	data += TypeSensor == ETypeSensor::Default ? FMath::FRandRange(0.5f, 2.f) : FMath::FRandRange(0.1f, 0.2f);
 	textBlock->SetText(FText::FromString(GetStringDataSensor()));
 }
 
 FString USensor::GetStringDataSensor()
 {
-	const FString Message = FString::Printf(TEXT("%s: %0.2f"), *nameSensor, FMath::FRandRange(20.f, 25.f));
+	const FString Message = FString::Printf(TEXT("%s: %i"), *nameSensor, int(data));
 	return Message;
 }

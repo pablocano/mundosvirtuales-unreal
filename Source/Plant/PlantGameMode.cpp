@@ -58,20 +58,23 @@ void APlantGameMode::initWorld()
 
 void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 {
+	// Access the wold and this class as pointers
 	UWorld* const World = GetWorld();
 	APlantGameMode* hInstance = this;
+
+	// Call this funtion in the game thread
 	AsyncTask(ENamedThreads::GameThread, [&stock, World, hInstance]()
 	{
+		// Create the only actor of this game
 		FTransform SpawnLocAndRotation;
 		hInstance->plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
-		hInstance->plantActor->init(&stock);
+		hInstance->plantActor->Init(&stock);
 		hInstance->plantActor->FinishSpawning(SpawnLocAndRotation);
 		hInstance->plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
 
+		// Create the user interface to toggle between the visualization modes
 		hInstance->statusWidget = NewObject<UStatusWidget>(hInstance, FName(TEXT("Status Wiget")));
-
 		hInstance->statusWidget->SetActor(hInstance->plantActor);
-
 		hInstance->statusWidget->AddToViewport();
 	});
 }

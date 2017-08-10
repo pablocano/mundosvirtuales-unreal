@@ -24,17 +24,6 @@ AMyPawn::AMyPawn(const FObjectInitializer& ObjectInitializer)
 	OurCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("GameCamera"));
 	OurCamera->SetupAttachment(OurCameraSpringArm, USpringArmComponent::SocketName);
 
-	// Create and position a mesh component so we can see where our sphere is
-	/*UStaticMeshComponent* SphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
-	SphereVisual->SetupAttachment(RootComponent);
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/Shape_Sphere.Shape_Sphere"));
-	if (SphereVisualAsset.Succeeded())
-	{
-		SphereVisual->SetStaticMesh(SphereVisualAsset.Object);
-		SphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
-		SphereVisual->SetWorldScale3D(FVector(0.8f));
-	}*/
-
 	//Take control of the default Player
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 
@@ -52,21 +41,8 @@ void AMyPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//Zoom in if ZoomIn button is down, zoom back out if it's not
-	{
-		/*if (bZoomingIn)
-		{
-			ZoomFactor += DeltaTime / 0.5f;         //Zoom in over half a second
-		}
-		else
-		{
-			ZoomFactor -= DeltaTime / 0.25f;        //Zoom out over a quarter of a second
-		}
-		ZoomFactor = FMath::Clamp<float>(ZoomFactor, 0.0f, 1.0f);*/
-		//Blend our camera's FOV and our SpringArm's length based on ZoomFactor
-		//OurCamera->FieldOfView = FMath::Lerp<float>(90.0f, 60.0f, ZoomFactor);
-		OurCameraSpringArm->TargetArmLength = FMath::Lerp<float>(250.0f, 10.0f, ZoomFactor);
-	}
+	// Set the lenght of the arm using the ZoomFactor
+	OurCameraSpringArm->TargetArmLength = FMath::Lerp<float>(250.0f, 10.0f, ZoomFactor);
 
 	//Rotate our actor's yaw, which will turn our camera because we're attached to it
 	{
@@ -152,10 +128,6 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AMyPawn::MoveForward(float AxisValue)
 {
 	MovementInput.X = FMath::Clamp<float>(AxisValue, -1.0f, 1.0f);
-	/*if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, FString::SanitizeFloat(AxisValue));
-	}*/
 }
 
 void AMyPawn::MoveRight(float AxisValue)
