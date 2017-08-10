@@ -58,4 +58,6 @@ public:
 
 	UFUNCTION()
 	FString GetStringDataSensor();
+
+	float data;
 };

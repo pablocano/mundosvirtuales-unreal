@@ -6,6 +6,7 @@
 #include "WidgetInfoComponent.h"
 #include "Sensor.h"
 #include "plant/StockPlant.h"
+#include "WrapedTextBlock.h"
 #include "MyUserWidgetInfo.generated.h"
 
 /**
@@ -49,7 +50,7 @@ class PLANT_API UMyUserWidgetInfo : public UUserWidget
 	UVerticalBox* ContentWindowBox;
 	UHorizontalBox* TitleBarBox;
 	UTextBlock* textTitle;
-	UTextBlock* textInfo;
+	UWrapedTextBlock* textInfo;
 
 	const StockPlant* stock;
 

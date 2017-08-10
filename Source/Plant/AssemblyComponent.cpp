@@ -562,22 +562,30 @@ void UAssemblyComponent::BeginPlay()
 
 		widgetInfo->SetStock(this->stock);
 
-		USensor* sensor1 = NewObject<USensor>();
-		sensor1->SetNameSensor("Temperatura");
-		sensor1->SetTypeSensor(ETypeSensor::Temperature);
-		Sensors.Add(sensor1);
+		if (assembly->getInfo().getName() == "Glory Sorter")
+		{
+			USensor* sensor1 = NewObject<USensor>();
+			sensor1->SetNameSensor("Banknotes processed");
+			sensor1->SetTypeSensor(ETypeSensor::Default);
+			Sensors.Add(sensor1);
 
-		USensor* sensor2 = NewObject<USensor>();
-		sensor2->SetNameSensor("Presion");
-		sensor2->SetTypeSensor(ETypeSensor::Pressure);
-		Sensors.Add(sensor2);
+			USensor* sensor2 = NewObject<USensor>();
+			sensor2->SetNameSensor("Banknotes rejected");
+			sensor2->SetTypeSensor(ETypeSensor::Pressure);
+			Sensors.Add(sensor2);
 
-		USensor* sensor3 = NewObject<USensor>();
-		sensor3->SetNameSensor("Flujo");
-		sensor3->SetTypeSensor(ETypeSensor::Flow);
-		Sensors.Add(sensor3);
+			widgetInfo->SetSensors(Sensors);
+		}
+		else if(assembly->getInfo().getName() == "Banding Machine")
+		{
+			USensor* sensor1 = NewObject<USensor>();
+			sensor1->SetNameSensor("Banknotes boundled");
+			sensor1->SetTypeSensor(ETypeSensor::Flow);
+			Sensors.Add(sensor1);
 
-		widgetInfo->SetSensors(Sensors);
+			widgetInfo->SetSensors(Sensors);
+		}
+		
 		widgetInfoComponent->SetWidget(widgetInfo);
 		widgetInfo->buttonOk->OnClicked.AddDynamic(this, &UAssemblyComponent::OnClickButtonOk);
 		widgetInfoComponent->OnClicked.AddDynamic(this, &UAssemblyComponent::OnClickWidgetComponent);
@@ -589,15 +597,20 @@ void UAssemblyComponent::BeginPlay()
 void UAssemblyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)
 {
 
-	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
+	if (widgetInfoComponent)
 	{
-		FVector cameraLocation = GEngine->GetFirstLocalPlayerController(GetWorld())->PlayerCameraManager->GetCameraLocation();
+		widgetInfo->textInfo->SetAutoWrapText(true);
+		if (widgetInfoComponent->IsVisible())
+		{
+			FVector cameraLocation = GEngine->GetFirstLocalPlayerController(GetWorld())->PlayerCameraManager->GetCameraLocation();
 
-		FVector widgetLocation = GetGlobalPosition_Implementation().GetLocation();
+			FVector widgetLocation = GetGlobalPosition_Implementation().GetLocation();
 
-		float angle = (cameraLocation - widgetLocation).Rotation().Yaw;
+			float angle = (cameraLocation - widgetLocation).Rotation().Yaw;
+
+			widgetInfoComponent->SetWorldRotation(FRotator(0.f, angle, 0.f));
+		}
 		
-		widgetInfoComponent->SetWorldRotation(FRotator(0.f, angle , 0.f));
 		widgetInfo->UpdateWidgetSensors(DeltaTime);
 	}
 }

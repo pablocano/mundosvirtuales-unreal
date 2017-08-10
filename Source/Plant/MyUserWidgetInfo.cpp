@@ -18,8 +18,8 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	this->WidgetTree->RootWidget = ScaleBox;
 
 	SizeBox = NewObject<USizeBox>(ScaleBox, USizeBox::StaticClass());
-	SizeBox->SetHeightOverride(180.f);
-	SizeBox->SetWidthOverride(240.f);
+	SizeBox->SetHeightOverride(260.f);
+	SizeBox->SetWidthOverride(400.f);
 	ScaleBox->AddChild(SizeBox);
 
 	// Content Window
@@ -76,13 +76,15 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	ScrollBox->AddChild(ItemWidgetsBox);
 
 	// Text Info
-	textInfo = NewObject<UTextBlock>(ContentWindowBox, UTextBlock::StaticClass());
+	textInfo = NewObject<UWrapedTextBlock>(ContentWindowBox, UWrapedTextBlock::StaticClass());
 	textInfo->SetText(FText::FromString(TEXT("Información")));
 	textInfo->Font.Size = 10;
+	textInfo->SetAutoWrapText(true);
+	textInfo->SynchronizeProperties();
 	textInfo->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
 	UVerticalBoxSlot* SlotItem = ItemWidgetsBox->AddChildToVerticalBox(textInfo);
 	SlotItem->SetPadding(fPadding);
-	SlotItem->SetSize(ESlateSizeRule::Fill);
+	SlotItem->SetSize(ESlateSizeRule::Automatic);
 
 	// Sensor
 	ScrollBoxSensor = NewObject<UScrollBox>(ContentWindowBox, TEXT("Scroll Box Sensor"));
@@ -110,7 +112,9 @@ void UMyUserWidgetInfo::SetStock(const StockPlant* _stock)
 		this->stock = _stock;
 		std::string title = this->stock->getAssembly().getInfo().getName() + "(" + this->stock->getSN() + ")";
 		SetTitleWindow(FText::FromString(title.c_str()));
-		textInfo->SetText(FText::FromString(this->stock->getAssembly().getInfo().getInfo().c_str()));
+
+		std::string info = this->stock->getAssembly().getInfo().getInfo();
+		textInfo->SetText(FText::FromString(info.c_str()));
 	}
 }
 
