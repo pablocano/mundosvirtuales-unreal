@@ -4,6 +4,7 @@
 #include "PlantActor.h"
 #include "AssemblyComponent.h"
 #include "WidgetInfoComponent.h"
+#include "AnimatedAssemblyComponent.h"
 
 #define M_PI           3.14159265358979323846  /* pi */
 
@@ -671,22 +672,44 @@ void UAssemblyComponent::ExpandComponent()
 		// Expand the substock only if is enable
 		if (substock.isEnable())
 		{
-			// Create the subcomponent with a unique name using the hash
-			FString name(substock.getstrHash().c_str());
-			UAssemblyComponent* subAssembly = NewObject<UAssemblyComponent>(this, FName(*name)); // text("") can be just about anything.
-			
-			// Init the subcomponent
-			subAssembly->Init(actor, this, &substock);
+			if (substock.getAssembly().getModel().isAnimated())
+			{
+				// Create the subcomponent with a unique name using the hash
+				FString name(substock.getstrHash().c_str());
+				UAnimatedAssemblyComponent* subAssembly = NewObject<UAnimatedAssemblyComponent>(this, FName(*name)); // text("") can be just about anything.
 
-			// Register and attach the subcomponent into the tree
-			subAssembly->RegisterComponent();
-			subAssembly->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+																									 // Init the subcomponent
+				subAssembly->Init(actor, this, &substock);
 
-			// Set the relative position of the component
-			subAssembly->SetRelativeLocationAndRotation(subAssembly->pose.GetTranslation(), subAssembly->pose.GetRotation(), false, nullptr, ETeleportType::None);
-			
-			// Add the subComponent into the subComponents list
-			subComponents.Add(subAssembly);
+				// Register and attach the subcomponent into the tree
+				subAssembly->RegisterComponent();
+				subAssembly->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+
+				// Set the relative position of the component
+				subAssembly->SetRelativeLocationAndRotation(subAssembly->GetPose().GetTranslation(), subAssembly->GetPose().GetRotation(), false, nullptr, ETeleportType::None);
+
+				// Add the subComponent into the subComponents list
+				subComponents.Add(subAssembly);
+			}
+			else
+			{
+				// Create the subcomponent with a unique name using the hash
+				FString name(substock.getstrHash().c_str());
+				UAssemblyComponent* subAssembly = NewObject<UAssemblyComponent>(this, FName(*name)); // text("") can be just about anything.
+
+																									 // Init the subcomponent
+				subAssembly->Init(actor, this, &substock);
+
+				// Register and attach the subcomponent into the tree
+				subAssembly->RegisterComponent();
+				subAssembly->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+
+				// Set the relative position of the component
+				subAssembly->SetRelativeLocationAndRotation(subAssembly->GetPose().GetTranslation(), subAssembly->GetPose().GetRotation(), false, nullptr, ETeleportType::None);
+
+				// Add the subComponent into the subComponents list
+				subComponents.Add(subAssembly);
+			}
 		}
 	}
 }

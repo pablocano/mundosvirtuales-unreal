@@ -116,6 +116,12 @@ public:
 	UFUNCTION()
 	virtual void ProcessVisualizationMode_Implementation() override;
 
+	/// <summary>
+	/// Access to the pose of this component
+	/// </summary>
+	/// <returns>The pose of this component</returns>
+	FTransform GetPose() { return pose; }
+
 private:
 	/* ----- Events section ----- */
 
