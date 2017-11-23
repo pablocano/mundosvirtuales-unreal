@@ -4,6 +4,7 @@
 #include "PlantGameMode.h"
 #include "PlantActor.h"
 #include "MyPawn.h"
+#include "FirstPersonCharacter.h"
 #include "MyGameState.h"
 #include "Async.h"
 #include "ClientPlant.h"
@@ -12,7 +13,8 @@
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	DefaultPawnClass = AMyPawn::StaticClass();
+	//DefaultPawnClass = AMyPawn::StaticClass();
+	DefaultPawnClass = AFirstPersonCharacter::StaticClass();
 
 	GameStateClass = AMyGameState::StaticClass();
 
