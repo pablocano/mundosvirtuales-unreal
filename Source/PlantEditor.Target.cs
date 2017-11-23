@@ -5,16 +5,17 @@ using System.Collections.Generic;
 
 public class PlantEditorTarget : TargetRules
 {
-	public PlantEditorTarget(TargetInfo Target)//: base(Target)
+	public PlantEditorTarget(TargetInfo Target): base(Target)
     {
 		Type = TargetType.Editor;
-        //ExtraModuleNames.Add("Plant");
+        ExtraModuleNames.Add("Plant");
     }
 
 	//
 	// TargetRules interface.
 	//
 
+	/*
 	public override void SetupBinaries(
 		TargetInfo Target,
 		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
@@ -22,5 +23,5 @@ public class PlantEditorTarget : TargetRules
 		)
 	{
 		OutExtraModuleNames.AddRange( new string[] { "Plant" } );
-	}
+	}*/
 }

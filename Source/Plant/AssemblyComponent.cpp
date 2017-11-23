@@ -40,12 +40,12 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 	if (!mesh)
 		return;
 
+	// Set the mesh of this component
+	this->SetStaticMesh(mesh);
+
 	// Set the collition enabled to respond to click
 	this->SetCollisionEnabled(ECollisionEnabled::Type::QueryOnly);
 	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-
-	// Set the mesh of this component
-	this->SetStaticMesh(mesh);
 
 	// Set all the materials of this component as a dynamic material
 	for (int i = 0; i < this->GetNumMaterials(); i++)

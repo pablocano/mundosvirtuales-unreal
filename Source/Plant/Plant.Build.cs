@@ -16,7 +16,7 @@ public class Plant : ModuleRules
         get { return Path.GetFullPath(Path.Combine(ModulePath, "../../ThirdParty/")); }
     }
 
-    public Plant(TargetInfo ROTargetRules)// : base(ROTargetRules)
+    public Plant(ReadOnlyTargetRules ROTargetRules) : base(ROTargetRules)
     {
 		Definitions.Add("DISABLE_LOGGER=1");
 		
@@ -34,10 +34,10 @@ public class Plant : ModuleRules
 
         LoadClientLib(ROTargetRules);
 
-        UEBuildConfiguration.bForceEnableExceptions = true;
+        //UEBuildConfiguration.bForceEnableExceptions = true;
     }
 
-    public bool LoadClientLib(TargetInfo Target)
+    public bool LoadClientLib(ReadOnlyTargetRules Target)
     {
         bool isLibrarySupported = false;
 

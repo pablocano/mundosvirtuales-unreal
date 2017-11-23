@@ -46,15 +46,15 @@ void UAnimatedAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent*
 	if (!mesh || !animation)
 		return;
 
-	// Set the collition enabled to respond to click
-	this->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-
 	// Set the mesh of this component
 	this->SetSkeletalMesh(mesh);
 
 	// Set the animation of this component
 	this->OverrideAnimationData(animation, false, false, 0.f, 1.f);
+
+	// Set the collition enabled to respond to click
+	this->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
 	// Set all the materials of this component as a dynamic material
 	for (int i = 0; i < this->GetNumMaterials(); i++)
@@ -129,6 +129,7 @@ void UAnimatedAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent*
 // Called when the game starts or when spawned
 void UAnimatedAssemblyComponent::BeginPlay()
 {
+	Super::BeginPlay();
 	// Initialize the widget component if needed
 	if (widgetInfoComponent)
 	{
@@ -176,6 +177,7 @@ void UAnimatedAssemblyComponent::BeginPlay()
 // Called every frame
 void UAnimatedAssemblyComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction * ThisTickFunction)
 {
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	// If this component has a widget component
 	if (widgetInfoComponent)
 	{
