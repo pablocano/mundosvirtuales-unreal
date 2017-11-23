@@ -32,7 +32,7 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 
 	// Generate Title
 	textTitle = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
-	textTitle->SetText(FText::FromString(TEXT("Información")));
+	textTitle->SetText(FText::FromString(TEXT("Informacion")));
 	textTitle->Font.Size = 12;
 	textTitle->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
 	UHorizontalBoxSlot* SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(textTitle);
@@ -77,7 +77,7 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 
 	// Text Info
 	textInfo = NewObject<UWrapedTextBlock>(ContentWindowBox, UWrapedTextBlock::StaticClass());
-	textInfo->SetText(FText::FromString(TEXT("Información")));
+	textInfo->SetText(FText::FromString(TEXT("Informacion")));
 	textInfo->Font.Size = 10;
 	textInfo->SetAutoWrapText(true);
 	textInfo->SynchronizeProperties();
