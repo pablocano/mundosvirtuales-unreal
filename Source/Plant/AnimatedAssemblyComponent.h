@@ -67,7 +67,7 @@ public:
 	/// Close all the childs of this component
 	/// </summary>
 	UFUNCTION()
-	virtual void Collapse_Implementation() override;
+	virtual void Collapse_Implementation(UMeshComponent* activeRoot) override;
 
 	/// <summary>
 	/// Unregister this stock from the components tree
@@ -116,6 +116,9 @@ public:
 	/// </summary>
 	UFUNCTION()
 	virtual void ProcessVisualizationMode_Implementation() override;
+
+	UFUNCTION()
+	virtual UMeshComponent* GetParent_Implementation() override;
 
 	/// <summary>
 	/// Access to the pose of this component
@@ -299,4 +302,9 @@ private:
 	/// If this component is selected
 	/// </summary>
 	bool selected;
+
+	/// <summary>
+	/// If this component is part of the active tree
+	/// </summary>
+	bool activeTree;
 };

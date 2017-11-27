@@ -49,6 +49,35 @@ void APlantActor::Init(const StockPlant* stock)
 	AssemblyRootComponentInterface->Execute_Expand(AssemblyRootComponent);
 }
 
+void APlantActor::HandleClickOnComponent(UMeshComponent* clickedComponent)
+{
+	// Access to the clicked component
+	IMeshInterface* ClickedComponentInterface = Cast<IMeshInterface>(clickedComponent);
+	
+	// Select the clicked component
+	ClickedComponentInterface->Execute_SetSelected(clickedComponent, true);
+
+	// Expand the current component
+	ClickedComponentInterface->Execute_Expand(clickedComponent);
+
+	// Obtain the parent of the clicked component
+	UMeshComponent* ClickedParent = ClickedComponentInterface->Execute_GetParent(clickedComponent);
+
+	if (SelectedComponent)
+	{
+		// Access to the previous selected component
+		IMeshInterface* SelectedComponentInterface = Cast<IMeshInterface>(SelectedComponent);
+
+		// Collapse iteratively, until reaching the parent of the clicked component
+		SelectedComponentInterface->Execute_Collapse(SelectedComponent, ClickedParent);
+
+		SelectedComponentInterface->Execute_SetSelected(SelectedComponent, false);
+	}
+
+	// Set the new selected component
+	SelectedComponent = clickedComponent;
+}
+
 void APlantActor::ToggleConstructionMode()
 {
 	// Toggle the construction mode

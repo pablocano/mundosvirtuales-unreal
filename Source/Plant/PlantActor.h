@@ -42,6 +42,12 @@ public:
 	/// </summary>
 	/// <param name="stock"></param>
 	void Init(const StockPlant* stock);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="clickedComponent"></param>
+	void HandleClickOnComponent(UMeshComponent* clickedComponent);
   
 	/// <summary>
 	/// The selected component

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Components/MeshComponent.h"
 #include "MeshInterface.generated.h"
 
 // This class does not need to be modified.
@@ -22,7 +23,7 @@ class PLANT_API IMeshInterface
 public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
-	void Collapse();
+	void Collapse(UMeshComponent* activeRoot);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	bool IsSelected();
@@ -53,4 +54,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	void ProcessVisualizationMode();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	UMeshComponent* GetParent();
 };
