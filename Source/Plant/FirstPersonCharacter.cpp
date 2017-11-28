@@ -31,7 +31,7 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	L_MotionController->SetupAttachment(RootComponent);
 	
 	// Uncomment the following line to turn motion controllers on by default:
-	//bUsingMotionControllers = true;
+	bUsingMotionControllers = true;
 
 }
 
@@ -39,7 +39,6 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -62,6 +61,11 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	const FInputAxisKeyMapping rightKey(FName("MoveRight"), EKeys::D, 1.f);
 	const FInputAxisKeyMapping leftKey(FName("MoveRight"), EKeys::A, -1.f);
 
+	const FInputAxisKeyMapping fowardKeyovr(FName("MoveForward"), EKeys::MotionController_Left_FaceButton1, 0.25f);
+	const FInputAxisKeyMapping backwardKeyovr(FName("MoveForward"), EKeys::MotionController_Left_FaceButton2, -0.25f);
+	const FInputAxisKeyMapping rightKeyovr(FName("MoveRight"), EKeys::MotionController_Right_FaceButton1, 0.25f);
+	const FInputAxisKeyMapping leftKeyovr(FName("MoveRight"), EKeys::MotionController_Right_FaceButton2, -0.25f);
+
 	const FInputActionKeyMapping jump(FName("Jump"), EKeys::SpaceBar);
 
 	const FInputAxisKeyMapping turnAxis(FName("Turn"), FKey(FName("MouseX")), 1.0f);
@@ -69,8 +73,12 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 	((UInputSettings*)inputSettings)->AddAxisMapping(fowardKey);
 	((UInputSettings*)inputSettings)->AddAxisMapping(backwardKey);
+	((UInputSettings*)inputSettings)->AddAxisMapping(fowardKeyovr);
+	((UInputSettings*)inputSettings)->AddAxisMapping(backwardKeyovr);
 	((UInputSettings*)inputSettings)->AddAxisMapping(rightKey);
 	((UInputSettings*)inputSettings)->AddAxisMapping(leftKey);
+	((UInputSettings*)inputSettings)->AddAxisMapping(rightKeyovr);
+	((UInputSettings*)inputSettings)->AddAxisMapping(leftKeyovr);
 	((UInputSettings*)inputSettings)->AddActionMapping(jump);
 
 	((UInputSettings*)inputSettings)->AddAxisMapping(turnAxis);
