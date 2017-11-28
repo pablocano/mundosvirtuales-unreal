@@ -9,7 +9,7 @@
 #define M_PI           3.14159265358979323846  /* pi */
 
 UAnimatedAssemblyComponent::UAnimatedAssemblyComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), selected(false), Space(EWidgetSpace::World), sizeWidget(1920, 1080), widgetInfoComponent(nullptr), pose()
+	: Super(ObjectInitializer), selected(false), Space(EWidgetSpace::World), sizeWidget(1920, 1080), widgetInfoComponent(nullptr), pose(), isExpanded(false)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -22,6 +22,9 @@ void UAnimatedAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent*
 	this->parent = parentComponent;
 	this->stock = stockEntry;
 	this->assembly = &this->stock->getAssembly();
+
+	// Initialization of the can be expanded variable
+	canBeExpanded = !this->stock->getSubStock().empty();
 
 	// Set the pose of this component using the position in the stock and transforming it in centimeters and degrees
 	Vectorf3D position = stock->getPosition().m_pos * 100;
@@ -263,6 +266,8 @@ void UAnimatedAssemblyComponent::Collapse_Implementation(UMeshComponent* activeR
 	// Show this component
 	ShowComponent_Implementation();
 
+	isExpanded = false;
+
 	// Collapse the parent
 	parentInterface->Execute_Collapse(parent, activeRoot);
 }
@@ -310,8 +315,15 @@ void UAnimatedAssemblyComponent::UnregisterStock_Implementation()
 // Expand this component
 void UAnimatedAssemblyComponent::Expand_Implementation()
 {
-	if (!stock->getSubStock().empty())
+	if (canBeExpanded)
 		ExpandComponent();
+}
+
+// Set the focus of this component
+void UAnimatedAssemblyComponent::SetFocus_Implementation()
+{
+	// Set the borders to nothing
+	SetBorders(HOVER);
 }
 
 // Remove the focus of this component
@@ -319,32 +331,6 @@ void UAnimatedAssemblyComponent::RemoveFocus_Implementation()
 {
 	// Set the borders to nothing
 	SetBorders(NOTHING);
-
-	// Disable the widget
-	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
-		widgetInfoComponent->DisableWidget();
-}
-
-// Remove the focus of the child
-void UAnimatedAssemblyComponent::RemoveFocusChild_Implementation()
-{
-	// If there is a focused child
-	if (focusedChild)
-	{
-		// Remove its focus
-		IMeshInterface* focusedChildInterface = Cast<IMeshInterface>(focusedChild);
-		focusedChildInterface->Execute_RemoveFocus(focusedChild);
-	}
-
-	// Disable the widget
-	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
-		widgetInfoComponent->DisableWidget();
-}
-
-// Set the component as the focused child
-void UAnimatedAssemblyComponent::SetFocusChild_Implementation(UMeshComponent * child)
-{
-	this->focusedChild = child;
 }
 
 // Get the global pose of this component by using the parent position
@@ -423,63 +409,25 @@ void UAnimatedAssemblyComponent::ProcessVisualizationMode_Implementation()
 // Called when mouse is over this component
 void UAnimatedAssemblyComponent::CustomOnBeginMouseOver(UPrimitiveComponent * TouchedComponent)
 {
-	//If this component is focused, do nothing
-	if (borderStatus == FOCUS)
+	if (selected || !stock->getCanBeSelected() || actor->procedureMode)
 		return;
 
-	// If this component has a parent
-	if (parent)
-	{
-		// Access to the parent
-		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
-
-		// And if its parent is selected
-		if (parentInterface->Execute_IsSelected(parent))
-		{
-			// If this componet is not already selected
-			if (!selected && stock->getCanBeSelected())
-			{
-				// Set borders as hover
-				SetBorders(HOVER);
-				return;
-			}
-		}
-	}
-
-	// If this component is not selected, set hover
-	if (!selected && stock->getCanBeSelected())
+	if (canBeExpanded)
 		SetHover();
+	else
+		SetBorders(HOVER);
 }
 
 // Called when mouse is stop been over this component
 void UAnimatedAssemblyComponent::CustomOnEndMouseOver(UPrimitiveComponent * TouchedComponent)
 {
-	// If this component is focused, do nothing
-	if (borderStatus == FOCUS)
+	if (selected || !stock->getCanBeSelected() || actor->procedureMode)
 		return;
 
-	// If this component has a parent
-	if (parent)
-	{
-		// Access to the parent
-		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
-
-		//If the parent is selected
-		if (parentInterface->Execute_IsSelected(parent))
-		{
-			// If this component is not already selected
-			if (!selected && stock->getCanBeSelected())
-			{
-				// Set borders to nothing
-				SetBorders(NOTHING);
-				return;
-			}
-		}
-	}
-
-	// If this component is not selected, remove hover
-	if (!selected && stock->getCanBeSelected())
+	if (canBeExpanded)
 		SetHover(false);
+	else
+		SetBorders(NOTHING);
 }
 
 // Set the hover status of this component
@@ -511,6 +459,11 @@ void UAnimatedAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent *
 		return;
 
 	actor->HandleClickOnComponent(this);
+}
+
+void UAnimatedAssemblyComponent::HideComponent_Implementation()
+{
+	Hide();
 }
 
 // Hide this component
@@ -558,6 +511,9 @@ void UAnimatedAssemblyComponent::ExpandComponent()
 {
 	// Hide the mesh of this componet
 	Hide();
+
+	isExpanded = true;
+
 	// Expand this component in all its childs
 	for (StockPlant const& substock : stock->getSubStock())
 	{
@@ -606,6 +562,11 @@ void UAnimatedAssemblyComponent::ExpandComponent()
 	}
 }
 
+bool UAnimatedAssemblyComponent::IsExpanded_Implementation()
+{
+	return isExpanded;
+}
+
 // Updates the position of the widget
 void UAnimatedAssemblyComponent::UpdateWidgetPosition()
 {
@@ -626,36 +587,6 @@ void UAnimatedAssemblyComponent::UpdateWidgetPosition()
 // Event triggered with the ok button of the widget
 void UAnimatedAssemblyComponent::OnClickButtonOk()
 {
-	/*if (selected && parent)
-	{
-		// Remove the selection
-		selected = false;
-
-		// Access to the parent
-		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
-
-		// Select the parent
-		parentInterface->Execute_SetSelected(parent, true);
-
-		// Remove this component as selected, and set the parent
-		actor->SelectedComponent = parent;
-
-		// Collapse this component
-		this->Collapse_Implementation(0);
-
-		return;
-	}
-	else if (parent)
-	{
-		// Access to the parent
-		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
-
-		// Disable the parent widget
-		parentInterface->Execute_RemoveFocusChild(parent);
-
-		// Show the widget of the parent
-		parentInterface->Execute_SetSelected(parent, true);
-	}*/
 }
 
 // Event triggered when the widget is clicked
@@ -665,6 +596,25 @@ void UAnimatedAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pCo
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click on WidgetComponent"));
 	}
+}
+
+UMeshComponent* UAnimatedAssemblyComponent::GetSubComponent_Implementation(int assemblyId, int instanceId)
+{
+	// Search between all the sub components
+	for (UMeshComponent* subComponent : this->subComponents)
+	{
+		IMeshInterface* assemblyComponentInterface = Cast<IMeshInterface>(subComponent);
+
+		if (assemblyComponentInterface->Execute_IsSubComponent(subComponent, assemblyId, instanceId))
+			return subComponent;
+	}
+
+	return nullptr;
+}
+
+bool UAnimatedAssemblyComponent::IsSubComponent_Implementation(int assemblyId, int instanceId)
+{
+	return stock->getAssemblyID() == assemblyId && stock->getInstance() == instanceId;
 }
 
 

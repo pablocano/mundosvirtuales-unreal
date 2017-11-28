@@ -9,7 +9,7 @@
 #define M_PI           3.14159265358979323846  /* pi */
 
 UAssemblyComponent::UAssemblyComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer), selected(false), Space(EWidgetSpace::World), sizeWidget(1920, 1080), widgetInfoComponent(nullptr), pose()
+	: Super(ObjectInitializer), selected(false), Space(EWidgetSpace::World), sizeWidget(1920, 1080), widgetInfoComponent(nullptr), pose(), isExpanded(false)
 {
 	PrimaryComponentTick.bCanEverTick = true;
 }
@@ -22,6 +22,9 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->parent = parentComponent;
 	this->stock = stockEntry;
 	this->assembly = &this->stock->getAssembly();
+
+	// Initialization of the can be expanded variable
+	canBeExpanded = !this->stock->getSubStock().empty();
 
 	// Set the pose of this component using the position in the stock and transforming it in centimeters and degrees
 	Vectorf3D position = stock->getPosition().m_pos * 100;
@@ -299,8 +302,15 @@ void UAssemblyComponent::UnregisterStock_Implementation()
 // Expand this component
 void UAssemblyComponent::Expand_Implementation()
 {
-	if(!stock->getSubStock().empty())
+	if(canBeExpanded)
 		ExpandComponent();
+}
+
+// Set the focus of this component
+void UAssemblyComponent::SetFocus_Implementation()
+{
+	// Set the borders to nothing
+	SetBorders(HOVER);
 }
 
 // Remove the focus of this component
@@ -308,32 +318,6 @@ void UAssemblyComponent::RemoveFocus_Implementation()
 {
 	// Set the borders to nothing
 	SetBorders(NOTHING);
-
-	// Disable the widget
-	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
-		widgetInfoComponent->DisableWidget();
-}
-
-// Remove the focus of the child
-void UAssemblyComponent::RemoveFocusChild_Implementation()
-{
-	// If there is a focused child
-	if (focusedChild)
-	{
-		// Remove its focus
-		IMeshInterface* focusedChildInterface = Cast<IMeshInterface>(focusedChild);
-		focusedChildInterface->Execute_RemoveFocus(focusedChild);
-	}
-
-	// Disable the widget
-	if (widgetInfoComponent && widgetInfoComponent->IsVisible())
-		widgetInfoComponent->DisableWidget();
-}
-
-// Set the component as the focused child
-void UAssemblyComponent::SetFocusChild_Implementation(UMeshComponent * child)
-{
-	this->focusedChild = child;
 }
 
 // Get the global pose of this component by using the parent position
@@ -412,63 +396,25 @@ void UAssemblyComponent::ProcessVisualizationMode_Implementation()
 // Called when mouse is over this component
 void UAssemblyComponent::CustomOnBeginMouseOver(UPrimitiveComponent * TouchedComponent)
 {
-	//If this component is focused, do nothing
-	if (borderStatus == FOCUS)
+	if (selected || !stock->getCanBeSelected() || actor->procedureMode)
 		return;
 
-	// If this component has a parent
-	if (parent)
-	{
-		// Access to the parent
-		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
-		
-		// And if its parent is selected
-		if (parentInterface->Execute_IsSelected(parent))
-		{
-			// If this componet is not already selected
-			if (!selected && stock->getCanBeSelected())
-			{
-				// Set borders as hover
-				SetBorders(HOVER);
-				return;
-			}
-		}
-	}
-
-	// If this component is not selected, set hover
-	if (!selected && stock->getCanBeSelected())
+	if (canBeExpanded)
 		SetHover();
+	else
+		SetBorders(HOVER);
 }
 
 // Called when mouse is stop been over this component
 void UAssemblyComponent::CustomOnEndMouseOver(UPrimitiveComponent * TouchedComponent)
 {
-	// If this component is focused, do nothing
-	if (borderStatus == FOCUS)
+	if (selected || !stock->getCanBeSelected() || actor->procedureMode)
 		return;
 
-	// If this component has a parent
-	if (parent)
-	{
-		// Access to the parent
-		IMeshInterface* parentInterface = Cast<IMeshInterface>(parent);
-    
-		//If the parent is selected
-		if (parentInterface->Execute_IsSelected(parent))
-		{
-			// If this component is not already selected
-			if (!selected && stock->getCanBeSelected())
-			{
-				// Set borders to nothing
-				SetBorders(NOTHING);
-				return;
-			}
-		}
-	}
-
-	// If this component is not selected, remove hover
-	if (!selected && stock->getCanBeSelected())
+	if (canBeExpanded)
 		SetHover(false);
+	else
+		SetBorders(NOTHING);
 }
 
 // Set the hover status of this component
@@ -500,6 +446,11 @@ void UAssemblyComponent::CustomOnBeginMouseClicked(UPrimitiveComponent * Touched
 		return;
 
 	actor->HandleClickOnComponent(this);
+}
+
+void UAssemblyComponent::HideComponent_Implementation()
+{
+	Hide();
 }
 
 // Hide this component
@@ -547,6 +498,8 @@ void UAssemblyComponent::ExpandComponent()
 {
 	// Hide the mesh of this componet
 	Hide();
+
+	isExpanded = true;
 	// Expand this component in all its childs
 	for (StockPlant const& substock : stock->getSubStock())
 	{
@@ -593,6 +546,12 @@ void UAssemblyComponent::ExpandComponent()
 			}
 		}
 	}
+}
+
+
+bool UAssemblyComponent::IsExpanded_Implementation()
+{
+	return isExpanded;
 }
 
 // Updates the position of the widget
@@ -654,6 +613,25 @@ void UAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pComponent,
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click on WidgetComponent"));
 	}
+}
+
+UMeshComponent* UAssemblyComponent::GetSubComponent_Implementation(int assemblyId, int instanceId)
+{
+	// Search between all the sub components
+	for (UMeshComponent* subComponent : this->subComponents)
+	{
+		IMeshInterface* assemblyComponentInterface = Cast<IMeshInterface>(subComponent);
+
+		if (assemblyComponentInterface->Execute_IsSubComponent(subComponent, assemblyId, instanceId))
+			return subComponent;
+	}
+
+	return nullptr;
+}
+
+bool UAssemblyComponent::IsSubComponent_Implementation(int assemblyId, int instanceId)
+{
+	return stock->getAssemblyID() == assemblyId && stock->getInstance() == instanceId;
 }
 
 

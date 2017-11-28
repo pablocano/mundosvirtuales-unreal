@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "AssemblyComponent.h" 
-#include "GameFramework/Actor.h"
+#include "plant/procedures/Procedure.h"
 #include "plant/StockPlant.h"
+#include "GameFramework/Actor.h"
 #include "PlantActor.generated.h"
 
 UCLASS()
@@ -48,6 +48,11 @@ public:
 	/// </summary>
 	/// <param name="clickedComponent"></param>
 	void HandleClickOnComponent(UMeshComponent* clickedComponent);
+
+	/// <summary>
+	/// 
+	/// </summary>
+	void PerformStep(UMeshComponent* procedureComponentRoot);
   
 	/// <summary>
 	/// The selected component
@@ -59,6 +64,8 @@ public:
 	/// </summary>
 	UMeshComponent* AssemblyRootComponent;
 
+	TArray<UMeshComponent*> LastUsedComponents;
+
 	/// <summary>
 	/// If the construction mode is ON
 	/// </summary>
@@ -68,5 +75,9 @@ public:
 	/// The highlight state in the construction mode
 	/// </summary>
 	StateStock highlightState;
+
+	Procedure p;
+
+	bool procedureMode;
 	
 };
