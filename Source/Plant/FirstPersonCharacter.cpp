@@ -28,7 +28,15 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	R_MotionController->Hand = EControllerHand::Right;
 	R_MotionController->SetupAttachment(RootComponent);
 	L_MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("L_MotionController"));
+	L_MotionController->Hand = EControllerHand::Left;
 	L_MotionController->SetupAttachment(RootComponent);
+
+	// Create Hand Mesh
+	HandMeshRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMeshRight"));
+	HandMeshRight->SetupAttachment(R_MotionController);
+
+	HandMeshLeft = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMeshLeft"));
+	HandMeshLeft->SetupAttachment(L_MotionController);
 	
 	// Uncomment the following line to turn motion controllers on by default:
 	bUsingMotionControllers = true;
@@ -39,6 +47,20 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Load Mesh
+	USkeletalMesh* mesh = LoadObject<USkeletalMesh>(NULL, TEXT("/Game/Mannequin/Character/Mesh/MannequinHand_Right.MannequinHand_Right"), NULL, LOAD_None, NULL);
+
+	// Setup Hand right
+	HandMeshRight->SetSkeletalMesh(mesh);
+	HandMeshRight->SetRelativeRotation(FRotator(0, 0, 90));
+
+	// Setup Hand left
+	HandMeshLeft->SetSkeletalMesh(mesh);
+	HandMeshLeft->SetWorldScale3D(FVector(1, 1, -1));
+	HandMeshLeft->SetRelativeRotation(FRotator(0, 0, 90));
+
+
 }
 
 // Called every frame

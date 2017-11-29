@@ -5,6 +5,14 @@
 #include "GameFramework/Character.h"
 #include "FirstPersonCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EGripState : uint8
+{
+	Open,
+	CanGrab,
+	Grab
+};
+
 UCLASS()
 class PLANT_API AFirstPersonCharacter : public ACharacter
 {
@@ -69,4 +77,15 @@ public:
 	/** Whether to use motion controller location for aiming. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
+
+protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Code Variables")
+	EGripState Grip;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	class USkeletalMeshComponent *HandMeshRight;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	class USkeletalMeshComponent *HandMeshLeft;
 };
