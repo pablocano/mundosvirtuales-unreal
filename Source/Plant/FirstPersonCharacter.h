@@ -88,4 +88,15 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
 	class USkeletalMeshComponent *HandMeshLeft;
+
+	UAnimSequence* animHandClose;
+	UAnimSequence* animHandOpen;
+
+	void CloseHandRight();
+
+	void StopCloseHandRight();
+
+	void CloseHandLeft();
+
+	void StopCloseHandLeft();
 };
