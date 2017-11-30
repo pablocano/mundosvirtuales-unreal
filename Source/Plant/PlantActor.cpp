@@ -97,52 +97,70 @@ void APlantActor::HandleClickOnComponent(UMeshComponent* clickedComponent)
 
 void APlantActor::PerformStep(UMeshComponent* procedureComponentRoot)
 {
+	// Set the procedure mode on
 	procedureMode = true;
-	IMeshInterface* ProcedureComponentRootInterface = Cast<IMeshInterface>(procedureComponentRoot);
 
+	// Check if the root component is expanded
+	IMeshInterface* ProcedureComponentRootInterface = Cast<IMeshInterface>(procedureComponentRoot);
 	if (!ProcedureComponentRootInterface->Execute_IsExpanded(procedureComponentRoot))
 		ProcedureComponentRootInterface->Execute_Expand(procedureComponentRoot);
 
+	// The next step
 	Step s;
 
 	// Ask for the next step
 	if (p.NextStep(s))
 	{
+		// Remove the focus of all the components of the previous step
 		for (UMeshComponent* lastComponent : LastUsedComponents)
 		{
 			IMeshInterface* LastComponentInterface = Cast<IMeshInterface>(lastComponent);
 			LastComponentInterface->Execute_RemoveFocus(lastComponent);
 		}
+
+		// Reset the list of the last used components
 		LastUsedComponents.Empty();
 
+		// Iterate over all the instructions of this step
 		for (Instruction instruction : s.getInstructions())
 		{
+			// Restart the root of the search
 			UMeshComponent* currentComponent = procedureComponentRoot;
 
+			// Search the component using the path
 			for (std::pair<int, int> path : instruction.m_path)
 			{
 				IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
 				UMeshComponent* currentSubComponent = CurrentComponentInterface->Execute_GetSubComponent(currentComponent, path.first, path.second);
 
+				// It should always find a component
 				if (currentSubComponent) {
+					// If the component is not expanded, expand it
 					IMeshInterface* CurrentSubComponentInterface = Cast<IMeshInterface>(currentSubComponent);
 					if(!CurrentSubComponentInterface->Execute_IsExpanded(currentSubComponent))
 						CurrentSubComponentInterface->Execute_Expand(currentSubComponent);
 
+					// Update the current component
 					currentComponent = currentSubComponent;
 				}
 				else
 				{
+					// This should never happen
+					std::cerr << "Component not found" << std::endl;
 					break;
 				}
 			}
 
+			// Add this component to the list of  used components
 			LastUsedComponents.Add(currentComponent);
 
+			//  Access to the interface
 			IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
+
+			// Set this component as focused
 			CurrentComponentInterface->Execute_SetFocus(currentComponent);
 
-			UAnimatedAssemblyComponent* animatedComponent;
+			// Execute the instruction accordingly
 			switch (instruction.m_type)
 			{
 			case Instruction::INS_CREATE:
@@ -152,18 +170,24 @@ void APlantActor::PerformStep(UMeshComponent* procedureComponentRoot)
 				CurrentComponentInterface->Execute_HideComponent(currentComponent);
 				break;
 			case Instruction::INS_INSERT:
+			{
+				UAnimatedAssemblyComponent* animatedComponent;
 				animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
 				if (animatedComponent) {
 					animatedComponent->SetPlayRate(-1);
 					animatedComponent->Play(true);
 				}
+			}
 				break;
 			case Instruction::INS_REMOVE:
+			{
+				UAnimatedAssemblyComponent* animatedComponent;
 				animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
 				if (animatedComponent) {
 					animatedComponent->SetPlayRate(1);
 					animatedComponent->Play(true);
 				}
+			}
 				break;
 			default:
 				break;

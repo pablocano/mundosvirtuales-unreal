@@ -64,6 +64,9 @@ public:
 	/// </summary>
 	UMeshComponent* AssemblyRootComponent;
 
+	/// <summary>
+	/// Helper array to unfocus the previous components used in a procedure
+	/// </summary>
 	TArray<UMeshComponent*> LastUsedComponents;
 
 	/// <summary>
