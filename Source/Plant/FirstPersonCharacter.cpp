@@ -23,6 +23,33 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	FirstPersonCameraComponent->RelativeLocation = FVector(0, 0, 64.f); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = false;
 	FirstPersonCameraComponent->bLockToHmd = true;
+
+	// UI VR
+	widgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("VRWidgetComponent"));
+	// Initialize widget component
+	widgetComponent->SetVisibility(true);
+	widgetComponent->SetOnlyOwnerSee(false);
+	widgetComponent->SetupAttachment(RootComponent);
+	//widgetComponent->RelativeLocation = FVector(40.f, -5.f, 5.f);
+	widgetComponent->RelativeLocation = FVector(80.f, -30.f, 30.f);
+	widgetComponent->SetRelativeRotation(FRotator(0, 150, 0));
+	widgetComponent->SetDrawSize(FVector2D(1920, 1080));
+
+	// Set collision to respond to clicks
+	widgetComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	widgetComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	widgetComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+	// Set the style of the widget
+	widgetComponent->SetBackgroundColor(FLinearColor(0.f, 0.f, 0.f, .5f));
+	widgetComponent->SetBlendMode(EWidgetBlendMode::Transparent);
+	widgetComponent->SetWidgetSpace(EWidgetSpace::World);
+
+	// Set the scale of the widget
+	widgetComponent->SetRelativeScale3D(FVector(0.02f, 0.02f, 0.02f));
+
+	widgetComponent->SetTwoSided(true);
+	SetBoolUProperty(widgetComponent, TEXT("bReceiveHardwareInput"), true);  // Enable click
 	
 	// Create VR Controllers.
 	R_MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("R_MotionController"));
@@ -49,17 +76,24 @@ void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Create the actual widget
+	widget = NewObject<UVRWidget>(this, UVRWidget::StaticClass());
+	// Set the widget into the widget component
+	widgetComponent->SetWidget(widget);
+
 	// Load Mesh
 	USkeletalMesh* mesh = LoadObject<USkeletalMesh>(NULL, TEXT("/Game/VirtualReality/Mannequin/Character/Mesh/MannequinHand_Right.MannequinHand_Right"), NULL, LOAD_None, NULL);
 
 	// Setup Hand right
 	HandMeshRight->SetSkeletalMesh(mesh);
 	HandMeshRight->SetRelativeRotation(FRotator(0, 0, 90));
+	HandMeshRight->RelativeLocation = FVector(-10.f, 5.f, -5.f);
 
 	// Setup Hand left
 	HandMeshLeft->SetSkeletalMesh(mesh);
 	HandMeshLeft->SetWorldScale3D(FVector(1, 1, -1));
 	HandMeshLeft->SetRelativeRotation(FRotator(0, 0, 90));
+	HandMeshLeft->RelativeLocation = FVector(-10.f, -5.f, -5.f);
 
 	// Load Animation
 	animHandClose = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Grab.MannequinHand_Right_Grab"), NULL, LOAD_None, NULL);

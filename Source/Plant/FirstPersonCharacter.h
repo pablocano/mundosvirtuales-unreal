@@ -3,6 +3,8 @@
 #pragma once
 
 #include "GameFramework/Character.h"
+#include "Components/WidgetComponent.h"
+#include "VRWidget.h"
 #include "FirstPersonCharacter.generated.h"
 
 UENUM(BlueprintType)
@@ -99,4 +101,14 @@ protected:
 	void CloseHandLeft();
 
 	void StopCloseHandLeft();
+
+	/// <summary>
+	/// The widget component of this component
+	/// </summary>
+	UWidgetComponent* widgetComponent;
+
+	/// <summary>
+	/// The widget component of this component
+	/// </summary>
+	UVRWidget* widget;
 };
