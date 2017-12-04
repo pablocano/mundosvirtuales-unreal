@@ -53,6 +53,7 @@ void UAnimatedAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent*
 	this->OverrideAnimationData(animation, false, false, 0.f, 1.f);
 
 	// Set the collition enabled to respond to click
+	this->SetEnablePhysicsBlending(true);
 	this->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 

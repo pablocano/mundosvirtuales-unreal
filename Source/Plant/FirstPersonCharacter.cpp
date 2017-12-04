@@ -32,16 +32,13 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	L_MotionController->Hand = EControllerHand::Left;
 	L_MotionController->SetupAttachment(RootComponent);
 
-	// Create Hand Mesh
+	// Create Hand Right
 	HandMeshRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMeshRight"));
 	HandMeshRight->SetupAttachment(R_MotionController);
 
+	// Create Hand Left
 	HandMeshLeft = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMeshLeft"));
 	HandMeshLeft->SetupAttachment(L_MotionController);
-	
-	// Uncomment the following line to turn motion controllers on by default:
-	bUsingMotionControllers = true;
-
 }
 
 // Called when the game starts or when spawned
@@ -55,13 +52,21 @@ void AFirstPersonCharacter::BeginPlay()
 	// Setup Hand right
 	HandMeshRight->SetSkeletalMesh(mesh);
 	HandMeshRight->SetRelativeRotation(FRotator(0, 0, 90));
+	HandMeshRight->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	HandMeshRight->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	HandMeshLeft->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
 	// Setup Hand left
 	HandMeshLeft->SetSkeletalMesh(mesh);
 	HandMeshLeft->SetWorldScale3D(FVector(1, 1, -1));
 	HandMeshLeft->SetRelativeRotation(FRotator(0, 0, 90));
+	HandMeshLeft->SetAllBodiesSimulatePhysics(true);
+	HandMeshLeft->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
+	HandMeshLeft->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
-	// Load Animation
+	HandMeshLeft->OnComponentHit.AddDynamic(this, &AFirstPersonCharacter::OnHit);
+
+	// Load Animations
 	animHandClose = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Grab.MannequinHand_Right_Grab"), NULL, LOAD_None, NULL);
 	animHandOpen = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Grab.MannequinHand_Right_Open"), NULL, LOAD_None, NULL);
 }
@@ -70,7 +75,6 @@ void AFirstPersonCharacter::BeginPlay()
 void AFirstPersonCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -79,8 +83,10 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	// set up gameplay key bindings
 	check(PlayerInputComponent);
 
+	// Genarate Mapping of inputs
 	const UInputSettings* inputSettings = GetDefault<UInputSettings>();
 
+	// Keys
 	const FInputAxisKeyMapping fowardKey(FName("MoveForward"), EKeys::W, 1.f);
 	const FInputAxisKeyMapping backwardKey(FName("MoveForward"), EKeys::S, -1.f);
 	const FInputAxisKeyMapping rightKey(FName("MoveRight"), EKeys::D, 1.f);
@@ -208,4 +214,16 @@ void AFirstPersonCharacter::StopCloseHandLeft()
 	HandMeshLeft->Stop();
 	HandMeshLeft->OverrideAnimationData(animHandOpen, false, false, 0.f, 0.25f);
 	HandMeshLeft->Play(false);
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Close Hand"));
+	}
+}
+
+void AFirstPersonCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Hit!"));
+	}
 }
