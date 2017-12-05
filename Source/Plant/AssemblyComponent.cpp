@@ -77,7 +77,8 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->OnBeginCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseOver);
 	this->OnEndCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnEndMouseOver);
 	this->OnClicked.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseClicked);
-	this->OnComponentHit.AddDynamic(this, &UAssemblyComponent::OnHit); 
+
+	// Set the overlay callbacks 
 	this->OnComponentBeginOverlap.AddDynamic(this, &UAssemblyComponent::OnOverlapBegin);
 	this->OnComponentEndOverlap.AddDynamic(this, &UAssemblyComponent::OnOverlapEnd);
 
@@ -783,23 +784,12 @@ void UAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pComponent,
 	}
 }
 
-void UAssemblyComponent::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Hit Assembly!"));
-	}
-}
-
 void UAssemblyComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// Other Actor is the actor that triggered the event. Check that is not ourself.  
 	if ((OtherActor != nullptr) && (OtherActor != this->GetOwner()) && (OtherComp != nullptr))
 	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Overlap Begin!"));
-		}
+		CustomOnBeginMouseOver(OverlappedComp);
 	}
 }
 
@@ -808,10 +798,7 @@ void UAssemblyComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActo
 	// Other Actor is the actor that triggered the event. Check that is not ourself.  
 	if ((OtherActor != nullptr) && (OtherActor != this->GetOwner()) && (OtherComp != nullptr))
 	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Overlap End!"));
-		}
+		CustomOnEndMouseOver(OverlappedComp);
 	}
 }
 

@@ -14,7 +14,8 @@ enum class EGripState : uint8
 {
 	Open,
 	CanGrab,
-	Grab
+	Grab,
+	Index
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -44,13 +45,21 @@ protected:
 	EGripState Grip;
 
 	// Animations
+	UPROPERTY()
 	UAnimSequence* animHandClose;
+
+	UPROPERTY()
 	UAnimSequence* animHandOpen;
 
+	UPROPERTY()
+	UAnimSequence* animHandIndex;
+
 	// Left or Right Hand
+	UPROPERTY()
 	EControllerHand Hand;
 
 	// Feedback Haptic
+	UPROPERTY()
 	UHapticFeedbackEffect_Curve* hapticFeedBack;
 
 	// Count of touch

@@ -2,29 +2,31 @@
 
 #include "Plant.h"
 #include "MyGameState.h"
+#include "AssemblyComponent.h"
 
 AMyGameState::AMyGameState(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), selectedComponent(nullptr)
 {
 }
 
-bool AMyGameState::isSeletedMyActor(UMeshInterface* actor)
+bool AMyGameState::isSeletedComponent(UPrimitiveComponent* component)
 {
-	if (actor == nullptr)
-		return selectedComponent != nullptr;
-	else
-		return selectedComponent == actor;
+	return selectedComponent == component;
 }
 
-bool AMyGameState::setSelectedMyActor(UMeshInterface* actor)
+void AMyGameState::setSelectedComponent(UPrimitiveComponent* component)
 {
-	if (selectedComponent != nullptr)
+	selectedComponent = component;
+}
+
+void AMyGameState::onComponent()
+{
+	if (selectedComponent)
 	{
-		IMeshInterface* componentInterface = Cast<IMeshInterface>(selectedComponent);
+		UAssemblyComponent* assemblyComponent = Cast<UAssemblyComponent>(selectedComponent);
 
-		componentInterface->Execute_SetSelected(selectedComponent, false);
+		if (assemblyComponent)
+		{
+			
+		}
 	}
-
-	selectedComponent = actor;
-	
-	return true;
 }

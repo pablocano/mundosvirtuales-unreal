@@ -68,6 +68,7 @@ void UHandComponent::BeginPlay()
 	// Load Animations
 	this->animHandClose = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Grab.MannequinHand_Right_Grab"), NULL, LOAD_None, NULL);
 	this->animHandOpen = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Open.MannequinHand_Right_Open"), NULL, LOAD_None, NULL);
+	this->animHandIndex = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Index.MannequinHand_Right_Index"), NULL, LOAD_None, NULL);
 }
 
 
@@ -81,10 +82,10 @@ void UHandComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 
 void UHandComponent::CloseHand()
 {
-	if (this->animHandClose && this->Grip != EGripState::Grab)
+	if (this->animHandIndex && this->Grip != EGripState::Grab)
 	{
 		// Override current animation and Play close hand animation
-		this->OverrideAnimationData(this->animHandClose, false, false, 0.f, 0.25f);
+		this->OverrideAnimationData(this->animHandIndex, false, false, 0.f, 0.25f);
 		this->Play(false);
 
 		// Change state of grip
@@ -116,7 +117,8 @@ void UHandComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 		if (++touchCount <= 1)
 		{
 			// Start loop of haptic effect
-			GetWorld()->GetFirstPlayerController()->PlayHapticEffect(Cast<UHapticFeedbackEffect_Base>(hapticFeedBack), Hand, 1.0f, true);
+			if(hapticFeedBack)
+				GetWorld()->GetFirstPlayerController()->PlayHapticEffect(hapticFeedBack, Hand, 1.0f, true);
 		}
 	}
 }

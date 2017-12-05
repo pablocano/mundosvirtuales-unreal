@@ -12,11 +12,12 @@ class PLANT_API AMyGameState : public AGameState
 {
 	GENERATED_UCLASS_BODY()
 	
-	UMeshInterface* selectedComponent;
+	UPrimitiveComponent* selectedComponent;
 
 public:
-	bool isSeletedMyActor(UMeshInterface* actor = nullptr);
+	bool isSeletedComponent(UPrimitiveComponent* component);
 
-	bool setSelectedMyActor(UMeshInterface* actor);
-	
+	void setSelectedComponent(UPrimitiveComponent* component);
+
+	void onComponent();
 };

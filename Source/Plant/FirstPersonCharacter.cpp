@@ -4,6 +4,7 @@
 #include "FirstPersonCharacter.h"
 #include "GameFramework/InputSettings.h"
 #include "Kismet/HeadMountedDisplayFunctionLibrary.h"
+#include "MyGameState.h"
 
 
 // Sets default values
@@ -56,8 +57,8 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	const FInputAxisKeyMapping fowardKeyovr(FName("MoveForward"), EKeys::MotionController_Left_Thumbstick_Y, -0.25f);
 	const FInputAxisKeyMapping rightKeyovr(FName("MoveRight"), EKeys::MotionController_Left_Thumbstick_X, 0.25f);
 
-	const FInputAxisKeyMapping turnAxisovr(FName("Turn"), EKeys::MotionController_Right_Thumbstick_Y, -0.5f);
-	const FInputAxisKeyMapping lookupAxisovr(FName("LookUp"), EKeys::MotionController_Right_Thumbstick_X, 0.5f);
+	const FInputAxisKeyMapping turnAxisovr(FName("Turn"), EKeys::MotionController_Right_Thumbstick_Y, -0.25f);
+	const FInputAxisKeyMapping lookupAxisovr(FName("LookUp"), EKeys::MotionController_Right_Thumbstick_X, 0.25f);
 
 	const FInputActionKeyMapping closeHandRight(FName("CloseHandRight"), EKeys::MotionController_Right_Trigger);
 	const FInputActionKeyMapping closeHandRightTouch(FName("CloseHandRight"), FKey(FName("OculusTouch_Right_Trigger")));
@@ -84,8 +85,8 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	((UInputSettings*)inputSettings)->AddActionMapping(closeHandLeft);
 	((UInputSettings*)inputSettings)->AddActionMapping(closeHandLeftTouch);
 
-	//((UInputSettings*)inputSettings)->AddAxisMapping(turnAxis);
-	//((UInputSettings*)inputSettings)->AddAxisMapping(lookupAxis);
+	((UInputSettings*)inputSettings)->AddAxisMapping(turnAxis);
+	((UInputSettings*)inputSettings)->AddAxisMapping(lookupAxis);
 
 	((UInputSettings*)inputSettings)->AddAxisMapping(turnAxisovr);
 	((UInputSettings*)inputSettings)->AddAxisMapping(lookupAxisovr);
@@ -97,11 +98,11 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AFirstPersonCharacter::OnResetVR);
 
-	PlayerInputComponent->BindAction("CloseHandRight", IE_Pressed, handRight, &UHandComponent::CloseHand);
-	PlayerInputComponent->BindAction("CloseHandRight", IE_Released, handRight, &UHandComponent::StopCloseHand);
+	PlayerInputComponent->BindAction("CloseHandRight", IE_Pressed, handRight, &UHandRightComponent::CloseHand);
+	PlayerInputComponent->BindAction("CloseHandRight", IE_Released, handRight, &UHandRightComponent::StopCloseHand);
 
-	PlayerInputComponent->BindAction("CloseHandLeft", IE_Pressed, handLeft, &UHandComponent::CloseHand);
-	PlayerInputComponent->BindAction("CloseHandLeft", IE_Released, handLeft, &UHandComponent::StopCloseHand);
+	PlayerInputComponent->BindAction("CloseHandLeft", IE_Pressed, handLeft, &UHandLeftComponent::CloseHand);
+	PlayerInputComponent->BindAction("CloseHandLeft", IE_Released, handLeft, &UHandLeftComponent::StopCloseHand);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFirstPersonCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFirstPersonCharacter::MoveRight);
