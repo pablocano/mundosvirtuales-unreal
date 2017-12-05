@@ -49,6 +49,7 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
+	// Enable Overlay Events
 	this->bGenerateOverlapEvents = true;
 
 	// Set all the materials of this component as a dynamic material
@@ -76,7 +77,9 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->OnBeginCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseOver);
 	this->OnEndCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnEndMouseOver);
 	this->OnClicked.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseClicked);
-	this->OnComponentHit.AddDynamic(this, &UAssemblyComponent::OnHit);
+	this->OnComponentHit.AddDynamic(this, &UAssemblyComponent::OnHit); 
+	this->OnComponentBeginOverlap.AddDynamic(this, &UAssemblyComponent::OnOverlapBegin);
+	this->OnComponentEndOverlap.AddDynamic(this, &UAssemblyComponent::OnOverlapEnd);
 
 	// Set the initial state of the borders
 	SetBorders(NOTHING);
