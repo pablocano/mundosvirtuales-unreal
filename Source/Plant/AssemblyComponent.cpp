@@ -44,9 +44,12 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->SetStaticMesh(mesh);
 
 	// Set the collition enabled to respond to click
+	// this->SetSimulatePhysics(true);
 	this->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
 	this->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+	this->bGenerateOverlapEvents = true;
 
 	// Set all the materials of this component as a dynamic material
 	for (int i = 0; i < this->GetNumMaterials(); i++)
@@ -73,6 +76,7 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 	this->OnBeginCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseOver);
 	this->OnEndCursorOver.AddDynamic(this, &UAssemblyComponent::CustomOnEndMouseOver);
 	this->OnClicked.AddDynamic(this, &UAssemblyComponent::CustomOnBeginMouseClicked);
+	this->OnComponentHit.AddDynamic(this, &UAssemblyComponent::OnHit);
 
 	// Set the initial state of the borders
 	SetBorders(NOTHING);
@@ -773,6 +777,38 @@ void UAssemblyComponent::OnClickWidgetComponent(UPrimitiveComponent* pComponent,
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Click on WidgetComponent"));
+	}
+}
+
+void UAssemblyComponent::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Hit Assembly!"));
+	}
+}
+
+void UAssemblyComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	// Other Actor is the actor that triggered the event. Check that is not ourself.  
+	if ((OtherActor != nullptr) && (OtherActor != this->GetOwner()) && (OtherComp != nullptr))
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Overlap Begin!"));
+		}
+	}
+}
+
+void UAssemblyComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	// Other Actor is the actor that triggered the event. Check that is not ourself.  
+	if ((OtherActor != nullptr) && (OtherActor != this->GetOwner()) && (OtherComp != nullptr))
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Overlap End!"));
+		}
 	}
 }
 

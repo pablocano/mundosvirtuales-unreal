@@ -4,7 +4,6 @@
 #include "FirstPersonCharacter.h"
 #include "GameFramework/InputSettings.h"
 #include "Kismet/HeadMountedDisplayFunctionLibrary.h"
-#include "MotionControllerComponent.h"
 
 
 // Sets default values
@@ -23,52 +22,14 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	FirstPersonCameraComponent->RelativeLocation = FVector(0, 0, 64.f); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = false;
 	FirstPersonCameraComponent->bLockToHmd = true;
-	
-	// Create VR Controllers.
-	R_MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("R_MotionController"));
-	R_MotionController->Hand = EControllerHand::Right;
-	R_MotionController->SetupAttachment(RootComponent);
-	L_MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("L_MotionController"));
-	L_MotionController->Hand = EControllerHand::Left;
-	L_MotionController->SetupAttachment(RootComponent);
 
-	// Create Hand Right
-	HandMeshRight = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMeshRight"));
-	HandMeshRight->SetupAttachment(R_MotionController);
-
-	// Create Hand Left
-	HandMeshLeft = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandMeshLeft"));
-	HandMeshLeft->SetupAttachment(L_MotionController);
+	createHands();
 }
 
 // Called when the game starts or when spawned
 void AFirstPersonCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Load Mesh
-	USkeletalMesh* mesh = LoadObject<USkeletalMesh>(NULL, TEXT("/Game/VirtualReality/Mannequin/Character/Mesh/MannequinHand_Right.MannequinHand_Right"), NULL, LOAD_None, NULL);
-
-	// Setup Hand right
-	HandMeshRight->SetSkeletalMesh(mesh);
-	HandMeshRight->SetRelativeRotation(FRotator(0, 0, 90));
-	HandMeshRight->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	HandMeshRight->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
-	HandMeshLeft->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-
-	// Setup Hand left
-	HandMeshLeft->SetSkeletalMesh(mesh);
-	HandMeshLeft->SetWorldScale3D(FVector(1, 1, -1));
-	HandMeshLeft->SetRelativeRotation(FRotator(0, 0, 90));
-	HandMeshLeft->SetAllBodiesSimulatePhysics(true);
-	HandMeshLeft->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
-	HandMeshLeft->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-
-	HandMeshLeft->OnComponentHit.AddDynamic(this, &AFirstPersonCharacter::OnHit);
-
-	// Load Animations
-	animHandClose = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Grab.MannequinHand_Right_Grab"), NULL, LOAD_None, NULL);
-	animHandOpen = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Grab.MannequinHand_Right_Open"), NULL, LOAD_None, NULL);
 }
 
 // Called every frame
@@ -129,18 +90,18 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	((UInputSettings*)inputSettings)->AddAxisMapping(turnAxisovr);
 	((UInputSettings*)inputSettings)->AddAxisMapping(lookupAxisovr);
 
-	((UInputSettings*)inputSettings)->SaveKeyMappings();
+	//((UInputSettings*)inputSettings)->SaveKeyMappings();
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AFirstPersonCharacter::OnResetVR);
 
-	PlayerInputComponent->BindAction("CloseHandRight", IE_Pressed, this, &AFirstPersonCharacter::CloseHandRight);
-	PlayerInputComponent->BindAction("CloseHandRight", IE_Released, this, &AFirstPersonCharacter::StopCloseHandRight);
+	PlayerInputComponent->BindAction("CloseHandRight", IE_Pressed, handRight, &UHandComponent::CloseHand);
+	PlayerInputComponent->BindAction("CloseHandRight", IE_Released, handRight, &UHandComponent::StopCloseHand);
 
-	PlayerInputComponent->BindAction("CloseHandLeft", IE_Pressed, this, &AFirstPersonCharacter::CloseHandLeft);
-	PlayerInputComponent->BindAction("CloseHandLeft", IE_Released, this, &AFirstPersonCharacter::StopCloseHandLeft);
+	PlayerInputComponent->BindAction("CloseHandLeft", IE_Pressed, handLeft, &UHandComponent::CloseHand);
+	PlayerInputComponent->BindAction("CloseHandLeft", IE_Released, handLeft, &UHandComponent::StopCloseHand);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFirstPersonCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFirstPersonCharacter::MoveRight);
@@ -190,40 +151,31 @@ void AFirstPersonCharacter::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AFirstPersonCharacter::CloseHandRight()
+void AFirstPersonCharacter::createHands()
 {
-	HandMeshRight->OverrideAnimationData(animHandClose, false, false, 0.f, 0.25f);
-	HandMeshRight->Play(false);
-}
+	// Definition Right hand
+	handRight = CreateDefaultSubobject<UHandRightComponent>(TEXT("HandRight"));
 
-void AFirstPersonCharacter::StopCloseHandRight()
-{
-	HandMeshRight->Stop();
-	HandMeshRight->OverrideAnimationData(animHandOpen, false, false, 0.f, 0.25f);
-	HandMeshRight->Play(false);
-}
+	R_MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("R_MotionController"));
+	R_MotionController->Hand = EControllerHand::Right;
+	R_MotionController->SetupAttachment(RootComponent);
 
-void AFirstPersonCharacter::CloseHandLeft()
-{
-	HandMeshLeft->OverrideAnimationData(animHandClose, false, false, 0.f, 0.25f);
-	HandMeshLeft->Play(false);
-}
+	// Create Right hand
+	handRight->SetupAttachment(R_MotionController);
 
-void AFirstPersonCharacter::StopCloseHandLeft()
-{
-	HandMeshLeft->Stop();
-	HandMeshLeft->OverrideAnimationData(animHandOpen, false, false, 0.f, 0.25f);
-	HandMeshLeft->Play(false);
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Cyan, TEXT("Close Hand"));
-	}
-}
+	// Append right hand
+	this->AddOwnedComponent(handRight);
 
-void AFirstPersonCharacter::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
-{
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, TEXT("Hit!"));
-	}
+	// Definition Left hand
+	handLeft = CreateDefaultSubobject<UHandLeftComponent>(TEXT("HandLeft"));
+
+	L_MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("L_MotionController"));
+	L_MotionController->Hand = EControllerHand::Left;
+	L_MotionController->SetupAttachment(RootComponent);
+
+	// Create Left hand
+	handLeft->SetupAttachment(L_MotionController);
+
+	// Append left hand
+	this->AddOwnedComponent(handLeft);
 }

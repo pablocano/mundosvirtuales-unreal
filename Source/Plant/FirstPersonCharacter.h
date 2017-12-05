@@ -3,15 +3,9 @@
 #pragma once
 
 #include "GameFramework/Character.h"
+#include "HandComponent.h"
 #include "FirstPersonCharacter.generated.h"
 
-UENUM(BlueprintType)
-enum class EGripState : uint8
-{
-	Open,
-	CanGrab,
-	Grab
-};
 
 UCLASS()
 class PLANT_API AFirstPersonCharacter : public ACharacter
@@ -21,14 +15,6 @@ class PLANT_API AFirstPersonCharacter : public ACharacter
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
-
-	/** Motion controller (right hand) */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UMotionControllerComponent* R_MotionController;
-
-	/** Motion controller (left hand) */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UMotionControllerComponent* L_MotionController;
 
 public:
 	// Sets default values for this character's properties
@@ -80,26 +66,16 @@ public:
 
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Code Variables")
-	EGripState Grip;
+	UHandRightComponent* handRight;
+	UHandLeftComponent* handLeft;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	class USkeletalMeshComponent *HandMeshRight;
+	/** Motion controller (right hand) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UMotionControllerComponent* R_MotionController;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	class USkeletalMeshComponent *HandMeshLeft;
+	/** Motion controller (left hand) */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UMotionControllerComponent* L_MotionController;
 
-	UAnimSequence* animHandClose;
-	UAnimSequence* animHandOpen;
-
-	void CloseHandRight();
-
-	void StopCloseHandRight();
-
-	void CloseHandLeft();
-
-	void StopCloseHandLeft();
-
-	UFUNCTION()
-	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+	void createHands();
 };
