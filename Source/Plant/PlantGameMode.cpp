@@ -13,8 +13,8 @@
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	DefaultPawnClass = AMyPawn::StaticClass();
-	//DefaultPawnClass = AFirstPersonCharacter::StaticClass();
+	//DefaultPawnClass = AMyPawn::StaticClass();
+	DefaultPawnClass = AFirstPersonCharacter::StaticClass();
 
 	GameStateClass = AMyGameState::StaticClass();
 
@@ -75,7 +75,7 @@ void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 		hInstanceThis->plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
 
 		// Create the user interface to toggle between the visualization modes
-		hInstanceThis->statusWidget = NewObject<UStatusWidget>(hInstanceThis, FName(TEXT("Status Wiget")));
+		hInstanceThis->statusWidget = NewObject<UStatusWidget>(hInstanceThis, FName(TEXT("Status Widget")));
 		hInstanceThis->statusWidget->SetActor(hInstanceThis->plantActor);
 		hInstanceThis->statusWidget->AddToViewport();
 	});

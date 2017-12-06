@@ -2,6 +2,7 @@
 
 #include "Plant.h"
 #include "MyGameState.h"
+#include "PlantActor.h"
 #include "AssemblyComponent.h"
 
 AMyGameState::AMyGameState(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), selectedComponent(nullptr)
@@ -18,15 +19,29 @@ void AMyGameState::setSelectedComponent(UPrimitiveComponent* component)
 	selectedComponent = component;
 }
 
+bool AMyGameState::isSeletedActor(AActor* actor)
+{
+	return selectedActor == actor;
+}
+
+void AMyGameState::setSelectedActor(AActor* actor)
+{
+	selectedActor = actor;
+}
+
 void AMyGameState::onComponent()
 {
-	if (selectedComponent)
-	{
-		UAssemblyComponent* assemblyComponent = Cast<UAssemblyComponent>(selectedComponent);
+	UAssemblyComponent* assembly = nullptr;
+	APlantActor* actor = nullptr;
 
-		if (assemblyComponent)
-		{
-			
-		}
+	if (selectedComponent)
+		assembly = Cast<UAssemblyComponent>(selectedComponent);
+
+	if (selectedActor)
+		actor = Cast<APlantActor>(selectedActor);
+
+	if (actor && assembly)
+	{
+		actor->HandleClickOnComponent(assembly);
 	}
 }

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Plant.h"
+#include "MyGameState.h"
 #include "HandComponent.h"
 
 
@@ -119,6 +120,17 @@ void UHandComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 			// Start loop of haptic effect
 			if(hapticFeedBack)
 				GetWorld()->GetFirstPlayerController()->PlayHapticEffect(hapticFeedBack, Hand, 1.0f, true);
+
+			if (touchCount == 1)
+			{
+				AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+				if (gameState)
+				{
+					gameState->setSelectedActor(OtherActor);
+					gameState->setSelectedComponent(OtherComp);
+				}
+			}
 		}
 	}
 }
@@ -132,6 +144,45 @@ void UHandComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* O
 		{
 			// Stop haptic effect
 			GetWorld()->GetFirstPlayerController()->StopHapticEffect(Hand);
+
+			AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+			if (gameState)
+			{
+				gameState->setSelectedActor(nullptr);
+				gameState->setSelectedComponent(nullptr);
+			}
 		}
 	}
+}
+
+void UHandComponent::SetupInput(UInputComponent* PlayerInputComponent, UInputSettings* inputSettings)
+{
+	FString strHand = (Hand == EControllerHand::Right ? "Right" : "Left");
+
+	const FInputActionKeyMapping closeHandRight(FName("CloseHandRight"), EKeys::MotionController_Right_Trigger);
+	const FInputActionKeyMapping closeHandRightTouch(FName("CloseHandRight"), FKey(FName("OculusTouch_Right_Trigger")));
+
+	if (Hand == EControllerHand::Left)
+	{
+		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("MoveForward"), EKeys::MotionController_Left_Thumbstick_Y, -0.25f));
+		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("MoveRight"), EKeys::MotionController_Left_Thumbstick_X, 0.25f));
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("CloseHandLeft"), EKeys::MotionController_Left_Trigger));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("CloseHandLeft"), FKey(FName("OculusTouch_Left_Trigger"))));
+	}
+	else
+	{
+		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("Turn"), EKeys::MotionController_Right_Thumbstick_Y, -0.25f));
+		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("LookUp"), EKeys::MotionController_Right_Thumbstick_X, 0.25f));
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("CloseHandRight"), EKeys::MotionController_Right_Trigger));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("CloseHandRight"), FKey(FName("OculusTouch_Right_Trigger"))));
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("onComponentRight"), EKeys::MotionController_Right_FaceButton1));
+		PlayerInputComponent->BindAction("onComponentRight", IE_Pressed, Cast<AMyGameState>(GetWorld()->GetGameState()), &AMyGameState::onComponent);
+	}
+
+	PlayerInputComponent->BindAction(*(FString("CloseHand") + strHand), IE_Pressed, this, &UHandComponent::CloseHand);
+	PlayerInputComponent->BindAction(*(FString("CloseHand") + strHand), IE_Released, this, &UHandComponent::StopCloseHand);
 }

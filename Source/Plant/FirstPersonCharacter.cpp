@@ -45,76 +45,42 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	// set up gameplay key bindings
 	check(PlayerInputComponent);
 
+	//
 	// Genarate Mapping of inputs
-	const UInputSettings* inputSettings = GetDefault<UInputSettings>();
+	//
+	UInputSettings* inputSettings = (UInputSettings*) GetDefault<UInputSettings>();
+	inputSettings->UpdateDefaultConfigFile();
 
-	// Keys
-	const FInputAxisKeyMapping fowardKey(FName("MoveForward"), EKeys::W, 1.f);
-	const FInputAxisKeyMapping backwardKey(FName("MoveForward"), EKeys::S, -1.f);
-	const FInputAxisKeyMapping rightKey(FName("MoveRight"), EKeys::D, 1.f);
-	const FInputAxisKeyMapping leftKey(FName("MoveRight"), EKeys::A, -1.f);
-
-	const FInputAxisKeyMapping fowardKeyovr(FName("MoveForward"), EKeys::MotionController_Left_Thumbstick_Y, -0.25f);
-	const FInputAxisKeyMapping rightKeyovr(FName("MoveRight"), EKeys::MotionController_Left_Thumbstick_X, 0.25f);
-
-	const FInputAxisKeyMapping turnAxisovr(FName("Turn"), EKeys::MotionController_Right_Thumbstick_Y, -0.25f);
-	const FInputAxisKeyMapping lookupAxisovr(FName("LookUp"), EKeys::MotionController_Right_Thumbstick_X, 0.25f);
-
-	const FInputActionKeyMapping closeHandRight(FName("CloseHandRight"), EKeys::MotionController_Right_Trigger);
-	const FInputActionKeyMapping closeHandRightTouch(FName("CloseHandRight"), FKey(FName("OculusTouch_Right_Trigger")));
-	const FInputActionKeyMapping closeHandLeft(FName("CloseHandLeft"), EKeys::MotionController_Left_Trigger);
-	const FInputActionKeyMapping closeHandLeftTouch(FName("CloseHandLeft"), FKey(FName("OculusTouch_Left_Trigger")));
-
-	const FInputActionKeyMapping jump(FName("Jump"), EKeys::SpaceBar);
-
-	const FInputAxisKeyMapping turnAxis(FName("Turn"), FKey(FName("MouseX")), 1.0f);
-	const FInputAxisKeyMapping lookupAxis(FName("LookUp"), FKey(FName("MouseY")), 1.0f);
-
-	((UInputSettings*)inputSettings)->UpdateDefaultConfigFile();
-
-	((UInputSettings*)inputSettings)->AddAxisMapping(fowardKey);
-	((UInputSettings*)inputSettings)->AddAxisMapping(backwardKey);
-	((UInputSettings*)inputSettings)->AddAxisMapping(fowardKeyovr);
-	((UInputSettings*)inputSettings)->AddAxisMapping(rightKey);
-	((UInputSettings*)inputSettings)->AddAxisMapping(leftKey);
-	((UInputSettings*)inputSettings)->AddAxisMapping(rightKeyovr);
-	((UInputSettings*)inputSettings)->AddActionMapping(jump);
-
-	((UInputSettings*)inputSettings)->AddActionMapping(closeHandRight);
-	((UInputSettings*)inputSettings)->AddActionMapping(closeHandRightTouch);
-	((UInputSettings*)inputSettings)->AddActionMapping(closeHandLeft);
-	((UInputSettings*)inputSettings)->AddActionMapping(closeHandLeftTouch);
-
-	((UInputSettings*)inputSettings)->AddAxisMapping(turnAxis);
-	((UInputSettings*)inputSettings)->AddAxisMapping(lookupAxis);
-
-	((UInputSettings*)inputSettings)->AddAxisMapping(turnAxisovr);
-	((UInputSettings*)inputSettings)->AddAxisMapping(lookupAxisovr);
-
-	//((UInputSettings*)inputSettings)->SaveKeyMappings();
-
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AFirstPersonCharacter::OnResetVR);
-
-	PlayerInputComponent->BindAction("CloseHandRight", IE_Pressed, handRight, &UHandRightComponent::CloseHand);
-	PlayerInputComponent->BindAction("CloseHandRight", IE_Released, handRight, &UHandRightComponent::StopCloseHand);
-
-	PlayerInputComponent->BindAction("CloseHandLeft", IE_Pressed, handLeft, &UHandLeftComponent::CloseHand);
-	PlayerInputComponent->BindAction("CloseHandLeft", IE_Released, handLeft, &UHandLeftComponent::StopCloseHand);
-
+	// Setup Axis
+	inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("MoveForward"), EKeys::W, 1.f));
+	inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("MoveForward"), EKeys::S, -1.f));
+	inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("MoveRight"), EKeys::D, 1.f));
+	inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("MoveRight"), EKeys::A, -1.f));
 	PlayerInputComponent->BindAxis("MoveForward", this, &AFirstPersonCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AFirstPersonCharacter::MoveRight);
 
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
+	// Setup Jump
+	inputSettings->AddActionMapping(FInputActionKeyMapping(FName("Jump"), EKeys::SpaceBar));
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	// Setup mouse moves
+	inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("Turn"), FKey(FName("MouseX")), 1.0f));
+	inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("LookUp"), FKey(FName("MouseY")), 1.0f));
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("TurnRate", this, &AFirstPersonCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &AFirstPersonCharacter::LookUpAtRate);
 
+	// Reset VR
+	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AFirstPersonCharacter::OnResetVR);
+
+	// Hands input configuration
+	handRight->SetupInput(PlayerInputComponent, inputSettings);
+	handLeft->SetupInput(PlayerInputComponent, inputSettings);
+
+	// Save Settings
+	//inputSettings->SaveKeyMappings();
 }
 
 void AFirstPersonCharacter::OnResetVR()

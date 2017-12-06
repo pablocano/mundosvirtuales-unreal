@@ -78,6 +78,9 @@ public:
 
 	UFUNCTION()
 	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	// Setup input
+	void SetupInput(UInputComponent* PlayerInputComponent, UInputSettings* inputSettings);
 };
 
 UCLASS()
