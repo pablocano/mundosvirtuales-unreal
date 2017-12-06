@@ -2,11 +2,13 @@
 
 #include "Plant.h"
 #include "PlantActor.h"
+#include "AssemblyComponent.h"
+#include "AnimatedAssemblyComponent.h"
 
 FLinearColor APlantActor::StateColorArray[6] = { FLinearColor::Green, FLinearColor(0.f,1.f,1.f), FLinearColor::Blue, FLinearColor::Yellow, FLinearColor::Red, FLinearColor::Black };
 
 // Sets default values
-APlantActor::APlantActor() : constructionMode(false), highlightState(StateStock::NONE_STATE)
+APlantActor::APlantActor() : constructionMode(false), highlightState(StateStock::NONE_STATE), procedureMode(false)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -47,6 +49,155 @@ void APlantActor::Init(const StockPlant* stock)
 	// Expand the firts layer of the tree
 	IMeshInterface* AssemblyRootComponentInterface = Cast<IMeshInterface>(AssemblyRootComponent);
 	AssemblyRootComponentInterface->Execute_Expand(AssemblyRootComponent);
+}
+
+void APlantActor::HandleClickOnComponent(UMeshComponent* clickedComponent)
+{
+	// Access to the clicked component
+	IMeshInterface* ClickedComponentInterface = Cast<IMeshInterface>(clickedComponent);
+
+	// TODO
+	UMeshComponent* parentCliked = ClickedComponentInterface->Execute_GetParent(clickedComponent);
+	IMeshInterface* ParentInterface = Cast<IMeshInterface>(parentCliked);
+	if (ClickedComponentInterface->Execute_IsSubComponent(clickedComponent, 24, 1))
+	{
+		PerformStep(clickedComponent);
+		return;
+	}
+
+	if (ParentInterface->Execute_IsSubComponent(parentCliked, 24, 1))
+	{
+		PerformStep(parentCliked);
+		return;
+	}
+	
+	// Select the clicked component
+	ClickedComponentInterface->Execute_SetSelected(clickedComponent, true);
+
+	// Expand the current component
+	ClickedComponentInterface->Execute_Expand(clickedComponent);
+
+	// Obtain the parent of the clicked component
+	UMeshComponent* ClickedParent = ClickedComponentInterface->Execute_GetParent(clickedComponent);
+
+	if (SelectedComponent)
+	{
+		// Access to the previous selected component
+		IMeshInterface* SelectedComponentInterface = Cast<IMeshInterface>(SelectedComponent);
+
+		// Collapse iteratively, until reaching the parent of the clicked component
+		SelectedComponentInterface->Execute_Collapse(SelectedComponent, ClickedParent);
+
+		SelectedComponentInterface->Execute_SetSelected(SelectedComponent, false);
+	}
+
+	// Set the new selected component
+	SelectedComponent = clickedComponent;
+}
+
+void APlantActor::PerformStep(UMeshComponent* procedureComponentRoot)
+{
+	// Set the procedure mode on
+	procedureMode = true;
+
+	// Check if the root component is expanded
+	IMeshInterface* ProcedureComponentRootInterface = Cast<IMeshInterface>(procedureComponentRoot);
+	if (!ProcedureComponentRootInterface->Execute_IsExpanded(procedureComponentRoot))
+		ProcedureComponentRootInterface->Execute_Expand(procedureComponentRoot);
+
+	// The next step
+	Step s;
+
+	// Ask for the next step
+	if (p.NextStep(s))
+	{
+		// Remove the focus of all the components of the previous step
+		for (UMeshComponent* lastComponent : LastUsedComponents)
+		{
+			IMeshInterface* LastComponentInterface = Cast<IMeshInterface>(lastComponent);
+			LastComponentInterface->Execute_RemoveFocus(lastComponent);
+		}
+
+		// Reset the list of the last used components
+		LastUsedComponents.Empty();
+
+		// Iterate over all the instructions of this step
+		for (Instruction instruction : s.getInstructions())
+		{
+			// Restart the root of the search
+			UMeshComponent* currentComponent = procedureComponentRoot;
+
+			// Search the component using the path
+			for (std::pair<int, int> path : instruction.m_path)
+			{
+				IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
+				UMeshComponent* currentSubComponent = CurrentComponentInterface->Execute_GetSubComponent(currentComponent, path.first, path.second);
+
+				// It should always find a component
+				if (currentSubComponent) {
+					// If the component is not expanded, expand it
+					IMeshInterface* CurrentSubComponentInterface = Cast<IMeshInterface>(currentSubComponent);
+					if(!CurrentSubComponentInterface->Execute_IsExpanded(currentSubComponent))
+						CurrentSubComponentInterface->Execute_Expand(currentSubComponent);
+
+					// Update the current component
+					currentComponent = currentSubComponent;
+				}
+				else
+				{
+					// This should never happen
+					std::cerr << "Component not found" << std::endl;
+					break;
+				}
+			}
+
+			// Add this component to the list of  used components
+			LastUsedComponents.Add(currentComponent);
+
+			//  Access to the interface
+			IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
+
+			// Set this component as focused
+			CurrentComponentInterface->Execute_SetFocus(currentComponent);
+
+			// Execute the instruction accordingly
+			switch (instruction.m_type)
+			{
+			case Instruction::INS_CREATE:
+				CurrentComponentInterface->Execute_ShowComponent(currentComponent);
+				break;
+			case Instruction::INS_DELETE:
+				CurrentComponentInterface->Execute_HideComponent(currentComponent);
+				break;
+			case Instruction::INS_INSERT:
+			{
+				UAnimatedAssemblyComponent* animatedComponent;
+				animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
+				if (animatedComponent) {
+					animatedComponent->SetPlayRate(-1);
+					animatedComponent->Play(true);
+				}
+			}
+				break;
+			case Instruction::INS_REMOVE:
+			{
+				UAnimatedAssemblyComponent* animatedComponent;
+				animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
+				if (animatedComponent) {
+					animatedComponent->SetPlayRate(1);
+					animatedComponent->Play(true);
+				}
+			}
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	else
+	{
+		procedureMode = false;
+	}
 }
 
 void APlantActor::ToggleConstructionMode()

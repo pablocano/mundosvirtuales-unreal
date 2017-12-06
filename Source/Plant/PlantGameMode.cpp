@@ -13,8 +13,8 @@
 
 APlantGameMode::APlantGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	//DefaultPawnClass = AMyPawn::StaticClass();
-	DefaultPawnClass = AFirstPersonCharacter::StaticClass();
+	DefaultPawnClass = AMyPawn::StaticClass();
+	//DefaultPawnClass = AFirstPersonCharacter::StaticClass();
 
 	GameStateClass = AMyGameState::StaticClass();
 

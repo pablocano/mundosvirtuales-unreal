@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Components/MeshComponent.h"
 #include "MeshInterface.generated.h"
 
 // This class does not need to be modified.
@@ -22,7 +23,7 @@ class PLANT_API IMeshInterface
 public:
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
-	void Collapse();
+	void Collapse(UMeshComponent* activeRoot);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	bool IsSelected();
@@ -31,26 +32,38 @@ public:
 	void SetSelected(bool select);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void SetFocus();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void RemoveFocus();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	void UnregisterStock();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	void Expand();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
-	void RemoveFocus();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
-	void RemoveFocusChild();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
-	void SetFocusChild(UMeshComponent* child);
+	bool IsExpanded();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	void ShowComponent();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	void HideComponent();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	FTransform GetGlobalPosition();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
 	void ProcessVisualizationMode();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	UMeshComponent* GetParent();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	UMeshComponent* GetSubComponent(int assemblyId, int instanceId);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "MyCategory")
+	bool IsSubComponent(int assemblyId, int instanceId);
 };

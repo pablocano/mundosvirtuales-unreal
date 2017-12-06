@@ -66,7 +66,7 @@ public:
 	/// Close all the childs of this component
 	/// </summary>
 	UFUNCTION()
-	virtual void Collapse_Implementation() override;
+	virtual void Collapse_Implementation(UMeshComponent* activeRoot) override;
 
 	/// <summary>
 	/// Unregister this stock from the components tree
@@ -80,6 +80,11 @@ public:
 	UFUNCTION()
 	virtual void Expand_Implementation() override;
 
+	UFUNCTION()
+	virtual bool IsExpanded_Implementation() override;
+
+	virtual void SetFocus_Implementation() override;
+
 	/// <summary>
 	/// Remove the focus from this component
 	/// </summary>
@@ -87,22 +92,16 @@ public:
 	virtual void RemoveFocus_Implementation() override;
 
 	/// <summary>
-	/// Remove the focus from the child of this component
-	/// </summary>
-	UFUNCTION()
-	virtual void RemoveFocusChild_Implementation() override;
-
-	/// <summary>
-	/// Set a child of this component as focused
-	/// </summary>
-	UFUNCTION()
-	virtual void SetFocusChild_Implementation(UMeshComponent* child) override;
-
-	/// <summary>
 	/// Show the mesh of this component
 	/// </summary>
 	UFUNCTION()
 	virtual void ShowComponent_Implementation() override;
+
+	/// <summary>
+	/// Hide the mesh of this component
+	/// </summary>
+	UFUNCTION()
+	virtual void HideComponent_Implementation() override;
 
 	/// <summary>
 	/// Get the global position of this component, by concatenation of all its parents
@@ -115,6 +114,21 @@ public:
 	/// </summary>
 	UFUNCTION()
 	virtual void ProcessVisualizationMode_Implementation() override;
+
+	/// <summary>
+	/// Returns the component given by its assembly id and instance id
+	/// </summary>
+	UFUNCTION()
+	virtual UMeshComponent* GetSubComponent_Implementation(int assemblyId, int instanceId) override;
+
+	/// <summary>
+	/// 
+	/// </summary>
+	UFUNCTION()
+	virtual UMeshComponent* GetParent_Implementation() override;
+
+	UFUNCTION()
+	virtual bool IsSubComponent_Implementation(int assemblyId, int instanceId) override;
 
 	/// <summary>
 	/// Access to the pose of this component
@@ -299,4 +313,14 @@ public:
 	/// If this component is selected
 	/// </summary>
 	bool selected;
+
+	/// <summary>
+	/// If this component can be expanded
+	/// </summary>
+	bool canBeExpanded;
+
+	/// <summary>
+	/// If this component is already expanded
+	/// </summary>
+	bool isExpanded;
 };
