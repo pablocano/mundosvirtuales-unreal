@@ -42,9 +42,9 @@ void APlantGameMode::StartPlay()
 		MyController->bEnableMouseOverEvents = true;
 	}
 
-	APlantGameMode* hInstance = this;
-	static Concurrency con([hInstance]() -> bool { return hInstance->clientPlant->requestPlant(); },
-		std::bind(&APlantGameMode::initWorld,this) , 5000);
+	APlantGameMode* hInstanceThis = this;
+	static Concurrency con([hInstanceThis]() -> bool { return hInstanceThis->clientPlant->requestPlant(); },
+		std::bind(&APlantGameMode::initWorld, this) , 5000);
 }
 
 void APlantGameMode::initWorld()
@@ -62,21 +62,21 @@ void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 {
 	// Access the wold and this class as pointers
 	UWorld* const World = GetWorld();
-	APlantGameMode* hInstance = this;
+	APlantGameMode* hInstanceThis = this;
 
 	// Call this funtion in the game thread
-	AsyncTask(ENamedThreads::GameThread, [&stock, World, hInstance]()
+	AsyncTask(ENamedThreads::GameThread, [&stock, World, hInstanceThis]()
 	{
 		// Create the only actor of this game
 		FTransform SpawnLocAndRotation;
-		hInstance->plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
-		hInstance->plantActor->Init(&stock);
-		hInstance->plantActor->FinishSpawning(SpawnLocAndRotation);
-		hInstance->plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
+		hInstanceThis->plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
+		hInstanceThis->plantActor->Init(&stock);
+		hInstanceThis->plantActor->FinishSpawning(SpawnLocAndRotation);
+		hInstanceThis->plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
 
 		// Create the user interface to toggle between the visualization modes
-		hInstance->statusWidget = NewObject<UStatusWidget>(hInstance, FName(TEXT("Status Wiget")));
-		hInstance->statusWidget->SetActor(hInstance->plantActor);
-		hInstance->statusWidget->AddToViewport();
+		hInstanceThis->statusWidget = NewObject<UStatusWidget>(hInstanceThis, FName(TEXT("Status Wiget")));
+		hInstanceThis->statusWidget->SetActor(hInstanceThis->plantActor);
+		hInstanceThis->statusWidget->AddToViewport();
 	});
 }
