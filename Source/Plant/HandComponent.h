@@ -12,10 +12,31 @@
 UENUM(BlueprintType)
 enum class EGripState : uint8
 {
+	None,
 	Open,
 	CanGrab,
 	Grab,
-	Index
+	Index,
+	Thumb,
+	Gun
+};
+
+UENUM(BlueprintType)
+enum class EFingers : uint8
+{
+	Pinky,
+	Ring,
+	Middle,
+	Index,
+	Thumb
+};
+
+UENUM(BlueprintType)
+enum class EFingerState : uint8
+{
+	Extended,
+	Semi_Extended,
+	Contracted
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -42,7 +63,10 @@ protected:
 
 	// Grip State
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Code Variables")
-	EGripState Grip;
+	EGripState currentGripState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Code Variables")
+	EGripState nextGripState;
 
 	// Animations
 	UPROPERTY()
@@ -54,6 +78,12 @@ protected:
 	UPROPERTY()
 	UAnimSequence* animHandIndex;
 
+	UPROPERTY()
+	UAnimSequence* animHandThumb;
+
+	UPROPERTY()
+	UAnimSequence* animHandGrip;
+
 	// Left or Right Hand
 	UPROPERTY()
 	EControllerHand Hand;
@@ -64,6 +94,66 @@ protected:
 
 	// Count of touch
 	int touchCount;
+
+	UAnimSequence* getAnim(EGripState state);
+
+	EGripState computeGripState(TArray<EFingerState>& fingers);
+
+	TArray<EFingerState> fingerState;
+
+	UFUNCTION()
+	void ExtendedFingerPinky();
+
+	UFUNCTION()
+	void ContractedFingerPinky();
+
+	UFUNCTION()
+	void SemiExtendedFingerPinky();
+
+	UFUNCTION()
+	void ExtendedFingerRing();
+
+	UFUNCTION()
+	void ContractedFingerRing();
+
+	UFUNCTION()
+	void SemiExtendedFingerRing();
+
+	UFUNCTION()
+	void ExtendedFingerMiddle();
+
+	UFUNCTION()
+	void ContractedFingerMiddle();
+
+	UFUNCTION()
+	void SemiExtendedFingerMiddle();
+
+	UFUNCTION()
+	void ExtendedFingerIndex();
+
+	UFUNCTION()
+	void ContractedFingerIndex();
+
+	UFUNCTION()
+	void SemiExtendedFingerIndex();
+
+	UFUNCTION()
+	void ExtendedFingerThumb();
+
+	UFUNCTION()
+	void ContractedFingerThumb();
+
+	UFUNCTION()
+	void SemiExtendedFingerThumb();
+
+	UFUNCTION()
+	void ExtendedGrip();
+
+	UFUNCTION()
+	void ContractedGrip();
+
+	UFUNCTION()
+	void SemiExtendedGrip();
 
 public:
 	// Callback close hand

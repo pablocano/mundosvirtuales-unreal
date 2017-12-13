@@ -6,20 +6,20 @@
 
 
 // Sets default values for this component's properties
-UHandComponent::UHandComponent()
+UHandComponent::UHandComponent() : currentGripState(EGripState::Open), nextGripState(EGripState::Open)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// Initialize Grip State
-	Grip = EGripState::Open;
 
 	// Initialiaze Touch State
 	touchCount = 0; // by default, nothing is touching
 
 	// Initialize hand by default
 	setHand(EControllerHand::Right); // by default, right hand
+
+	// Initialize state each fingers
+	fingerState.Init(EFingerState::Extended, 5);
 }
 
 void UHandComponent::setHand(EControllerHand hand)
@@ -70,6 +70,8 @@ void UHandComponent::BeginPlay()
 	this->animHandClose = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Grab.MannequinHand_Right_Grab"), NULL, LOAD_None, NULL);
 	this->animHandOpen = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Open.MannequinHand_Right_Open"), NULL, LOAD_None, NULL);
 	this->animHandIndex = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Index.MannequinHand_Right_Index"), NULL, LOAD_None, NULL);
+	this->animHandThumb = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Thumb.MannequinHand_Right_Thumb"), NULL, LOAD_None, NULL);
+	this->animHandGrip = LoadObject<UAnimSequence>(NULL, TEXT("/Game/VirtualReality/Mannequin/Animations/MannequinHand_Right_Grip.MannequinHand_Right_Grip"), NULL, LOAD_None, NULL);
 }
 
 
@@ -78,19 +80,49 @@ void UHandComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	if (currentGripState != nextGripState)
+	{
+		currentGripState = nextGripState;
+		nextGripState = EGripState::None;
+	}
+}
+
+UAnimSequence* UHandComponent::getAnim(EGripState state)
+{
+	switch (state)
+	{
+	case EGripState::CanGrab:
+	case EGripState::Grab:
+		return animHandClose;
+	case EGripState::Index:
+		return animHandIndex;
+	case EGripState::Thumb:
+		return animHandThumb;
+	case EGripState::Gun:
+		return animHandGrip;
+	case EGripState::Open:
+	default:
+		return animHandOpen;
+	}
+}
+
+EGripState UHandComponent::computeGripState(TArray<EFingerState>& fingers)
+{
+	EGripState stateGrip = EGripState::None;
+
+	return stateGrip;
 }
 
 void UHandComponent::CloseHand()
 {
-	if (this->animHandIndex && this->Grip != EGripState::Grab)
+	if (this->animHandIndex && this->currentGripState != EGripState::Grab)
 	{
 		// Override current animation and Play close hand animation
 		this->OverrideAnimationData(this->animHandIndex, false, false, 0.f, 0.25f);
 		this->Play(false);
 
 		// Change state of grip
-		this->Grip = EGripState::Grab;
+		this->currentGripState = EGripState::Grab;
 	}
 }
 
@@ -99,14 +131,14 @@ void UHandComponent::StopCloseHand()
 	// Stop current animation
 	Stop();
 
-	if (this->animHandOpen && this->Grip != EGripState::Open)
+	if (this->animHandOpen && this->currentGripState != EGripState::Open)
 	{
 		// Override current animation and Play open hand animation
 		this->OverrideAnimationData(this->animHandOpen, false, false, 0.f, 0.25f);
 		this->Play(false);
 
 		// Change state of grip
-		this->Grip = EGripState::Open;
+		this->currentGripState = EGripState::Open;
 	}
 }
 
@@ -160,29 +192,153 @@ void UHandComponent::SetupInput(UInputComponent* PlayerInputComponent, UInputSet
 {
 	FString strHand = (Hand == EControllerHand::Right ? "Right" : "Left");
 
-	const FInputActionKeyMapping closeHandRight(FName("CloseHandRight"), EKeys::MotionController_Right_Trigger);
-	const FInputActionKeyMapping closeHandRightTouch(FName("CloseHandRight"), FKey(FName("OculusTouch_Right_Trigger")));
-
 	if (Hand == EControllerHand::Left)
 	{
 		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("MoveForward"), EKeys::MotionController_Left_Thumbstick_Y, -0.25f));
 		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("MoveRight"), EKeys::MotionController_Left_Thumbstick_X, 0.25f));
 
-		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("CloseHandLeft"), EKeys::MotionController_Left_Trigger));
-		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("CloseHandLeft"), FKey(FName("OculusTouch_Left_Trigger"))));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Finger_Index_") + strHand), EKeys::MotionController_Left_Trigger));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Touch_Finger_Index_") + strHand), FKey(FName("OculusTouch_Left_Trigger"))));
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Finger_Thumb_") + strHand), EKeys::MotionController_Left_Thumbstick));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Touch_Finger_Thumb_") + strHand), FKey(FName("OculusTouch_Left_Thumbstick"))));
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Finger_Grip_") + strHand), EKeys::MotionController_Left_Grip1));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Touch_Finger_Grip_") + strHand), FKey(FName("OculusTouch_Left_Grip1"))));
 	}
 	else
 	{
 		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("Turn"), EKeys::MotionController_Right_Thumbstick_Y, -0.25f));
 		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("LookUp"), EKeys::MotionController_Right_Thumbstick_X, 0.25f));
 
-		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("CloseHandRight"), EKeys::MotionController_Right_Trigger));
-		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("CloseHandRight"), FKey(FName("OculusTouch_Right_Trigger"))));
-
 		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("onComponentRight"), EKeys::MotionController_Right_FaceButton1));
 		PlayerInputComponent->BindAction("onComponentRight", IE_Pressed, Cast<AMyGameState>(GetWorld()->GetGameState()), &AMyGameState::onComponent);
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Finger_Index_") + strHand), EKeys::MotionController_Right_Trigger));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Touch_Finger_Index_") + strHand), FKey(FName("OculusTouch_Right_Trigger"))));
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Finger_Thumb_") + strHand), EKeys::MotionController_Right_Thumbstick));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Touch_Finger_Thumb_") + strHand), FKey(FName("OculusTouch_Right_Thumbstick"))));
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Finger_Grip_") + strHand), EKeys::MotionController_Right_Grip1));
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Touch_Finger_Grip_") + strHand), FKey(FName("OculusTouch_Right_Grip1"))));
 	}
 
-	PlayerInputComponent->BindAction(*(FString("CloseHand") + strHand), IE_Pressed, this, &UHandComponent::CloseHand);
-	PlayerInputComponent->BindAction(*(FString("CloseHand") + strHand), IE_Released, this, &UHandComponent::StopCloseHand);
+
+	// Index finger
+	PlayerInputComponent->BindAction(*(FString("Finger_Index_") + strHand), IE_Pressed, this, &UHandComponent::ContractedFingerIndex);
+	PlayerInputComponent->BindAction(*(FString("Finger_Index_") + strHand), IE_Released, this, &UHandComponent::ExtendedFingerIndex);
+
+	PlayerInputComponent->BindAction(*(FString("Touch_Finger_Index_") + strHand), IE_Pressed, this, &UHandComponent::SemiExtendedFingerIndex);
+	PlayerInputComponent->BindAction(*(FString("Touch_Finger_Index_") + strHand), IE_Released, this, &UHandComponent::ExtendedFingerIndex);
+
+	// Thumb finger
+	PlayerInputComponent->BindAction(*(FString("Finger_Thumb_") + strHand), IE_Pressed, this, &UHandComponent::ContractedFingerThumb);
+	PlayerInputComponent->BindAction(*(FString("Finger_Thumb_") + strHand), IE_Released, this, &UHandComponent::ExtendedFingerThumb);
+
+	PlayerInputComponent->BindAction(*(FString("Touch_Finger_Thumb_") + strHand), IE_Pressed, this, &UHandComponent::SemiExtendedFingerThumb);
+	PlayerInputComponent->BindAction(*(FString("Touch_Finger_Thumb_") + strHand), IE_Released, this, &UHandComponent::ExtendedFingerThumb);
+
+	// Grip (Pinky, Ring and Middle fingers)
+	PlayerInputComponent->BindAction(*(FString("Finger_Grip_") + strHand), IE_Pressed, this, &UHandComponent::ContractedGrip);
+	PlayerInputComponent->BindAction(*(FString("Finger_Grip_") + strHand), IE_Released, this, &UHandComponent::ExtendedGrip);
+
+	PlayerInputComponent->BindAction(*(FString("Touch_Finger_Grip_") + strHand), IE_Pressed, this, &UHandComponent::SemiExtendedGrip);
+	PlayerInputComponent->BindAction(*(FString("Touch_Finger_Grip_") + strHand), IE_Released, this, &UHandComponent::ExtendedGrip);
+}
+
+void UHandComponent::ExtendedFingerPinky()
+{
+	this->fingerState[(int) EFingers::Pinky] = EFingerState::Extended;
+}
+
+void UHandComponent::ContractedFingerPinky()
+{
+	this->fingerState[(int)EFingers::Pinky] = EFingerState::Contracted;
+}
+
+void UHandComponent::SemiExtendedFingerPinky()
+{
+	this->fingerState[(int)EFingers::Pinky] = EFingerState::Semi_Extended;
+}
+
+void UHandComponent::ExtendedFingerRing()
+{
+	this->fingerState[(int)EFingers::Ring] = EFingerState::Extended;
+}
+
+void UHandComponent::ContractedFingerRing()
+{
+	this->fingerState[(int)EFingers::Ring] = EFingerState::Contracted;
+}
+
+void UHandComponent::SemiExtendedFingerRing()
+{
+	this->fingerState[(int)EFingers::Ring] = EFingerState::Semi_Extended;
+}
+
+void UHandComponent::ExtendedFingerMiddle()
+{
+	this->fingerState[(int)EFingers::Middle] = EFingerState::Extended;
+}
+
+void UHandComponent::ContractedFingerMiddle()
+{
+	this->fingerState[(int)EFingers::Middle] = EFingerState::Contracted;
+}
+
+void UHandComponent::SemiExtendedFingerMiddle()
+{
+	this->fingerState[(int)EFingers::Middle] = EFingerState::Semi_Extended;
+}
+
+void UHandComponent::ExtendedFingerIndex()
+{
+	this->fingerState[(int)EFingers::Index] = EFingerState::Extended;
+}
+
+void UHandComponent::ContractedFingerIndex()
+{
+	this->fingerState[(int)EFingers::Index] = EFingerState::Contracted;
+}
+
+void UHandComponent::SemiExtendedFingerIndex()
+{
+	this->fingerState[(int)EFingers::Index] = EFingerState::Semi_Extended;
+}
+
+void UHandComponent::ExtendedFingerThumb()
+{
+	this->fingerState[(int)EFingers::Thumb] = EFingerState::Extended;
+}
+
+void UHandComponent::ContractedFingerThumb()
+{
+	this->fingerState[(int)EFingers::Thumb] = EFingerState::Contracted;
+}
+
+void UHandComponent::SemiExtendedFingerThumb()
+{
+	this->fingerState[(int)EFingers::Thumb] = EFingerState::Semi_Extended;
+}
+
+void UHandComponent::ExtendedGrip()
+{
+	this->ExtendedFingerPinky();
+	this->ExtendedFingerRing();
+	this->ExtendedFingerThumb();
+}
+
+void UHandComponent::ContractedGrip()
+{
+	this->ContractedFingerPinky();
+	this->ContractedFingerRing();
+	this->ContractedFingerThumb();
+}
+
+void UHandComponent::SemiExtendedGrip()
+{
+	this->SemiExtendedFingerPinky();
+	this->SemiExtendedFingerRing();
+	this->SemiExtendedFingerThumb();
 }
