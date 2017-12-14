@@ -11,7 +11,7 @@
 AFirstPersonCharacter::AFirstPersonCharacter()
 {
 	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(55.f, 200);
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
@@ -20,7 +20,7 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	// Create a CameraComponent	
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCameraComponent->RelativeLocation = FVector(0, 0, 64.f); // Position the camera
+	FirstPersonCameraComponent->RelativeLocation = FVector(0, 0, 0); // Position the camera
 	FirstPersonCameraComponent->bUsePawnControlRotation = false;
 	FirstPersonCameraComponent->bLockToHmd = true;
 
@@ -145,4 +145,11 @@ void AFirstPersonCharacter::createHands()
 
 	// Append left hand
 	this->AddOwnedComponent(handLeft);
+
+	widgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("Widget Interaction"));
+
+	widgetInteraction->SetupAttachment(handRight);
+
+	widgetInteraction->bShowDebug = true;
+	widgetInteraction->bEnableHitTesting = true;
 }

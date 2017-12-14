@@ -80,10 +80,15 @@ void UHandComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	nextGripState = computeGripState(fingerState);
+
 	if (currentGripState != nextGripState)
 	{
 		currentGripState = nextGripState;
-		nextGripState = EGripState::None;
+
+		UAnimSequence* currentAnim = getAnim(currentGripState);
+		this->OverrideAnimationData(currentAnim, false, false, 0.f, 0.25f);
+		this->Play(false);
 	}
 }
 
@@ -109,6 +114,24 @@ UAnimSequence* UHandComponent::getAnim(EGripState state)
 EGripState UHandComponent::computeGripState(TArray<EFingerState>& fingers)
 {
 	EGripState stateGrip = EGripState::None;
+
+	if (fingers[(int)EFingers::Thumb] == EFingerState::Extended && fingers[(int)EFingers::Index] == EFingerState::Extended && fingers[(int)EFingers::Middle] == EFingerState::Semi_Extended)
+		stateGrip = EGripState::CanGrab;
+
+	if (fingers[(int)EFingers::Thumb] == EFingerState::Contracted && fingers[(int)EFingers::Index] == EFingerState::Contracted && fingers[(int)EFingers::Middle] == EFingerState::Contracted)
+		stateGrip = EGripState::Grab;
+
+	if (fingers[(int)EFingers::Thumb] == EFingerState::Extended && fingers[(int)EFingers::Index] == EFingerState::Extended && fingers[(int)EFingers::Middle] == EFingerState::Contracted)
+		stateGrip = EGripState::Gun;
+
+	if (fingers[(int)EFingers::Thumb] == EFingerState::Contracted && fingers[(int)EFingers::Index] == EFingerState::Extended && fingers[(int)EFingers::Middle] == EFingerState::Contracted)
+		stateGrip = EGripState::Index;
+
+	if (fingers[(int)EFingers::Thumb] == EFingerState::Extended && fingers[(int)EFingers::Index] == EFingerState::Contracted && fingers[(int)EFingers::Middle] == EFingerState::Contracted)
+		stateGrip = EGripState::Thumb;
+
+	if (fingers[(int)EFingers::Thumb] == EFingerState::Extended && fingers[(int)EFingers::Index] == EFingerState::Extended && fingers[(int)EFingers::Middle] == EFingerState::Extended)
+		stateGrip = EGripState::Open;
 
 	return stateGrip;
 }
@@ -326,19 +349,19 @@ void UHandComponent::ExtendedGrip()
 {
 	this->ExtendedFingerPinky();
 	this->ExtendedFingerRing();
-	this->ExtendedFingerThumb();
+	this->ExtendedFingerMiddle();
 }
 
 void UHandComponent::ContractedGrip()
 {
 	this->ContractedFingerPinky();
 	this->ContractedFingerRing();
-	this->ContractedFingerThumb();
+	this->ContractedFingerMiddle();
 }
 
 void UHandComponent::SemiExtendedGrip()
 {
 	this->SemiExtendedFingerPinky();
 	this->SemiExtendedFingerRing();
-	this->SemiExtendedFingerThumb();
+	this->SemiExtendedFingerMiddle();
 }
