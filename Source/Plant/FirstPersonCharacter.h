@@ -4,6 +4,8 @@
 
 #include "GameFramework/Character.h"
 #include "HandComponent.h"
+#include "Components/WidgetComponent.h"
+#include "VRWidget.h"
 #include "FirstPersonCharacter.generated.h"
 
 
@@ -78,4 +80,14 @@ protected:
 	class UMotionControllerComponent* L_MotionController;
 
 	void createHands();
+
+	/// <summary>
+	/// The widget component of this component
+	/// </summary>
+	UWidgetComponent* widgetComponent;
+
+	/// <summary>
+	/// The widget component of this component
+	/// </summary>
+	UVRWidget* widget;
 };

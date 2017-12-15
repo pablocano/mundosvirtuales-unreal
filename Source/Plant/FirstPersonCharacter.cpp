@@ -25,6 +25,33 @@ AFirstPersonCharacter::AFirstPersonCharacter()
 	FirstPersonCameraComponent->bLockToHmd = true;
 
 	createHands();
+
+	// UI VR
+	widgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("VRWidgetComponent"));
+	// Initialize widget component
+	widgetComponent->SetVisibility(true);
+	widgetComponent->SetOnlyOwnerSee(false);
+	widgetComponent->SetupAttachment(RootComponent);
+	//widgetComponent->RelativeLocation = FVector(40.f, -5.f, 5.f);
+	widgetComponent->RelativeLocation = FVector(80.f, -30.f, 30.f);
+	widgetComponent->SetRelativeRotation(FRotator(0, 150, 0));
+	widgetComponent->SetDrawSize(FVector2D(1920, 1080));
+
+	// Set collision to respond to clicks
+	widgetComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	widgetComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	widgetComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+	// Set the style of the widget
+	widgetComponent->SetBackgroundColor(FLinearColor(0.f, 0.f, 0.f, .5f));
+	widgetComponent->SetBlendMode(EWidgetBlendMode::Transparent);
+	widgetComponent->SetWidgetSpace(EWidgetSpace::World);
+
+	// Set the scale of the widget
+	widgetComponent->SetRelativeScale3D(FVector(0.02f, 0.02f, 0.02f));
+
+	widgetComponent->SetTwoSided(true);
+	SetBoolUProperty(widgetComponent, TEXT("bReceiveHardwareInput"), true);  // Enable click
 }
 
 // Called when the game starts or when spawned

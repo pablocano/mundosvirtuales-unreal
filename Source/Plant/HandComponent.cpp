@@ -45,6 +45,8 @@ void UHandComponent::BeginPlay()
 	{
 		// Setup Hand right
 		this->SetRelativeRotation(FRotator(0, 0, 90));
+		this->RelativeLocation = FVector(-10.f, 5.f, -5.f);
+		this->->RelativeLocation = FVector(-10.f, -5.f, -5.f);
 	}
 	else
 	{
