@@ -31,11 +31,11 @@ void AMyGameState::setSelectedActor(AActor* actor)
 
 void AMyGameState::onComponent()
 {
-	UAssemblyComponent* assembly = nullptr;
+	UMeshComponent* assembly = nullptr;
 	APlantActor* actor = nullptr;
 
 	if (selectedComponent)
-		assembly = Cast<UAssemblyComponent>(selectedComponent);
+		assembly = Cast<UMeshComponent>(selectedComponent);
 
 	if (selectedActor)
 		actor = Cast<APlantActor>(selectedActor);

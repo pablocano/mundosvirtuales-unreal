@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/WidgetInteractionComponent.h"
 #include "components/SkeletalMeshComponent.h"
 #include "MotionControllerComponent.h"
 #include "Runtime/Engine/Classes/Haptics/HapticFeedbackEffect_Curve.h"
@@ -18,7 +19,8 @@ enum class EGripState : uint8
 	Grab,
 	Index,
 	Thumb,
-	Gun
+	Gun,
+	IndexClick
 };
 
 UENUM(BlueprintType)
@@ -68,6 +70,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Code Variables")
 	EGripState nextGripState;
 
+	// Widget interaction
+	UWidgetInteractionComponent* widgetInteraction;
+
 	// Animations
 	UPROPERTY()
 	UAnimSequence* animHandClose;
@@ -83,6 +88,12 @@ protected:
 
 	UPROPERTY()
 	UAnimSequence* animHandGrip;
+
+	UPROPERTY()
+	UAnimSequence* animHandCanGrab;
+
+	UPROPERTY()
+	UAnimSequence* animHandClick;
 
 	// Left or Right Hand
 	UPROPERTY()
@@ -100,6 +111,8 @@ protected:
 	EGripState computeGripState(TArray<EFingerState>& fingers);
 
 	TArray<EFingerState> fingerState;
+
+	EFingerState lastIndexState;
 
 	UFUNCTION()
 	void ExtendedFingerPinky();
@@ -171,6 +184,8 @@ public:
 
 	// Setup input
 	void SetupInput(UInputComponent* PlayerInputComponent, UInputSettings* inputSettings);
+
+	void HandleClick();
 };
 
 UCLASS()

@@ -56,9 +56,13 @@ void UAnimatedAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent*
 	this->OverrideAnimationData(animation, false, false, 0.f, 1.f);
 
 	// Set the collition enabled to respond to click
-	this->SetEnablePhysicsBlending(true);
+	//this->SetEnablePhysicsBlending(true);
+	this->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
 	this->SetCollisionEnabled(ECollisionEnabled::Type::QueryAndPhysics);
 	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+	// Enable Overlay Events
+	this->bGenerateOverlapEvents = true;
 
 	// Set all the materials of this component as a dynamic material
 	for (int i = 0; i < this->GetNumMaterials(); i++)
@@ -618,6 +622,23 @@ bool UAnimatedAssemblyComponent::IsSubComponent_Implementation(int assemblyId, i
 	return stock->getAssemblyID() == assemblyId && stock->getInstance() == instanceId;
 }
 
+void UAnimatedAssemblyComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	// Other Actor is the actor that triggered the event. Check that is not ourself.  
+	if ((OtherActor != nullptr) && (OtherActor != this->GetOwner()) && (OtherComp != nullptr))
+	{
+		CustomOnBeginMouseOver(OverlappedComp);
+	}
+}
+
+void UAnimatedAssemblyComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	// Other Actor is the actor that triggered the event. Check that is not ourself.  
+	if ((OtherActor != nullptr) && (OtherActor != this->GetOwner()) && (OtherComp != nullptr))
+	{
+		CustomOnEndMouseOver(OverlappedComp);
+	}
+}
 
 
 

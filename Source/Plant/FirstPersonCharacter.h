@@ -3,7 +3,6 @@
 #pragma once
 
 #include "GameFramework/Character.h"
-#include "Components/WidgetInteractionComponent.h"
 #include "HandComponent.h"
 #include "FirstPersonCharacter.generated.h"
 
@@ -77,8 +76,6 @@ protected:
 	/** Motion controller (left hand) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMotionControllerComponent* L_MotionController;
-
-	UWidgetInteractionComponent* widgetInteraction;
 
 	void createHands();
 };

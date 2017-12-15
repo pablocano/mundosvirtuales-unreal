@@ -43,8 +43,7 @@ UMyUserWidgetInfo::UMyUserWidgetInfo(const FObjectInitializer& ObjectInitializer
 	buttonOk = NewObject<UButton>(TitleBarBox, UButton::StaticClass());
 	SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(buttonOk);
 	SlotItemHorz->SetPadding(fPadding);
-
-	FVector2D sizeButton(16, 16);
+	FVector2D sizeButton(80, 80);
 
 	static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGObj(TEXT("/Game/WidgetTextures/close-button.close-button"));
 	ButtonBG = ButtonBGObj.Object;

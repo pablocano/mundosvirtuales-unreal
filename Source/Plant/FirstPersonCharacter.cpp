@@ -11,7 +11,7 @@
 AFirstPersonCharacter::AFirstPersonCharacter()
 {
 	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(55.f, 200);
+	GetCapsuleComponent()->InitCapsuleSize(55.f, 100);
 
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
@@ -145,11 +145,4 @@ void AFirstPersonCharacter::createHands()
 
 	// Append left hand
 	this->AddOwnedComponent(handLeft);
-
-	widgetInteraction = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("Widget Interaction"));
-
-	widgetInteraction->SetupAttachment(handRight);
-
-	widgetInteraction->bShowDebug = true;
-	widgetInteraction->bEnableHitTesting = true;
 }
