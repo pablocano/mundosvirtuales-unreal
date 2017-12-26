@@ -8,6 +8,13 @@
 #include "VRWidget.h"
 #include "FirstPersonCharacter.generated.h"
 
+UENUM(BlueprintType)
+enum class EWidgetStatus : uint8
+{
+	GrabLeft,
+	GrabRight,
+	None
+};
 
 UCLASS()
 class PLANT_API AFirstPersonCharacter : public ACharacter
@@ -81,6 +88,24 @@ protected:
 
 	void createHands();
 
+	UFUNCTION()
+	void ToogleWidget();
+
+	UFUNCTION()
+	void LeftGrabWidget();
+
+	UFUNCTION()
+	void LeftDropWidget();
+
+	UFUNCTION()
+	void RightGrabWidget();
+
+	UFUNCTION()
+	void RightDropWidget();
+
+	UFUNCTION()
+	void SelectComponent();
+
 	/// <summary>
 	/// The widget component of this component
 	/// </summary>
@@ -90,4 +115,8 @@ protected:
 	/// The widget component of this component
 	/// </summary>
 	UVRWidget* widget;
+
+	EWidgetStatus widgetStatus;
+
+	bool MovingWidget;
 };

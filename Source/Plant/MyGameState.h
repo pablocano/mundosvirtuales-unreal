@@ -25,4 +25,6 @@ public:
 	void setSelectedActor(AActor* actor);
 
 	void onComponent();
+
+	void ToogleConstruction();
 };

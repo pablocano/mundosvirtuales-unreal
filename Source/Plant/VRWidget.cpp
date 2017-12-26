@@ -3,6 +3,7 @@
 #include "Plant.h"
 #include "VRWidget.h"
 #include "plant/StockPlant.h" 
+#include "MyGameState.h"
 
 UVRWidget::UVRWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -39,21 +40,57 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 			RootWidgetSlot->SetOffsets(FMargin(100.f, 100.f));
 		}
 
-		// Title
-		Title = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Procedure Title"));
-		ContentWindowBox->AddChildToVerticalBox(Title);
-		Title->SetText(FText::FromString("Filter Change"));
-		Title->Font.Size = 50;
-		Title->SynchronizeProperties();
+		// Title Bar and Buttons
+		TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("TitleAndExit"));
+		ContentWindowBox->AddChildToVerticalBox(TitleBarBox);
+
+		// Generate Title
+		Title = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
+		Title->SetText(FText::FromString(TEXT("Filter Change Tutorial")));
+		Title->Font.Size = 100;
+		Title->SetColorAndOpacity(FSlateColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f)));
+		UHorizontalBoxSlot* SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(Title);
+		SlotItemHorz->SetPadding(10);
+		SlotItemHorz->SetSize(ESlateSizeRule::Fill);
+
+		// Generate Button Ok
+		ButtonExit = NewObject<UButton>(TitleBarBox, UButton::StaticClass());
+		SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(ButtonExit);
+		SlotItemHorz->SetPadding(5);
+		FVector2D sizeButton(150, 150);
+
+		//static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGObj(TEXT("/Game/WidgetTextures/close-button.close-button"));
+		ButtonBG = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/close-button.close-button"), NULL, LOAD_None, NULL); //ButtonBGObj.Object;
+		ButtonExit->WidgetStyle.Normal.SetResourceObject(ButtonBG);
+		ButtonExit->WidgetStyle.Normal.ImageSize = sizeButton;
+		ButtonExit->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
+
+		//static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGPressedObj(TEXT("/Game/WidgetTextures/close-button-pressed.close-button-pressed"));
+		ButtonBGPressed = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/close-button-pressed.close-button-pressed"), NULL, LOAD_None, NULL);//ButtonBGPressedObj.Object;
+		ButtonExit->WidgetStyle.Pressed.SetResourceObject(ButtonBGPressed);
+		ButtonExit->WidgetStyle.Pressed.ImageSize = sizeButton;
+		ButtonExit->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
+
+		//static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGHoveredObj(TEXT("/Game/WidgetTextures/close-button-hovered.close-button-hovered"));
+		ButtonBGHovered = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/close-button-hovered.close-button-hovered"), NULL, LOAD_None, NULL);//ButtonBGHoveredObj.Object;
+		ButtonExit->WidgetStyle.Hovered.SetResourceObject(ButtonBGHovered);
+		ButtonExit->WidgetStyle.Hovered.ImageSize = sizeButton;
+		ButtonExit->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
 
 		// SubTitle
-		Title = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PhaseTitle"));
-		ContentWindowBox->AddChildToVerticalBox(Title);
-		Title->SetText(FText::FromString("Opening door"));
-		Title->Font.Size = 30;
-		Title->SynchronizeProperties();
+		Subtitle = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PhaseTitle"));
+		ContentWindowBox->AddChildToVerticalBox(Subtitle);
+		Subtitle->SetText(FText::FromString("Opening door"));
+		Subtitle->Font.Size = 90;
+		Subtitle->SynchronizeProperties();
 
-		//
+		// Instructions
+		Instructions = WidgetTree->ConstructWidget<UWrapedTextBlock>(UWrapedTextBlock::StaticClass(), TEXT("InstructionsBlock"));
+		ContentWindowBox->AddChildToVerticalBox(Instructions);
+		Instructions->SetText(FText::FromString("To open the door, go near the engine and pull the manilla."));
+		Instructions->SetAutoWrapText(true);
+		Instructions->Font.Size = 50;
+		Instructions->SynchronizeProperties();
 
 		// Add Button
 		ToggleButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Toggle Button"));
@@ -65,98 +102,32 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 
 		// Set text of the button
 		TextButton->SetText(FText::FromString("Construction Mode"));
-		TextButton->Font.Size = 50;
+		TextButton->Font.Size = 100;
 		TextButton->SynchronizeProperties();
 
 		// Delegate click actions
-		//ToggleButton->OnClicked.AddDynamic(this, &UStatusWidget::OnClickToggleButton);
+		ButtonExit->OnClicked.AddDynamic(this, &UVRWidget::OnClickToggleButton);
 
-		for (int i = 0; i < 5; i++)
-		{
-			// Create a horizontal box for one slot of the legend
-			std::string LegendName = "Legend" + i;
-			FString Name(LegendName.c_str());
-			UHorizontalBox* LegendItem = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*Name));
-
-			// Add the horizontal box to the vertical box
-			UVerticalBoxSlot* legendSlot = ContentWindowBox->AddChildToVerticalBox(LegendItem);
-
-			// Set the margin of the slot
-			legendSlot->SetPadding(FMargin(5));
-
-			// Create Color Button
-			std::string ColorName = "Color" + std::to_string(i) + "Name";
-			FString ColorNameStr(ColorName.c_str());
-			UButton* itemButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), FName(*ColorNameStr));
-
-			// Set the color of the button
-			FLinearColor color;
-			StateStock state = static_cast<StateStock>(i);
-			std::string messageItem;
-
-			switch (state)
-			{
-			case StateStock::INSTALLED:
-				color = FLinearColor::Green;
-				messageItem = "Installed";
-				//itemButton->OnClicked.AddDynamic(this, &UStatusWidget::OnClickInstalledButton);
-				break;
-
-			case StateStock::CONSTRUCTION:
-				color = FLinearColor(0.f, 1.f, 1.f);
-				messageItem = "In construction";
-				//itemButton->OnClicked.AddDynamic(this, &UStatusWidget::OnClickConstructionButton);
-				break;
-
-			case StateStock::WAREHOUSE:
-				color = FLinearColor::Blue;
-				messageItem = "In the warehouse";
-				//itemButton->OnClicked.AddDynamic(this, &UStatusWidget::OnClickWarehouseButton);
-				break;
-			case StateStock::PROCESS_OF_PURCHASE:
-				color = FLinearColor::Yellow;
-				messageItem = "Process of purchase";
-				//itemButton->OnClicked.AddDynamic(this, &UStatusWidget::OnClickPoPButton);
-				break;
-			case StateStock::NEED_BUY:
-				color = FLinearColor::Red;
-				messageItem = "Need to buy";
-				//itemButton->OnClicked.AddDynamic(this, &UStatusWidget::OnClickNeedToBuyButton);
-				break;
-			}
-			itemButton->SetBackgroundColor(color);
-
-			// Add button color to this legend item
-			LegendItem->AddChildToHorizontalBox(itemButton);
-
-			// Add the button to the corresponding array
-			LegendColor.Add(itemButton);
-
-			// Create the text of the item
-			std::string TextName = "Text" + std::to_string(i) + "Name";
-			FString TextNameStr(TextName.c_str());
-			UTextBlock* itemText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), FName(*TextNameStr));
-
-			itemText->SetText(FText::FromString(messageItem.c_str()));
-			itemText->Font.Size = 20;
-			itemText->SynchronizeProperties();
-
-			// Add the text to the item
-			UHorizontalBoxSlot* itemTextSlot = LegendItem->AddChildToHorizontalBox(itemText);
-			itemTextSlot->SetPadding(FMargin(5));
-
-			// Add the button to the corresponding array
-			LegendText.Add(itemText);
-
-			// Add the item to the array of legends
-			Legend.Add(LegendItem);
-
-			// Hide the Legend Initialy
-			LegendItem->SetVisibility(ESlateVisibility::Visible);
-		}
+		ToggleButton->OnClicked.AddDynamic(this, &UVRWidget::DoSmth);
 	}
 
 	return Widget;
+}
+
+void UVRWidget::OnClickToggleButton()
+{
+	GetWorld()->GetFirstPlayerController()->ConsoleCommand("quit");
+}
+
+void UVRWidget::DoSmth()
+{
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+	if (gameState)
+		gameState->ToogleConstruction();
+
+
+	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Blue, "Click on button", true, FVector2D(10, 10));
 }
 
 

@@ -106,6 +106,7 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 		widgetInfoComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		widgetInfoComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 		widgetInfoComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+		widgetInfoComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 
 		// Set the style of the widget
 		widgetInfoComponent->SetBackgroundColor(FLinearColor(.0f, .0f, .0f, .95f));

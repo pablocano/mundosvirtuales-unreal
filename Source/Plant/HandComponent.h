@@ -41,6 +41,10 @@ enum class EFingerState : uint8
 	Contracted
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMenuKeyClicked);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGripPressed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGripReleased);
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PLANT_API UHandComponent : public USkeletalMeshComponent
 {
@@ -168,6 +172,9 @@ protected:
 	UFUNCTION()
 	void SemiExtendedGrip();
 
+	UFUNCTION()
+	void MenuKeyPressed();
+
 public:
 	// Callback close hand
 	void CloseHand();
@@ -185,7 +192,13 @@ public:
 	// Setup input
 	void SetupInput(UInputComponent* PlayerInputComponent, UInputSettings* inputSettings);
 
+	FMenuKeyClicked MenuKeyClicked;
+	FGripPressed GripPressed;
+	FGripReleased GripReleased;
+
+
 	void HandleClick();
+
 };
 
 UCLASS()

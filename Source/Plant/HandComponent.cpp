@@ -3,6 +3,7 @@
 #include "Plant.h"
 #include "MyGameState.h"
 #include "HandComponent.h"
+#include "Components/WidgetComponent.h"
 
 
 // Sets default values for this component's properties
@@ -46,13 +47,13 @@ void UHandComponent::BeginPlay()
 		// Setup Hand right
 		this->SetRelativeRotation(FRotator(0, 0, 90));
 		this->RelativeLocation = FVector(-10.f, 5.f, -5.f);
-		this->->RelativeLocation = FVector(-10.f, -5.f, -5.f);
 	}
 	else
 	{
 		// Setup Hand left
 		this->SetWorldScale3D(FVector(1, 1, -1));
 		this->SetRelativeRotation(FRotator(0, 0, 90));
+		this->RelativeLocation = FVector(-10.f, -5.f, -5.f);
 	}
 
 	// Setting Collision
@@ -60,6 +61,7 @@ void UHandComponent::BeginPlay()
 	this->SetCollisionObjectType(ECollisionChannel::ECC_Pawn);
 	this->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	this->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Overlap);
+	this->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
 
 	// Setting Overlay callbacks 
 	this->OnComponentBeginOverlap.AddDynamic(this, &UHandComponent::OnOverlapBegin);
@@ -72,10 +74,21 @@ void UHandComponent::BeginPlay()
 	widgetInteraction = NewObject<UWidgetInteractionComponent>(this,TEXT("Widget Interaction"));
 	widgetInteraction->RegisterComponent();
 	widgetInteraction->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-	widgetInteraction->SetRelativeLocationAndRotation(FVector(19, -4, 0), FQuat(FRotator(-80, 0, 0)));
+	widgetInteraction->SetRelativeLocationAndRotation(FVector(20, -4, 3), FQuat(FRotator(-80, 0, 0)));
 	widgetInteraction->bShowDebug = false;
 	widgetInteraction->bEnableHitTesting = true;
-	widgetInteraction->InteractionDistance = 10;
+	widgetInteraction->InteractionDistance = 12;
+
+	if (Hand == EControllerHand::Right)
+	{
+		widgetInteraction->VirtualUserIndex = 0;
+		widgetInteraction->PointerIndex = 0.f;
+	}
+	else
+	{
+		widgetInteraction->VirtualUserIndex = 1;
+		widgetInteraction->PointerIndex = 1.f;
+	}
 
 	// Load Animations
 	
@@ -162,10 +175,10 @@ void UHandComponent::HandleClick()
 	if (lastIndexState == currentIndexState)
 		return;
 
-	if (lastIndexState == EFingerState::Extended && currentIndexState >= EFingerState::Semi_Extended)
+	/*if (lastIndexState == EFingerState::Extended && currentIndexState >= EFingerState::Semi_Extended)
 		widgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
 	if (lastIndexState >= EFingerState::Semi_Extended && currentIndexState == EFingerState::Extended)
-		widgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
+		widgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);*/
 
 	lastIndexState = currentIndexState;
 	return;
@@ -222,12 +235,31 @@ void UHandComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
 				}
 			}
 		}
+		return;
+	}
+	if (widgetInteraction->IsOverInteractableWidget() && OtherComp != nullptr)
+	{
+		UWidgetComponent* widgetOverlaped = Cast<UWidgetComponent>(OtherComp);
+
+		if (widgetOverlaped) {
+			widgetInteraction->PressPointerKey(EKeys::LeftMouseButton);
+			// Start loop of haptic effect
+			if (hapticFeedBack)
+				GetWorld()->GetFirstPlayerController()->PlayHapticEffect(hapticFeedBack, Hand, 1.0f, true);
+		}
 	}
 }
 
 void UHandComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// Other Actor is the actor that triggered the event. Check that is not ourself.  
+	
+	widgetInteraction->ReleasePointerKey(EKeys::LeftMouseButton);
+
+	// Start loop of haptic effect
+	if (hapticFeedBack)
+		GetWorld()->GetFirstPlayerController()->StopHapticEffect(Hand);
+
+	// Other Actor is the actor that triggered the event. Check that is not ourself.
 	if ((OtherActor != nullptr) && (OtherActor != this->GetOwner()) && (OtherComp != nullptr))
 	{
 		if (--touchCount <= 0)
@@ -239,7 +271,7 @@ void UHandComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* O
 
 			if (gameState)
 			{
-				gameState->setSelectedActor(nullptr);
+				//gameState->setSelectedActor(nullptr);
 				gameState->setSelectedComponent(nullptr);
 			}
 		}
@@ -263,14 +295,20 @@ void UHandComponent::SetupInput(UInputComponent* PlayerInputComponent, UInputSet
 
 		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Finger_Grip_") + strHand), EKeys::MotionController_Left_Grip1));
 		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Touch_Finger_Grip_") + strHand), EKeys::MotionController_Left_Grip2/*FKey(FName("OculusTouch_Left_Grip2"))*/));
+
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("MenuKey_") + strHand), EKeys::MotionController_Left_FaceButton2));
+		//PlayerInputComponent->BindAction("onComponentRight", IE_Pressed, Cast<AMyGameState>(GetWorld()->GetGameState()), &AMyGameState::onComponent);
+		PlayerInputComponent->BindAction(*(FString("MenuKey_") + strHand), IE_Pressed, this, &UHandComponent::MenuKeyPressed);
 	}
 	else
 	{
-		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("Turn"), EKeys::MotionController_Right_Thumbstick_Y, -0.25f));
-		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("LookUp"), EKeys::MotionController_Right_Thumbstick_X, 0.25f));
+		//inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("Turn"), EKeys::MotionController_Right_Thumbstick_Y, -0.25f));
+		//inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("LookUp"), EKeys::MotionController_Right_Thumbstick_X, 0.25f));
+		inputSettings->AddAxisMapping(FInputAxisKeyMapping(FName("Turn"), EKeys::MotionController_Right_Thumbstick_X, 0.25f));
 
-		inputSettings->AddActionMapping(FInputActionKeyMapping(FName("onComponentRight"), EKeys::MotionController_Right_FaceButton1));
-		PlayerInputComponent->BindAction("onComponentRight", IE_Pressed, Cast<AMyGameState>(GetWorld()->GetGameState()), &AMyGameState::onComponent);
+		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("MenuKey_") + strHand), EKeys::MotionController_Right_FaceButton2));
+		//PlayerInputComponent->BindAction("onComponentRight", IE_Pressed, Cast<AMyGameState>(GetWorld()->GetGameState()), &AMyGameState::onComponent);
+		PlayerInputComponent->BindAction(*(FString("MenuKey_") + strHand), IE_Pressed, this, &UHandComponent::MenuKeyPressed);
 
 		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Finger_Index_") + strHand), EKeys::MotionController_Right_Trigger));
 		inputSettings->AddActionMapping(FInputActionKeyMapping(*(FString("Touch_Finger_Index_") + strHand), FKey(FName("OculusTouch_Right_Trigger"))));
@@ -385,6 +423,7 @@ void UHandComponent::ExtendedGrip()
 	this->ExtendedFingerPinky();
 	this->ExtendedFingerRing();
 	this->ExtendedFingerMiddle();
+	this->GripReleased.Broadcast();
 }
 
 void UHandComponent::ContractedGrip()
@@ -392,6 +431,7 @@ void UHandComponent::ContractedGrip()
 	this->ContractedFingerPinky();
 	this->ContractedFingerRing();
 	this->ContractedFingerMiddle();
+	this->GripPressed.Broadcast();
 }
 
 void UHandComponent::SemiExtendedGrip()
@@ -399,4 +439,9 @@ void UHandComponent::SemiExtendedGrip()
 	this->SemiExtendedFingerPinky();
 	this->SemiExtendedFingerRing();
 	this->SemiExtendedFingerMiddle();
+}
+
+void UHandComponent::MenuKeyPressed()
+{
+	MenuKeyClicked.Broadcast();
 }

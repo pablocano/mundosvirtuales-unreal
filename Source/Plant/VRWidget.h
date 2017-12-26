@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "WrapedTextBlock.h"
 #include "VRWidget.generated.h"
 
 /**
@@ -20,16 +21,6 @@ class PLANT_API UVRWidget : public UUserWidget
 	/// The tree of all the components of this widget
 	/// </summary>
 	UWidgetTree* widgetTree;
-
-	/// <summary>
-	/// A box used to give the size
-	/// </summary>
-	USizeBox* SizeBox;
-
-	/// <summary>
-	/// A box used to scale the widget
-	/// </summary>
-	UScaleBox* ScaleBox;
 
 	/// <summary>
 	/// The component where all the components are going to be
@@ -55,5 +46,23 @@ class PLANT_API UVRWidget : public UUserWidget
 	UTextBlock* Title;
 
 	UTextBlock* Subtitle;
+
+	UHorizontalBox* TitleBarBox;
+
+	UTexture2D* ButtonBG;
+	UTexture2D* ButtonBGPressed;
+	UTexture2D* ButtonBGHovered;
+	UButton* ButtonExit;
 	
+
+
+	UFUNCTION()
+	void OnClickToggleButton();
+
+	UFUNCTION()
+	void DoSmth();
+
+public:
+
+	UWrapedTextBlock* Instructions;
 };

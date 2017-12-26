@@ -45,3 +45,10 @@ void AMyGameState::onComponent()
 		actor->HandleClickOnComponent(assembly);
 	}
 }
+
+void AMyGameState::ToogleConstruction()
+{
+	APlantActor* actor = Cast<APlantActor>(selectedActor);
+	if (actor)
+		actor->ToggleConstructionMode();
+}
