@@ -29,9 +29,8 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 
 		SetForegroundColor(FSlateColor(FLinearColor(1.f, 1.f, 1.f, 1.f)));
 
-		// Content Window
-		ContentWindowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Content Windows"));
-		UPanelSlot* rootSlot = RootWidget->AddChild(ContentWindowBox);
+		WidgetSwitcher = WidgetTree->ConstructWidget<UWidgetSwitcher>(UWidgetSwitcher::StaticClass(), TEXT("WidgetSwitcher"));
+		UPanelSlot* rootSlot = RootWidget->AddChild(WidgetSwitcher);
 
 		UCanvasPanelSlot* RootWidgetSlot = Cast<UCanvasPanelSlot>(rootSlot);
 		if (RootWidgetSlot)
@@ -39,6 +38,10 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 			RootWidgetSlot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
 			RootWidgetSlot->SetOffsets(FMargin(100.f, 100.f));
 		}
+
+		// Content Window
+		ContentWindowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Content Windows"));
+		WidgetSwitcher->AddChild(ContentWindowBox);
 
 		// Title Bar and Buttons
 		TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("TitleAndExit"));
@@ -54,28 +57,28 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 		SlotItemHorz->SetSize(ESlateSizeRule::Fill);
 
 		// Generate Button Ok
-		ButtonExit = NewObject<UButton>(TitleBarBox, UButton::StaticClass());
-		SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(ButtonExit);
+		ButtonSwitchExit = NewObject<UButton>(TitleBarBox, UButton::StaticClass());
+		SlotItemHorz = TitleBarBox->AddChildToHorizontalBox(ButtonSwitchExit);
 		SlotItemHorz->SetPadding(5);
 		FVector2D sizeButton(150, 150);
 
 		//static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGObj(TEXT("/Game/WidgetTextures/close-button.close-button"));
 		ButtonBG = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/close-button.close-button"), NULL, LOAD_None, NULL); //ButtonBGObj.Object;
-		ButtonExit->WidgetStyle.Normal.SetResourceObject(ButtonBG);
-		ButtonExit->WidgetStyle.Normal.ImageSize = sizeButton;
-		ButtonExit->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
+		ButtonSwitchExit->WidgetStyle.Normal.SetResourceObject(ButtonBG);
+		ButtonSwitchExit->WidgetStyle.Normal.ImageSize = sizeButton;
+		ButtonSwitchExit->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
 
 		//static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGPressedObj(TEXT("/Game/WidgetTextures/close-button-pressed.close-button-pressed"));
 		ButtonBGPressed = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/close-button-pressed.close-button-pressed"), NULL, LOAD_None, NULL);//ButtonBGPressedObj.Object;
-		ButtonExit->WidgetStyle.Pressed.SetResourceObject(ButtonBGPressed);
-		ButtonExit->WidgetStyle.Pressed.ImageSize = sizeButton;
-		ButtonExit->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
+		ButtonSwitchExit->WidgetStyle.Pressed.SetResourceObject(ButtonBGPressed);
+		ButtonSwitchExit->WidgetStyle.Pressed.ImageSize = sizeButton;
+		ButtonSwitchExit->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
 
 		//static ConstructorHelpers::FObjectFinder<UTexture2D> ButtonBGHoveredObj(TEXT("/Game/WidgetTextures/close-button-hovered.close-button-hovered"));
 		ButtonBGHovered = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/close-button-hovered.close-button-hovered"), NULL, LOAD_None, NULL);//ButtonBGHoveredObj.Object;
-		ButtonExit->WidgetStyle.Hovered.SetResourceObject(ButtonBGHovered);
-		ButtonExit->WidgetStyle.Hovered.ImageSize = sizeButton;
-		ButtonExit->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
+		ButtonSwitchExit->WidgetStyle.Hovered.SetResourceObject(ButtonBG);
+		ButtonSwitchExit->WidgetStyle.Hovered.ImageSize = sizeButton;
+		ButtonSwitchExit->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
 
 		// SubTitle
 		Subtitle = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PhaseTitle"));
@@ -105,18 +108,117 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 		TextButton->Font.Size = 100;
 		TextButton->SynchronizeProperties();
 
-		// Delegate click actions
-		ButtonExit->OnClicked.AddDynamic(this, &UVRWidget::OnClickToggleButton);
+		// Control Buttons
+		UHorizontalBox* ControlButtons = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("ControlButtons"));
+		ContentWindowBox->AddChildToVerticalBox(ControlButtons);
 
+		// Generate Button Prev
+		UButton* ButtonPrev = NewObject<UButton>(ControlButtons, UButton::StaticClass());
+		SlotItemHorz = ControlButtons->AddChildToHorizontalBox(ButtonPrev);
+		SlotItemHorz->SetPadding(50);
+
+		UTexture2D* ButtonPrevTexture = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/prevarrow.prevarrow"), NULL, LOAD_None, NULL);
+		ButtonPrev->WidgetStyle.Normal.SetResourceObject(ButtonPrevTexture);
+		ButtonPrev->WidgetStyle.Normal.ImageSize = FVector2D(250,250);
+		ButtonPrev->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
+
+		ButtonPrev->WidgetStyle.Hovered.SetResourceObject(ButtonPrevTexture);
+		ButtonPrev->WidgetStyle.Hovered.ImageSize = FVector2D(250, 250);
+		ButtonPrev->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
+
+		UTexture2D* ButtonPrevPressed = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/prevarrowclicked.prevarrowclicked"), NULL, LOAD_None, NULL);//ButtonBGPressedObj.Object;
+		ButtonPrev->WidgetStyle.Pressed.SetResourceObject(ButtonPrevPressed);
+		ButtonPrev->WidgetStyle.Pressed.ImageSize = FVector2D(250, 250);
+		ButtonPrev->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
+
+		// Generate Button Next
+		UButton* ButtonNext = NewObject<UButton>(ControlButtons, UButton::StaticClass());
+		SlotItemHorz = ControlButtons->AddChildToHorizontalBox(ButtonNext);
+		SlotItemHorz->SetPadding(FMargin(1000,50,0,50));
+
+		UTexture2D* ButtonNextTexture = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/nextarrow.nextarrow"), NULL, LOAD_None, NULL);
+		ButtonNext->WidgetStyle.Normal.SetResourceObject(ButtonNextTexture);
+		ButtonNext->WidgetStyle.Normal.ImageSize = FVector2D(250, 250);
+		ButtonNext->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
+
+		ButtonNext->WidgetStyle.Hovered.SetResourceObject(ButtonNextTexture);
+		ButtonNext->WidgetStyle.Hovered.ImageSize = FVector2D(250, 250);
+		ButtonNext->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
+
+		UTexture2D* ButtonNextPressed = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/nextarrowcliked.nextarrowcliked"), NULL, LOAD_None, NULL);//ButtonBGPressedObj.Object;
+		ButtonNext->WidgetStyle.Pressed.SetResourceObject(ButtonNextPressed);
+		ButtonNext->WidgetStyle.Pressed.ImageSize = FVector2D(250, 250);
+		ButtonNext->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
+
+		// Delegate click actions
+		ButtonSwitchExit->OnClicked.AddDynamic(this, &UVRWidget::SwitchToExit);
 		ToggleButton->OnClicked.AddDynamic(this, &UVRWidget::DoSmth);
+
+		// Exit widget
+		ExitWindowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ExitWindows"));
+		WidgetSwitcher->AddChild(ExitWindowBox);
+
+		// Exit Instructions
+		UTextBlock* ExitInstructions = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("ExitInstructions"));
+		UVerticalBoxSlot* VerticalSlot = ExitWindowBox->AddChildToVerticalBox(ExitInstructions);
+		ExitInstructions->SetText(FText::FromString("Are you sure you want to exit?"));
+		ExitInstructions->Font.Size = 80;
+		ExitInstructions->SetJustification(ETextJustify::Center);
+		ExitInstructions->SynchronizeProperties();
+
+		VerticalSlot->SetPadding(FMargin(50, 50, 50, 50));
+
+		// Exit Buttons
+		UHorizontalBox* ExitButtons = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("ExitButtons"));
+		UVerticalBoxSlot* ExitWindowSlot = ExitWindowBox->AddChildToVerticalBox(ExitButtons);
+		ExitWindowSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+
+
+		// Generate Button Prev
+		UButton* ButtonCancelExit = NewObject<UButton>(ControlButtons, UButton::StaticClass());
+		SlotItemHorz = ExitButtons->AddChildToHorizontalBox(ButtonCancelExit);
+		SlotItemHorz->SetPadding(50);
+
+		UTexture2D* ButtonCancelTexture = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/cancel.cancel"), NULL, LOAD_None, NULL);
+		ButtonCancelExit->WidgetStyle.Normal.SetResourceObject(ButtonCancelTexture);
+		ButtonCancelExit->WidgetStyle.Normal.ImageSize = FVector2D(600, 180);
+		ButtonCancelExit->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
+
+		ButtonCancelExit->WidgetStyle.Hovered.SetResourceObject(ButtonCancelTexture);
+		ButtonCancelExit->WidgetStyle.Hovered.ImageSize = FVector2D(600, 180);
+		ButtonCancelExit->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
+
+		UTexture2D* ButtonCancelPressed = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/cancelhovered.cancelhovered"), NULL, LOAD_None, NULL);//ButtonBGPressedObj.Object;
+		ButtonCancelExit->WidgetStyle.Pressed.SetResourceObject(ButtonCancelPressed);
+		ButtonCancelExit->WidgetStyle.Pressed.ImageSize = FVector2D(600, 180);
+		ButtonCancelExit->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
+
+		// Generate Button Next
+		UButton* ButtonExit = NewObject<UButton>(ControlButtons, UButton::StaticClass());
+		SlotItemHorz = ExitButtons->AddChildToHorizontalBox(ButtonExit);
+		SlotItemHorz->SetPadding(50);
+
+		UTexture2D* ButtonExitTexture = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/exit.exit"), NULL, LOAD_None, NULL);
+		ButtonExit->WidgetStyle.Normal.SetResourceObject(ButtonExitTexture);
+		ButtonExit->WidgetStyle.Normal.ImageSize = FVector2D(600, 180);
+		ButtonExit->WidgetStyle.Normal.DrawAs = ESlateBrushDrawType::Image;
+
+		ButtonExit->WidgetStyle.Hovered.SetResourceObject(ButtonExitTexture);
+		ButtonExit->WidgetStyle.Hovered.ImageSize = FVector2D(600, 180);
+		ButtonExit->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
+
+		UTexture2D* ButtonExitPressed = LoadObject<UTexture2D>(NULL, TEXT("/Game/WidgetTextures/exithovered.exithovered"), NULL, LOAD_None, NULL);//ButtonBGPressedObj.Object;
+		ButtonExit->WidgetStyle.Pressed.SetResourceObject(ButtonExitPressed);
+		ButtonExit->WidgetStyle.Pressed.ImageSize = FVector2D(600, 180);
+		ButtonExit->WidgetStyle.Pressed.DrawAs = ESlateBrushDrawType::Image;
+
+		// Delegate click actions
+		ButtonCancelExit->OnClicked.AddDynamic(this, &UVRWidget::CancelExit);
+		ButtonExit->OnClicked.AddDynamic(this, &UVRWidget::ExitProgram);
+
 	}
 
 	return Widget;
-}
-
-void UVRWidget::OnClickToggleButton()
-{
-	GetWorld()->GetFirstPlayerController()->ConsoleCommand("quit");
 }
 
 void UVRWidget::DoSmth()
@@ -125,9 +227,21 @@ void UVRWidget::DoSmth()
 
 	if (gameState)
 		gameState->ToogleConstruction();
+}
 
+void UVRWidget::SwitchToExit()
+{
+	WidgetSwitcher->SetActiveWidget(ExitWindowBox);
+}
 
-	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Blue, "Click on button", true, FVector2D(10, 10));
+void UVRWidget::CancelExit()
+{
+	WidgetSwitcher->SetActiveWidget(ContentWindowBox);
+}
+
+void UVRWidget::ExitProgram()
+{
+	GetWorld()->GetFirstPlayerController()->ConsoleCommand("quit");
 }
 
 

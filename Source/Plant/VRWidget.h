@@ -52,15 +52,24 @@ class PLANT_API UVRWidget : public UUserWidget
 	UTexture2D* ButtonBG;
 	UTexture2D* ButtonBGPressed;
 	UTexture2D* ButtonBGHovered;
-	UButton* ButtonExit;
+	UButton* ButtonSwitchExit;
 	
+	UWidgetSwitcher* WidgetSwitcher;
+
+	UVerticalBox* ExitWindowBox;
 
 
 	UFUNCTION()
-	void OnClickToggleButton();
+	void SwitchToExit();
 
 	UFUNCTION()
 	void DoSmth();
+
+	UFUNCTION()
+	void CancelExit();
+
+	UFUNCTION()
+	void ExitProgram();
 
 public:
 
