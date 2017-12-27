@@ -56,6 +56,11 @@ void APlantActor::HandleClickOnComponent(UMeshComponent* clickedComponent)
 	// Access to the clicked component
 	IMeshInterface* ClickedComponentInterface = Cast<IMeshInterface>(clickedComponent);
 
+	if (!ClickedComponentInterface)
+	{
+		return;
+	}
+
 	// TODO
 	UMeshComponent* parentCliked = ClickedComponentInterface->Execute_GetParent(clickedComponent);
 	IMeshInterface* ParentInterface = Cast<IMeshInterface>(parentCliked);
