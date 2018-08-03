@@ -72,7 +72,15 @@ void APlantGameMode::asyncSpawnMachine(const StockPlant& stock)
 		hInstanceThis->plantActor = World->SpawnActorDeferred<APlantActor>(APlantActor::StaticClass(), SpawnLocAndRotation);
 		hInstanceThis->plantActor->Init(&stock);
 		hInstanceThis->plantActor->FinishSpawning(SpawnLocAndRotation);
-		hInstanceThis->plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
+		//hInstanceThis->plantActor->SetActorLocationAndRotation(FVector(0, -100, 72.5), FRotator(0, 0, 0));
+		hInstanceThis->plantActor->SetActorLocationAndRotation(FVector(0, 0, 0), FRotator(0, 0, 0));
+
+		AMyGameState* gameState = Cast<AMyGameState>(hInstanceThis->plantActor->GetWorld()->GetGameState());
+
+		if (gameState)
+		{
+			gameState->setSelectedActor(hInstanceThis->plantActor);
+		}
 
 		// Create the user interface to toggle between the visualization modes
 		//hInstance->statusWidget = NewObject<UStatusWidget>(hInstance, FName(TEXT("Status Wiget")));

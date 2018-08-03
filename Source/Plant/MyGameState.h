@@ -27,4 +27,6 @@ public:
 	void onComponent();
 
 	void ToogleConstruction();
+
+	AActor* GetSelectedActor();
 };

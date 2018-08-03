@@ -50,9 +50,25 @@ public:
 	void HandleClickOnComponent(UMeshComponent* clickedComponent);
 
 	/// <summary>
-	/// 
+	/// Perform one step forward of the currently selected procedure assembly
 	/// </summary>
-	void PerformStep(UMeshComponent* procedureComponentRoot);
+	void PerformStepForward();
+
+	/// <summary>
+	/// Perform one step backwards of the currently selected procedure assembly
+	/// </summary>
+	void PerformStepBackward();
+
+	/// <summary>
+	/// Start the procedure
+	/// </summary>
+	/// <param name="procedureComponentRoot"></param>
+	void InitProcedure();
+
+	/// <summary>
+	/// Finish the procedure
+	/// </summary>
+	void FinishProcedure();
   
 	/// <summary>
 	/// The selected component
@@ -79,8 +95,19 @@ public:
 	/// </summary>
 	StateStock highlightState;
 
-	Procedure p;
+	/// <summary>
+	/// The current procedure been executed
+	/// </summary>
+	Procedure *p;
 
+	/// <summary>
+	/// The root of the current procedure
+	/// </summary>
+	UMeshComponent* procedureComponentRoot;
+
+	/// <summary>
+	/// If we are in the procedure mode or not
+	/// </summary>
 	bool procedureMode;
 	
 };

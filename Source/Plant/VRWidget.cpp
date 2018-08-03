@@ -3,6 +3,7 @@
 #include "Plant.h"
 #include "VRWidget.h"
 #include "plant/StockPlant.h" 
+#include "PlantActor.h"
 #include "MyGameState.h"
 
 UVRWidget::UVRWidget(const FObjectInitializer& ObjectInitializer)
@@ -39,13 +40,17 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 			RootWidgetSlot->SetOffsets(FMargin(100.f, 100.f));
 		}
 
-		// Content Window
-		ContentWindowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Content Windows"));
-		WidgetSwitcher->AddChild(ContentWindowBox);
+		//Procedure Content Window
+		//InitWindowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Content Windows"));
+		//WidgetSwitcher->AddChild(InitWindowBox);
+
+		//Procedure Content Window
+		ProcedureWindowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("Content Windows"));
+		WidgetSwitcher->AddChild(ProcedureWindowBox);
 
 		// Title Bar and Buttons
-		TitleBarBox = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("TitleAndExit"));
-		ContentWindowBox->AddChildToVerticalBox(TitleBarBox);
+		TitleBarBox = NewObject<UHorizontalBox>(ProcedureWindowBox, TEXT("TitleAndExit"));
+		ProcedureWindowBox->AddChildToVerticalBox(TitleBarBox);
 
 		// Generate Title
 		Title = NewObject<UTextBlock>(TitleBarBox, UTextBlock::StaticClass());
@@ -82,14 +87,14 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 
 		// SubTitle
 		Subtitle = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PhaseTitle"));
-		ContentWindowBox->AddChildToVerticalBox(Subtitle);
+		ProcedureWindowBox->AddChildToVerticalBox(Subtitle);
 		Subtitle->SetText(FText::FromString("Opening door"));
 		Subtitle->Font.Size = 90;
 		Subtitle->SynchronizeProperties();
 
 		// Instructions
 		Instructions = WidgetTree->ConstructWidget<UWrapedTextBlock>(UWrapedTextBlock::StaticClass(), TEXT("InstructionsBlock"));
-		ContentWindowBox->AddChildToVerticalBox(Instructions);
+		ProcedureWindowBox->AddChildToVerticalBox(Instructions);
 		Instructions->SetText(FText::FromString("To open the door, go near the engine and pull the manilla."));
 		Instructions->SetAutoWrapText(true);
 		Instructions->Font.Size = 50;
@@ -97,7 +102,7 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 
 		// Add Button
 		ToggleButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Toggle Button"));
-		ContentWindowBox->AddChildToVerticalBox(ToggleButton);
+		ProcedureWindowBox->AddChildToVerticalBox(ToggleButton);
 
 		// Add text to the button
 		TextButton = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Toggle Button Text"));
@@ -109,8 +114,8 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 		TextButton->SynchronizeProperties();
 
 		// Control Buttons
-		UHorizontalBox* ControlButtons = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("ControlButtons"));
-		ContentWindowBox->AddChildToVerticalBox(ControlButtons);
+		UHorizontalBox* ControlButtons = NewObject<UHorizontalBox>(ProcedureWindowBox, TEXT("ControlButtons"));
+		ProcedureWindowBox->AddChildToVerticalBox(ControlButtons);
 
 		// Generate Button Prev
 		UButton* ButtonPrev = NewObject<UButton>(ControlButtons, UButton::StaticClass());
@@ -153,6 +158,8 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 		// Delegate click actions
 		ButtonSwitchExit->OnClicked.AddDynamic(this, &UVRWidget::SwitchToExit);
 		ToggleButton->OnClicked.AddDynamic(this, &UVRWidget::DoSmth);
+		ButtonPrev->OnClicked.AddDynamic(this, &UVRWidget::PrevStep);
+		ButtonNext->OnClicked.AddDynamic(this, &UVRWidget::NextStep);
 
 		// Exit widget
 		ExitWindowBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ExitWindows"));
@@ -169,7 +176,7 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 		VerticalSlot->SetPadding(FMargin(50, 50, 50, 50));
 
 		// Exit Buttons
-		UHorizontalBox* ExitButtons = NewObject<UHorizontalBox>(ContentWindowBox, TEXT("ExitButtons"));
+		UHorizontalBox* ExitButtons = NewObject<UHorizontalBox>(ProcedureWindowBox, TEXT("ExitButtons"));
 		UVerticalBoxSlot* ExitWindowSlot = ExitWindowBox->AddChildToVerticalBox(ExitButtons);
 		ExitWindowSlot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
 
@@ -236,12 +243,47 @@ void UVRWidget::SwitchToExit()
 
 void UVRWidget::CancelExit()
 {
-	WidgetSwitcher->SetActiveWidget(ContentWindowBox);
+	WidgetSwitcher->SetActiveWidget(ProcedureWindowBox);
 }
 
 void UVRWidget::ExitProgram()
 {
 	GetWorld()->GetFirstPlayerController()->ConsoleCommand("quit");
+}
+
+void UVRWidget::PrevStep()
+{
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+	if (gameState)
+	{
+		AActor* actor = gameState->GetSelectedActor();
+		if (actor)
+		{
+			APlantActor* plantActor = Cast<APlantActor>(actor);
+			if (plantActor)
+			{
+				plantActor->PerformStepBackward();
+			}
+		}
+	}
+}
+
+void UVRWidget::NextStep()
+{
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+	if (gameState)
+	{
+		AActor* actor = gameState->GetSelectedActor();
+		if (actor)
+		{
+			APlantActor* plantActor = Cast<APlantActor>(actor);
+			if (plantActor)
+			{
+				plantActor->PerformStepForward();
+			}
+		}
+	}
 }
 
 

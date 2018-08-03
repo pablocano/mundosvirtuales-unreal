@@ -5,6 +5,7 @@
 #include "AssemblyComponent.h"
 #include "WidgetInfoComponent.h"
 #include "AnimatedAssemblyComponent.h"
+#include <algorithm>
 
 #define M_PI           3.14159265358979323846  /* pi */
 
@@ -30,12 +31,13 @@ void UAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent* parentC
 	Vectorf3D position = stock->getPosition().m_pos * 100;
 	Vectorf3D rotation = stock->getPosition().m_rot;
 	rotation = rotation * (180.f / M_PI);
-	pose = FTransform(FRotator(rotation.y, -rotation.z, rotation.x), FVector(position.x, -position.y, position.z));
+	pose = FTransform(FRotator(rotation.y, -rotation.z, -rotation.x), FVector(position.x, -position.y, position.z));
 
 	// Get the mesh of this component using the model of the stock
 	std::string modelname = assembly->getModel().getPathModel();
-	modelname.erase(modelname.end() - 4, modelname.end());
-	modelname = "/Game/CashSorter/" + modelname + "." + modelname;
+	//modelname.erase(modelname.end() - 4, modelname.end());
+	std::replace(modelname.begin(), modelname.end(), ' ', '_');
+	modelname = "/Game/Turbofan/" + modelname + "." + modelname;
 	FString meshName = FString(modelname.c_str());
 	mesh = LoadObject<UStaticMesh>(NULL, *meshName, NULL, LOAD_None, NULL);
 

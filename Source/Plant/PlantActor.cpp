@@ -25,7 +25,6 @@ void APlantActor::BeginPlay()
 void APlantActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void APlantActor::Init(const StockPlant* stock)
@@ -38,6 +37,11 @@ void APlantActor::Init(const StockPlant* stock)
 	FString name(stock->getstrHash().c_str());
 	UAssemblyComponent* InitRootComponent = NewObject<UAssemblyComponent>(this, FName(*name));
 
+	//TODO
+	// Procedure init
+	FString path = FPaths::ProjectSavedDir() + FString("Config/");
+	p = new Procedure(std::string(TCHAR_TO_UTF8(*path)) + "filterchange.xml");
+
 	// Init the root assembly component
 	InitRootComponent->Init(this, nullptr, stock);
 	InitRootComponent->RegisterComponent();
@@ -49,30 +53,20 @@ void APlantActor::Init(const StockPlant* stock)
 	// Expand the firts layer of the tree
 	IMeshInterface* AssemblyRootComponentInterface = Cast<IMeshInterface>(AssemblyRootComponent);
 	AssemblyRootComponentInterface->Execute_Expand(AssemblyRootComponent);
+
+	InitProcedure();
 }
 
 void APlantActor::HandleClickOnComponent(UMeshComponent* clickedComponent)
 {
+	if (procedureMode)
+		return;
+
 	// Access to the clicked component
 	IMeshInterface* ClickedComponentInterface = Cast<IMeshInterface>(clickedComponent);
 
 	if (!ClickedComponentInterface)
 	{
-		return;
-	}
-
-	// TODO
-	UMeshComponent* parentCliked = ClickedComponentInterface->Execute_GetParent(clickedComponent);
-	IMeshInterface* ParentInterface = Cast<IMeshInterface>(parentCliked);
-	if (ClickedComponentInterface->Execute_IsSubComponent(clickedComponent, 24, 1))
-	{
-		PerformStep(clickedComponent);
-		return;
-	}
-
-	if (ParentInterface->Execute_IsSubComponent(parentCliked, 24, 1))
-	{
-		PerformStep(parentCliked);
 		return;
 	}
 	
@@ -100,11 +94,8 @@ void APlantActor::HandleClickOnComponent(UMeshComponent* clickedComponent)
 	SelectedComponent = clickedComponent;
 }
 
-void APlantActor::PerformStep(UMeshComponent* procedureComponentRoot)
+void APlantActor::PerformStepForward()
 {
-	// Set the procedure mode on
-	procedureMode = true;
-
 	// Check if the root component is expanded
 	IMeshInterface* ProcedureComponentRootInterface = Cast<IMeshInterface>(procedureComponentRoot);
 	if (!ProcedureComponentRootInterface->Execute_IsExpanded(procedureComponentRoot))
@@ -114,7 +105,7 @@ void APlantActor::PerformStep(UMeshComponent* procedureComponentRoot)
 	Step s;
 
 	// Ask for the next step
-	if (p.NextStep(s))
+	if (p->NextStep(s))
 	{
 		// Remove the focus of all the components of the previous step
 		for (UMeshComponent* lastComponent : LastUsedComponents)
@@ -133,7 +124,7 @@ void APlantActor::PerformStep(UMeshComponent* procedureComponentRoot)
 			UMeshComponent* currentComponent = procedureComponentRoot;
 
 			// Search the component using the path
-			for (std::pair<int, int> path : instruction.m_path)
+			for (std::pair<int, int> path : instruction.m_path.GetPath())
 			{
 				IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
 				UMeshComponent* currentSubComponent = CurrentComponentInterface->Execute_GetSubComponent(currentComponent, path.first, path.second);
@@ -205,6 +196,10 @@ void APlantActor::PerformStep(UMeshComponent* procedureComponentRoot)
 	}
 }
 
+void APlantActor::PerformStepBackward()
+{
+}
+
 void APlantActor::ToggleConstructionMode()
 {
 	// Toggle the construction mode
@@ -223,5 +218,18 @@ void APlantActor::SetHighlightState(StateStock state)
 	// Process the visualization mode in all the tree
 	IMeshInterface* AssemblyRootComponentInterface = Cast<IMeshInterface>(AssemblyRootComponent);
 	AssemblyRootComponentInterface->Execute_ProcessVisualizationMode(AssemblyRootComponent);
+}
+
+void APlantActor::InitProcedure()
+{
+	procedureMode = true;
+
+	IMeshInterface* AssemblyRootComponentInterface = Cast<IMeshInterface>(AssemblyRootComponent);
+	procedureComponentRoot = AssemblyRootComponentInterface->Execute_GetSubComponent(AssemblyRootComponent, p->GetAssemblyId(), 1);
+}
+
+void APlantActor::FinishProcedure()
+{
+	procedureMode = false;
 }
 

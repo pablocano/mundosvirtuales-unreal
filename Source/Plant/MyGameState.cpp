@@ -52,3 +52,8 @@ void AMyGameState::ToogleConstruction()
 	if (actor)
 		actor->ToggleConstructionMode();
 }
+
+AActor* AMyGameState::GetSelectedActor()
+{
+	return selectedActor;
+}

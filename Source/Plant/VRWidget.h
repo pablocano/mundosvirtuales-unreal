@@ -25,7 +25,12 @@ class PLANT_API UVRWidget : public UUserWidget
 	/// <summary>
 	/// The component where all the components are going to be
 	/// </summary>
-	UVerticalBox* ContentWindowBox;
+	UVerticalBox* ProcedureWindowBox;
+
+	/// <summary>
+	/// The component where all the components are going to be
+	/// </summary>
+	UVerticalBox* InitWindowBox;
 
 	/// <summary>
 	/// The button that toggle tw view between construction and standart mode
@@ -70,6 +75,12 @@ class PLANT_API UVRWidget : public UUserWidget
 
 	UFUNCTION()
 	void ExitProgram();
+
+	UFUNCTION()
+	void NextStep();
+
+	UFUNCTION()
+	void PrevStep();
 
 public:
 

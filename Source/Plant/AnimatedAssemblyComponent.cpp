@@ -34,11 +34,12 @@ void UAnimatedAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent*
 
 	// Get the mesh of this component using the model of the stock
 	std::string modelname = assembly->getModel().getPathModel();
-	modelname.erase(modelname.end() - 4, modelname.end());
+	//modelname.erase(modelname.end() - 4, modelname.end());
+	std::replace(modelname.begin(), modelname.end(), ' ', '_');
 
-	std::string modelAnimationName = "/Game/CashSorter/Animated/" + modelname + "_Anim." + modelname + "_Anim";
+	std::string modelAnimationName = "/Game/Turbofan/Animated/" + modelname + "_Anim." + modelname + "_Anim";
 
-	modelname = "/Game/CashSorter/Animated/" + modelname + "." + modelname;
+	modelname = "/Game/Turbofan/Animated/" + modelname + "." + modelname;
 	FString meshName = FString(modelname.c_str());
 	mesh = LoadObject<USkeletalMesh>(NULL, *meshName, NULL, LOAD_None, NULL);
 	
@@ -69,6 +70,9 @@ void UAnimatedAssemblyComponent::Init(APlantActor* actorPointer, UMeshComponent*
 	{
 		// Create a dynamic material using the base material of this slpt
 		UMaterialInstanceDynamic *dynMaterial = CreateAndSetMaterialInstanceDynamic(i);
+
+		if (!dynMaterial)
+			continue;
 
 		// Add a pointer of this material in a list
 		DynMaterials.Add(dynMaterial);
@@ -223,6 +227,8 @@ void UAnimatedAssemblyComponent::SetSelected_Implementation(bool select)
 {
 	// Set the selection
 	selected = select;
+
+	Play(false);
 
 	// If the component is selected
 	if (selected)
