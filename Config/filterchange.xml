@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<procedure description="Filter Change" procedureId="1" assemblyId="27">
+	<phase description="Open the gates">
+		<step description="Open the handles">
+			<instruction type="2" path="25:1,5:1" description=""/>
+			<instruction type="2" path="25:1,6:1" description=""/>
+			<instruction type="2" path="25:1,7:1" description=""/>
+			<instruction type="2" path="25:1,9:2" description=""/>
+		</step>
+		<step description="Open the gates">
+			<instruction type="2" path="25:1,8:2" description=""/>
+			<instruction type="2" path="25:1,10:1" description=""/>
+		</step>
+	</phase>
+	<phase description="Open the filter">
+		<step description="Remove the drain plug from the oil filter">
+			<instruction type="2" path="26:1,18:1" description=""/>
+			<instruction type="2" path="26:1,19:1" description=""/>
+		</step>
+		<step description="Remove the oil filter bowl from the lube unit">
+			<instruction type="2" path="26:1,21:1" description=""/>
+		</step>
+	</phase>
+	<phase description="Change the filter">
+		<step description="Remove the old lube oil filter element from the oil filter bowl">
+			<instruction type="2" path="26:1,20:1" description=""/>
+			<instruction type="2" path="26:1,15:1" description=""/>
+			<instruction type="2" path="26:1,16:1" description=""/>
+			<instruction type="2" path="26:1,17:1" description=""/>
+		</step>
+		<step description="Install the new lube oil filter element in the lube unit.">
+			<instruction type="1" path="26:1,20:1" description=""/>
+			<instruction type="1" path="26:1,15:1" description=""/>
+			<instruction type="1" path="26:1,16:1" description=""/>
+			<instruction type="1" path="26:1,17:1" description=""/>
+		</step>
+	</phase>
+</procedure>
