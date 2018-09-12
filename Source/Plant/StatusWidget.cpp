@@ -73,6 +73,17 @@ TSharedRef<SWidget> UStatusWidget::RebuildWidget()
 			std::string ColorName = "Color" + std::to_string(i) + "Name";
 			FString ColorNameStr(ColorName.c_str());
 			UButton* itemButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), FName(*ColorNameStr));
+
+			// Add text to the button
+			std::string LegendTextButtonName = "LegendButtonText" + std::to_string(i) + "Name";
+			FString LegendTextNameStr(LegendTextButtonName.c_str());
+			UTextBlock* LegendTextButton = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), FName(*LegendTextNameStr));
+			itemButton->AddChild(LegendTextButton);
+
+			// Set text of the button
+			LegendTextButton->SetText(FText::FromString("   "));
+			LegendTextButton->Font.Size = 40;
+			LegendTextButton->SynchronizeProperties();
 			
 			// Set the color of the button
 			FLinearColor color;

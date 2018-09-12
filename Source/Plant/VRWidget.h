@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "plant/StockPlant.h" 
 #include "WrapedTextBlock.h"
 #include "VRWidget.generated.h"
 
@@ -62,6 +63,9 @@ class PLANT_API UVRWidget : public UUserWidget
 	UWidgetSwitcher* WidgetSwitcher;
 
 	UVerticalBox* ExitWindowBox;
+	UVerticalBox* ConstructionModeBox;
+	UButton* ToggleButton2;
+	UTextBlock* TextButton2;
 
 
 	UFUNCTION()
@@ -69,6 +73,9 @@ class PLANT_API UVRWidget : public UUserWidget
 
 	UFUNCTION()
 	void DoSmth();
+
+	UFUNCTION()
+	void DoSmth2();
 
 	UFUNCTION()
 	void CancelExit();
@@ -82,7 +89,24 @@ class PLANT_API UVRWidget : public UUserWidget
 	UFUNCTION()
 	void PrevStep();
 
+	UFUNCTION()
+	void OnClickInstalledButton();
+
+	UFUNCTION()
+	void OnClickConstructionButton();
+
+	UFUNCTION()
+	void OnClickWarehouseButton();
+
+	UFUNCTION()
+	void OnClickPoPButton();
+
+	UFUNCTION()
+	void OnClickNeedToBuyButton();
+
 public:
 
 	UWrapedTextBlock* Instructions;
+
+	StateStock highlightState;
 };

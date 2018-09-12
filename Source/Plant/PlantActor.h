@@ -109,5 +109,11 @@ public:
 	/// If we are in the procedure mode or not
 	/// </summary>
 	bool procedureMode;
+
+	// The next step
+	Step s;
+
+	//Step already performed
+	bool stepPerformed;
 	
 };

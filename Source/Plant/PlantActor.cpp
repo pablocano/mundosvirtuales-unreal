@@ -8,7 +8,7 @@
 FLinearColor APlantActor::StateColorArray[6] = { FLinearColor::Green, FLinearColor(0.f,1.f,1.f), FLinearColor::Blue, FLinearColor::Yellow, FLinearColor::Red, FLinearColor::Black };
 
 // Sets default values
-APlantActor::APlantActor() : constructionMode(false), highlightState(StateStock::NONE_STATE), procedureMode(false)
+APlantActor::APlantActor() : constructionMode(false), highlightState(StateStock::NONE_STATE), procedureMode(false), stepPerformed(true)
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -39,7 +39,7 @@ void APlantActor::Init(const StockPlant* stock)
 
 	//TODO
 	// Procedure init
-	FString path = FPaths::ProjectSavedDir() + FString("Config/");
+	FString path = FPaths::ProjectConfigDir();// +FString("Config/");
 	p = new Procedure(std::string(TCHAR_TO_UTF8(*path)) + "filterchange.xml");
 
 	// Init the root assembly component
@@ -101,12 +101,22 @@ void APlantActor::PerformStepForward()
 	if (!ProcedureComponentRootInterface->Execute_IsExpanded(procedureComponentRoot))
 		ProcedureComponentRootInterface->Execute_Expand(procedureComponentRoot);
 
-	// The next step
-	Step s;
+	bool performNextStep;
+	if (stepPerformed) 
+	{
+		performNextStep = p->NextStep(s);
+	}
+	else
+	{
+		performNextStep = true;
+	}
 
 	// Ask for the next step
-	if (p->NextStep(s))
+	if (performNextStep)
 	{
+		//
+		stepPerformed = true;
+
 		// Remove the focus of all the components of the previous step
 		for (UMeshComponent* lastComponent : LastUsedComponents)
 		{
@@ -171,7 +181,7 @@ void APlantActor::PerformStepForward()
 				animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
 				if (animatedComponent) {
 					animatedComponent->SetPlayRate(-1);
-					animatedComponent->Play(true);
+					animatedComponent->Play(false);
 				}
 			}
 				break;
@@ -181,7 +191,7 @@ void APlantActor::PerformStepForward()
 				animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
 				if (animatedComponent) {
 					animatedComponent->SetPlayRate(1);
-					animatedComponent->Play(true);
+					animatedComponent->Play(false);
 				}
 			}
 				break;
@@ -198,6 +208,187 @@ void APlantActor::PerformStepForward()
 
 void APlantActor::PerformStepBackward()
 {
+	// Check if the root component is expanded
+	IMeshInterface* ProcedureComponentRootInterface = Cast<IMeshInterface>(procedureComponentRoot);
+	if (!ProcedureComponentRootInterface->Execute_IsExpanded(procedureComponentRoot))
+		ProcedureComponentRootInterface->Execute_Expand(procedureComponentRoot);
+
+	// Remove the focus of all the components of the previous step
+	for (UMeshComponent* lastComponent : LastUsedComponents)
+	{
+		IMeshInterface* LastComponentInterface = Cast<IMeshInterface>(lastComponent);
+		LastComponentInterface->Execute_RemoveFocus(lastComponent);
+	}
+
+	// Reset the list of the last used components
+	LastUsedComponents.Empty();
+
+	// Iterate over all the instructions of this step
+	for (Instruction instruction : s.getInstructions())
+	{
+		// Restart the root of the search
+		UMeshComponent* currentComponent = procedureComponentRoot;
+
+		// Search the component using the path
+		for (std::pair<int, int> path : instruction.m_path.GetPath())
+		{
+			IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
+			UMeshComponent* currentSubComponent = CurrentComponentInterface->Execute_GetSubComponent(currentComponent, path.first, path.second);
+
+			// It should always find a component
+			if (currentSubComponent) {
+				// If the component is not expanded, expand it
+				IMeshInterface* CurrentSubComponentInterface = Cast<IMeshInterface>(currentSubComponent);
+				if (!CurrentSubComponentInterface->Execute_IsExpanded(currentSubComponent))
+					CurrentSubComponentInterface->Execute_Expand(currentSubComponent);
+
+				// Update the current component
+				currentComponent = currentSubComponent;
+			}
+			else
+			{
+				// This should never happen
+				std::cerr << "Component not found" << std::endl;
+				break;
+			}
+		}
+
+		// Add this component to the list of  used components
+		LastUsedComponents.Add(currentComponent);
+
+		//  Access to the interface
+		IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
+
+		// Set this component as focused
+		CurrentComponentInterface->Execute_SetFocus(currentComponent);
+
+		// Execute the instruction accordingly
+		switch (instruction.m_type)
+		{
+		case Instruction::INS_CREATE:
+			CurrentComponentInterface->Execute_ShowComponent(currentComponent);
+			break;
+		case Instruction::INS_DELETE:
+			CurrentComponentInterface->Execute_HideComponent(currentComponent);
+			break;
+		case Instruction::INS_INSERT:
+		{
+			UAnimatedAssemblyComponent* animatedComponent;
+			animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
+			if (animatedComponent) {
+				animatedComponent->SetPlayRate(1);
+				animatedComponent->Play(false);
+			}
+		}
+		break;
+		case Instruction::INS_REMOVE:
+		{
+			UAnimatedAssemblyComponent* animatedComponent;
+			animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
+			if (animatedComponent) {
+				animatedComponent->SetPlayRate(-1);
+				animatedComponent->Play(false);
+			}
+		}
+		break;
+		default:
+			break;
+		}
+	}
+
+	// Ask for the previous step
+	if (p->PreviousStep(s))
+	{
+		//
+		stepPerformed = false;
+
+		// Remove the focus of all the components of the previous step
+		for (UMeshComponent* lastComponent : LastUsedComponents)
+		{
+			IMeshInterface* LastComponentInterface = Cast<IMeshInterface>(lastComponent);
+			LastComponentInterface->Execute_RemoveFocus(lastComponent);
+		}
+
+		// Reset the list of the last used components
+		LastUsedComponents.Empty();
+
+		// Iterate over all the instructions of this step
+		for (Instruction instruction : s.getInstructions())
+		{
+			// Restart the root of the search
+			UMeshComponent* currentComponent = procedureComponentRoot;
+
+			// Search the component using the path
+			for (std::pair<int, int> path : instruction.m_path.GetPath())
+			{
+				IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
+				UMeshComponent* currentSubComponent = CurrentComponentInterface->Execute_GetSubComponent(currentComponent, path.first, path.second);
+
+				// It should always find a component
+				if (currentSubComponent) {
+					// If the component is not expanded, expand it
+					IMeshInterface* CurrentSubComponentInterface = Cast<IMeshInterface>(currentSubComponent);
+					if (!CurrentSubComponentInterface->Execute_IsExpanded(currentSubComponent))
+						CurrentSubComponentInterface->Execute_Expand(currentSubComponent);
+
+					// Update the current component
+					currentComponent = currentSubComponent;
+				}
+				else
+				{
+					// This should never happen
+					std::cerr << "Component not found" << std::endl;
+					break;
+				}
+			}
+
+			// Add this component to the list of  used components
+			LastUsedComponents.Add(currentComponent);
+
+			//  Access to the interface
+			IMeshInterface* CurrentComponentInterface = Cast<IMeshInterface>(currentComponent);
+
+			// Set this component as focused
+			CurrentComponentInterface->Execute_SetFocus(currentComponent);
+
+			// Execute the instruction accordingly
+			switch (instruction.m_type)
+			{
+			case Instruction::INS_CREATE:
+				CurrentComponentInterface->Execute_ShowComponent(currentComponent);
+				break;
+			case Instruction::INS_DELETE:
+				CurrentComponentInterface->Execute_HideComponent(currentComponent);
+				break;
+			case Instruction::INS_INSERT:
+			{
+				UAnimatedAssemblyComponent* animatedComponent;
+				animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
+				if (animatedComponent) {
+					animatedComponent->SetPlayRate(1);
+					animatedComponent->Play(false);
+				}
+			}
+			break;
+			case Instruction::INS_REMOVE:
+			{
+				UAnimatedAssemblyComponent* animatedComponent;
+				animatedComponent = Cast<UAnimatedAssemblyComponent>(currentComponent);
+				if (animatedComponent) {
+					animatedComponent->SetPlayRate(-1);
+					animatedComponent->Play(false);
+				}
+			}
+			break;
+			default:
+				break;
+			}
+		}
+	}
+	else
+	{
+		procedureMode = false;
+	}
 }
 
 void APlantActor::ToggleConstructionMode()

@@ -71,6 +71,9 @@ void AFirstPersonCharacter::BeginPlay()
 	widget = NewObject<UVRWidget>(this, UVRWidget::StaticClass());
 	// Set the widget into the widget component
 	widgetComponent->SetWidget(widget);
+
+	// Set tracking origin (Oculus & Vive)
+	UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Floor);
 }
 
 // Called every frame

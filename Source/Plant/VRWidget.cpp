@@ -6,8 +6,7 @@
 #include "PlantActor.h"
 #include "MyGameState.h"
 
-UVRWidget::UVRWidget(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+UVRWidget::UVRWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer), highlightState(StateStock::NONE_STATE)
 {
 	widgetTree = NewObject<UWidgetTree>(this, UWidgetTree::StaticClass(), TEXT("WidgetTree"));
 	this->WidgetTree = widgetTree;
@@ -85,21 +84,6 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 		ButtonSwitchExit->WidgetStyle.Hovered.ImageSize = sizeButton;
 		ButtonSwitchExit->WidgetStyle.Hovered.DrawAs = ESlateBrushDrawType::Image;
 
-		// SubTitle
-		Subtitle = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PhaseTitle"));
-		ProcedureWindowBox->AddChildToVerticalBox(Subtitle);
-		Subtitle->SetText(FText::FromString("Opening door"));
-		Subtitle->Font.Size = 90;
-		Subtitle->SynchronizeProperties();
-
-		// Instructions
-		Instructions = WidgetTree->ConstructWidget<UWrapedTextBlock>(UWrapedTextBlock::StaticClass(), TEXT("InstructionsBlock"));
-		ProcedureWindowBox->AddChildToVerticalBox(Instructions);
-		Instructions->SetText(FText::FromString("To open the door, go near the engine and pull the manilla."));
-		Instructions->SetAutoWrapText(true);
-		Instructions->Font.Size = 50;
-		Instructions->SynchronizeProperties();
-
 		// Add Button
 		ToggleButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Toggle Button"));
 		ProcedureWindowBox->AddChildToVerticalBox(ToggleButton);
@@ -111,7 +95,23 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 		// Set text of the button
 		TextButton->SetText(FText::FromString("Construction Mode"));
 		TextButton->Font.Size = 100;
+		TextButton->SetColorAndOpacity(FSlateColor(FLinearColor(0, 0, 0, 0.8f)));
 		TextButton->SynchronizeProperties();
+
+		// SubTitle
+		Subtitle = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("PhaseTitle"));
+		ProcedureWindowBox->AddChildToVerticalBox(Subtitle);
+		Subtitle->SetText(FText::FromString("Opening door"));
+		Subtitle->Font.Size = 90;
+		Subtitle->SynchronizeProperties();
+
+		// Instructions
+		Instructions = WidgetTree->ConstructWidget<UWrapedTextBlock>(UWrapedTextBlock::StaticClass(), TEXT("InstructionsBlock"));
+		ProcedureWindowBox->AddChildToVerticalBox(Instructions);
+		Instructions->SetText(FText::FromString("To open the door, go near the engine and pull the lever."));
+		Instructions->SetAutoWrapText(true);
+		Instructions->Font.Size = 50;
+		Instructions->SynchronizeProperties();
 
 		// Control Buttons
 		UHorizontalBox* ControlButtons = NewObject<UHorizontalBox>(ProcedureWindowBox, TEXT("ControlButtons"));
@@ -223,6 +223,118 @@ TSharedRef<SWidget> UVRWidget::RebuildWidget()
 		ButtonCancelExit->OnClicked.AddDynamic(this, &UVRWidget::CancelExit);
 		ButtonExit->OnClicked.AddDynamic(this, &UVRWidget::ExitProgram);
 
+		//Contruction Mode Widget
+		ConstructionModeBox = WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), TEXT("ConstructionWindows"));
+		WidgetSwitcher->AddChild(ConstructionModeBox);
+
+		// Add Button
+		ToggleButton2 = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), TEXT("Toggle2 Button"));
+		ConstructionModeBox->AddChildToVerticalBox(ToggleButton2);
+		ToggleButton2->SetColorAndOpacity(FLinearColor(10, 10, 10,0.8f));
+
+		// Add text to the button
+		TextButton2 = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Toggle2 Button Text"));
+		ToggleButton2->AddChild(TextButton2);
+
+		// Set text of the button
+		TextButton2->SetText(FText::FromString("Procedure Mode"));
+		TextButton2->Font.Size = 100;
+		TextButton2->SetColorAndOpacity(FSlateColor(FLinearColor(0, 0, 0, 0.8f)));
+		TextButton2->SynchronizeProperties();
+
+		ToggleButton2->OnClicked.AddDynamic(this, &UVRWidget::DoSmth2);
+
+		for (int i = 0; i < 5; i++)
+		{
+			// Create a horizontal box for one slot of the legend
+			std::string LegendName = "Legend" + i;
+			FString Name(LegendName.c_str());
+			UHorizontalBox* LegendItem = WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), FName(*Name));
+
+			// Add the horizontal box to the vertical box
+			UVerticalBoxSlot* legendSlot = ConstructionModeBox->AddChildToVerticalBox(LegendItem);
+
+			// Set the margin of the slot
+			legendSlot->SetPadding(FMargin(12));
+
+			// Create Color Button
+			std::string ColorName = "Color" + std::to_string(i) + "Name";
+			FString ColorNameStr(ColorName.c_str());
+			UButton* itemButton = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), FName(*ColorNameStr));
+
+			// Add text to the button
+			std::string LegendTextButtonName = "LegendButtonText" + std::to_string(i) + "Name";
+			FString LegendTextNameStr(LegendTextButtonName.c_str());
+			UTextBlock* LegendTextButton = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), FName(*LegendTextNameStr));
+			itemButton->AddChild(LegendTextButton);
+
+			// Set text of the button
+			LegendTextButton->SetText(FText::FromString("       "));
+			LegendTextButton->Font.Size = 40;
+			LegendTextButton->SynchronizeProperties();
+
+			// Set the color of the button
+			FLinearColor color;
+			StateStock state = static_cast<StateStock>(i);
+			std::string messageItem;
+
+			switch (state)
+			{
+			case StateStock::INSTALLED:
+				color = FLinearColor::Green;
+				messageItem = "Installed";
+				itemButton->OnClicked.AddDynamic(this, &UVRWidget::OnClickInstalledButton);
+				break;
+
+			case StateStock::CONSTRUCTION:
+				color = FLinearColor(0.f, 1.f, 1.f);
+				messageItem = "In construction";
+				itemButton->OnClicked.AddDynamic(this, &UVRWidget::OnClickConstructionButton);
+				break;
+
+			case StateStock::WAREHOUSE:
+				color = FLinearColor::Blue;
+				messageItem = "In the warehouse";
+				itemButton->OnClicked.AddDynamic(this, &UVRWidget::OnClickWarehouseButton);
+				break;
+			case StateStock::PROCESS_OF_PURCHASE:
+				color = FLinearColor::Yellow;
+				messageItem = "Process of purchase";
+				itemButton->OnClicked.AddDynamic(this, &UVRWidget::OnClickPoPButton);
+				break;
+			case StateStock::NEED_BUY:
+				color = FLinearColor::Red;
+				messageItem = "Need to buy";
+				itemButton->OnClicked.AddDynamic(this, &UVRWidget::OnClickNeedToBuyButton);
+				break;
+			}
+			itemButton->SetBackgroundColor(color);
+
+			// Add button color to this legend item
+			LegendItem->AddChildToHorizontalBox(itemButton);
+
+			// Add the button to the corresponding array
+			LegendColor.Add(itemButton);
+
+			// Create the text of the item
+			std::string TextName = "Text" + std::to_string(i) + "Name";
+			FString TextNameStr(TextName.c_str());
+			UTextBlock* itemText = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), FName(*TextNameStr));
+
+			itemText->SetText(FText::FromString(messageItem.c_str()));
+			itemText->Font.Size = 40;
+			itemText->SynchronizeProperties();
+
+			// Add the text to the item
+			UHorizontalBoxSlot* itemTextSlot = LegendItem->AddChildToHorizontalBox(itemText);
+			itemTextSlot->SetPadding(FMargin(30));
+
+			// Add the button to the corresponding array
+			LegendText.Add(itemText);
+
+			// Add the item to the array of legends
+			Legend.Add(LegendItem);
+		}
 	}
 
 	return Widget;
@@ -233,7 +345,31 @@ void UVRWidget::DoSmth()
 	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
 
 	if (gameState)
+	{
 		gameState->ToogleConstruction();
+		AActor* actor = gameState->GetSelectedActor();
+		if (actor)
+		{
+			APlantActor* plantActor = Cast<APlantActor>(actor);
+			if (plantActor)
+			{
+				highlightState = StateStock::NONE_STATE;
+				plantActor->SetHighlightState(highlightState);
+			}
+		}
+	}
+
+	WidgetSwitcher->SetActiveWidget(ConstructionModeBox);
+}
+
+void UVRWidget::DoSmth2()
+{
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+	if (gameState)
+		gameState->ToogleConstruction();
+
+	WidgetSwitcher->SetActiveWidget(ProcedureWindowBox);
 }
 
 void UVRWidget::SwitchToExit()
@@ -281,6 +417,142 @@ void UVRWidget::NextStep()
 			if (plantActor)
 			{
 				plantActor->PerformStepForward();
+			}
+		}
+	}
+}
+
+void UVRWidget::OnClickInstalledButton()
+{
+	if (highlightState == StateStock::INSTALLED)
+	{
+		highlightState = StateStock::NONE_STATE;
+	}
+	else
+	{
+		highlightState = StateStock::INSTALLED;
+	}
+
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+	if (gameState)
+	{
+		AActor* actor = gameState->GetSelectedActor();
+		if (actor)
+		{
+			APlantActor* plantActor = Cast<APlantActor>(actor);
+			if (plantActor)
+			{
+				plantActor->SetHighlightState(highlightState);
+			}
+		}
+	}
+}
+
+void UVRWidget::OnClickConstructionButton()
+{
+	if (highlightState == StateStock::CONSTRUCTION)
+	{
+		highlightState = StateStock::NONE_STATE;
+	}
+	else
+	{
+		highlightState = StateStock::CONSTRUCTION;
+	}
+
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+	if (gameState)
+	{
+		AActor* actor = gameState->GetSelectedActor();
+		if (actor)
+		{
+			APlantActor* plantActor = Cast<APlantActor>(actor);
+			if (plantActor)
+			{
+				plantActor->SetHighlightState(highlightState);
+			}
+		}
+	}
+
+}
+
+void UVRWidget::OnClickWarehouseButton()
+{
+	if (highlightState == StateStock::WAREHOUSE)
+	{
+		highlightState = StateStock::NONE_STATE;
+	}
+	else
+	{
+		highlightState = StateStock::WAREHOUSE;
+	}
+
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+	if (gameState)
+	{
+		AActor* actor = gameState->GetSelectedActor();
+		if (actor)
+		{
+			APlantActor* plantActor = Cast<APlantActor>(actor);
+			if (plantActor)
+			{
+				plantActor->SetHighlightState(highlightState);
+			}
+		}
+	}
+}
+
+void UVRWidget::OnClickPoPButton()
+{
+	if (highlightState == StateStock::PROCESS_OF_PURCHASE)
+	{
+		highlightState = StateStock::NONE_STATE;
+	}
+	else
+	{
+		highlightState = StateStock::PROCESS_OF_PURCHASE;
+	}
+
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+	if (gameState)
+	{
+		AActor* actor = gameState->GetSelectedActor();
+		if (actor)
+		{
+			APlantActor* plantActor = Cast<APlantActor>(actor);
+			if (plantActor)
+			{
+				plantActor->SetHighlightState(highlightState);
+			}
+		}
+	}
+}
+
+void UVRWidget::OnClickNeedToBuyButton()
+{
+	if (highlightState == StateStock::NEED_BUY)
+	{
+		highlightState = StateStock::NONE_STATE;
+	}
+	else
+	{
+		highlightState = StateStock::NEED_BUY;
+	}
+
+	AMyGameState* gameState = Cast<AMyGameState>(GetWorld()->GetGameState());
+
+	if (gameState)
+	{
+		AActor* actor = gameState->GetSelectedActor();
+		if (actor)
+		{
+			APlantActor* plantActor = Cast<APlantActor>(actor);
+			if (plantActor)
+			{
+				plantActor->SetHighlightState(highlightState);
 			}
 		}
 	}
